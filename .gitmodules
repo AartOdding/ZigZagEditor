@@ -1,0 +1,9 @@
+[submodule "ext/ZigZagCore"]
+	path = ext/ZigZagCore
+	url = https://github.com/AartOdding/ZigZagCore
+[submodule "ext/glfw"]
+	path = ext/glfw
+	url = https://github.com/glfw/glfw.git
+[submodule "ext/imgui/imgui"]
+	path = ext/imgui/imgui
+	url = https://github.com/ocornut/imgui.git
