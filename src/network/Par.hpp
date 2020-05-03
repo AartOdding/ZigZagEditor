@@ -9,38 +9,21 @@ class Par : public ZigZag::BaseParameter
 public:
 
     Par(Object* parent = nullptr, std::string_view name = std::string())
-        : BaseParameter(parent, name),
-          m_value(),
-          m_input()
+        : BaseParameter(parent, name)
     {
-
+        m_value.set(T());
     }
 
     const T& value() const
     {
-        return m_value;
+        return m_value.get<T>();
     }
-    
-    virtual void process()
+
+    template<typename T2>
+    Par& operator=(T2&& value)
     {
-        if (m_value != m_input)
-        {
-            m_value = m_input;
-            supply(m_value);
-        }
+        m_value.set<T2>(std::forward<T2>(value));
+        return *this;
     }
-
-    virtual void consume(const ZigZag::Variant& var)
-    {
-        if (var.canGet<T>())
-        {
-            m_input = var.get<T>();
-        }
-    }
-
-private:
-
-    T m_value;
-    T m_input;
 
 };

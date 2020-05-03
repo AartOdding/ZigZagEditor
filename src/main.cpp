@@ -15,6 +15,7 @@
 #include "network/Par.hpp"
 #include "library/dataInputs/GenericInput.hpp"
 #include "library/dataSources/TextureData.hpp"
+#include "VariantDefinitions.hpp"
 
 #include "OpenSansRegular.hpp"
 
@@ -40,6 +41,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 
 namespace zz = ZigZag;
 
+
 int main(int, char**)
 {
     zz::BaseOperator op1(nullptr, "op1");
@@ -54,17 +56,18 @@ int main(int, char**)
 
     connect(&par1, &par2);
 
-    par1.consume(100);
-    
+    //par1.consume(100);
+    par1 = 100;
     std::cout << par1.value() << " " << par2.value() << std::endl;
 
-    par1.process();
+    par1.processPendingChanges();
+    //par1.process();
 
     std::cout << par1.value() << " " << par2.value() << std::endl;
 
-    par2.process();
+    //par2.process();
 
-    std::cout << par1.value() << " " << par2.value() << std::endl;
+    //std::cout << par1.value() << " " << par2.value() << std::endl;
 
     glfwSetErrorCallback(error_callback);
     
