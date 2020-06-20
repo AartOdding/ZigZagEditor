@@ -2,7 +2,7 @@
 
 #include <ZigZag/Object.hpp>
 #include <ZigZag/BaseOperator.hpp>
-#include <ZigZag/BaseParameter.hpp>
+#include <ZigZag/TParameter.hpp>
 
 #include <glad/glad.h>
 #define GLFW_INCLUDE_NONE
@@ -12,11 +12,11 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
-#include "network/Par.hpp"
 #include "library/dataInputs/GenericInput.hpp"
 #include "library/dataSources/TextureData.hpp"
-#include "VariantDefinitions.hpp"
 
+#include "types.hpp"
+#include "gui/ObjectInspector.hpp"
 #include "OpenSansRegular.hpp"
 
 
@@ -42,16 +42,22 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 namespace zz = ZigZag;
 
 
+
 int main(int, char**)
 {
+    registerTypes();
+
+    auto i1 = zz::ObjectFactory::instance()->create("IntParameter");
+    std::cout << i1->typeName() << std::endl;
+
     zz::BaseOperator op1(nullptr, "op1");
-    Par<int> par1;
-    Par<int> par2;
+    IntParameter par1{ &op1 };
+    IntParameter par2{ &op1 };
 
     TextureData tex1(nullptr, "text1");
     GenericInput<TextureData> textIn1(nullptr, "texIn1");
 
-
+    std::cout << par1.typeName() << std::endl;
     std::cout << par1.value() << " " << par2.value() << std::endl;
 
     connect(&par1, &par2);
@@ -60,7 +66,7 @@ int main(int, char**)
     par1 = 100;
     std::cout << par1.value() << " " << par2.value() << std::endl;
 
-    par1.processPendingChanges();
+    par2.process();
     //par1.process();
 
     std::cout << par1.value() << " " << par2.value() << std::endl;
@@ -137,6 +143,9 @@ int main(int, char**)
     bool show_another_window = false;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
+    ObjectInspector inspector{ "Inspector" };
+    inspector.setRootObject(&op1);
+
     // Main loop
     while (!glfwWindowShouldClose(window))
     {
@@ -188,6 +197,8 @@ int main(int, char**)
                 show_another_window = false;
             ImGui::End();
         }
+
+        inspector.draw();
 
         // Rendering
         ImGui::Render();

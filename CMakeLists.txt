@@ -8,6 +8,7 @@ project(ZigZag VERSION 0.1.0)
 
 add_executable(ZigZag
     src/main.cpp
+    src/gui/ObjectInspector.cpp
     #external/imgui/imgui/examples/example_glfw_opengl3/main.cpp
 )
 
@@ -24,6 +25,9 @@ set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 add_subdirectory(external/glfw)
 target_link_libraries(ZigZag glfw)
+
+# GLM
+target_include_directories(ZigZag PUBLIC external/glm)
 
 # IMGUI
 add_subdirectory(external/imgui)
