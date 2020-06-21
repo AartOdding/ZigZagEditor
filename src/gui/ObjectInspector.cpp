@@ -12,7 +12,9 @@ using namespace ZigZag;
 
 ObjectInspector::ObjectInspector(std::string_view windowName, ZigZag::Object* rootObject)
     : m_windowName(windowName),
-      m_rootObject(rootObject)
+      m_rootObject(rootObject),
+      m_editedObject(nullptr),
+      m_objectSelection(rootObject)
 {
 }
 
@@ -20,19 +22,26 @@ ObjectInspector::ObjectInspector(std::string_view windowName, ZigZag::Object* ro
 void ObjectInspector::setRootObject(ZigZag::Object* rootObject)
 {
     m_rootObject = rootObject;
+    m_objectSelection.setRootObject(rootObject);
 }
 
 
 void ObjectInspector::draw()
 {
-    Begin(m_windowName.c_str());
+    m_objectSelection.clearInvalidObjects();
 
+    for (auto& [object, data] : m_objectData)
+    {
+        data.active = false;
+    }
+
+    Begin(m_windowName.c_str());
 
     if (Button("Add Child"))
     {
-        if (m_selectedObjects.size() == 1)
+        if (m_objectSelection.getSelection().size() == 1)
         {
-            m_editedObject = *m_selectedObjects.begin();
+            m_editedObject = *m_objectSelection.getSelection().begin();
             OpenPopup("Select object type");
         }
     }
@@ -40,7 +49,7 @@ void ObjectInspector::draw()
     {
         int current = -1;
         auto factory = ObjectFactory::instance();
-        ListBoxHeader("test");
+        ListBoxHeader("##listbox");
 
         for (const auto& type : factory->getObjectTypeNames())
         {
@@ -49,19 +58,25 @@ void ObjectInspector::draw()
             {
                 auto newObject = factory->create(type);
                 newObject->setParent(m_editedObject);
-                std::cout << type << std::endl;
+
+                if (!GetIO().KeyShift)
+                {
+                    CloseCurrentPopup();
+                }
             }
         }
 
         ListBoxFooter();
-        //ListBox("test", &current, factory->getObjectNamesCArray(), factory->getObjectCount(), 10);
-        //if (IsItemClicked())
-        //{
-        //    std::cout << current << std::endl;
-        //}
-        //ListBoxHeader("test", 20, 12);
-        //ListBoxFooter();
+
         EndPopup();
+    }
+    SameLine();
+    if (Button("Delete"))
+    {
+        for (auto obj : m_objectSelection.getSelection())
+        {
+            delete obj;
+        }
     }
 
     Columns(2);
@@ -69,6 +84,8 @@ void ObjectInspector::draw()
     showObjectTree(m_rootObject);
 
     End();
+
+    clearUnusedObjectData();
 }
 
 
@@ -76,13 +93,13 @@ void ObjectInspector::showObjectTree(ZigZag::Object* object)
 {
     if (object)
     {
-        //AlignTextToFramePadding();
+        AlignTextToFramePadding();
         ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_DefaultOpen;
         flags |= ImGuiTreeNodeFlags_OpenOnDoubleClick;
         flags |= ImGuiTreeNodeFlags_OpenOnArrow;
         flags |= ImGuiTreeNodeFlags_SpanFullWidth;
         flags |= ImGuiTreeNodeFlags_AllowItemOverlap;
-        flags |= m_selectedObjects.count(object) ? ImGuiTreeNodeFlags_Selected : 0;
+        flags |= m_objectSelection.isSelected(object) ? ImGuiTreeNodeFlags_Selected : 0;
         flags |= object->getChildObjects().empty() ? ImGuiTreeNodeFlags_Leaf : 0;
         flags |= object->getChildObjects().empty() ? ImGuiTreeNodeFlags_Bullet : 0;
 
@@ -92,19 +109,12 @@ void ObjectInspector::showObjectTree(ZigZag::Object* object)
         {
             if (GetIO().KeyCtrl)
             {
-                if (m_selectedObjects.count(object))
-                {
-                    m_selectedObjects.erase(object);
-                }
-                else
-                {
-                    m_selectedObjects.emplace(object);
-                }
+                m_objectSelection.toggleSelected(object);
             }
             else
             {
-                m_selectedObjects.clear();
-                m_selectedObjects.emplace(object);
+                m_objectSelection.clearSelection();
+                m_objectSelection.setSelected(object, true);
             }
         }
 
@@ -112,7 +122,35 @@ void ObjectInspector::showObjectTree(ZigZag::Object* object)
         //SameLine(w - 76);
 
         NextColumn();
-        Text(object->getName().c_str());
+
+
+        if (m_objectData.count(object) == 0)
+        {
+            ObjectData& data = m_objectData[object];
+            data.id.reserve(object->getName().size() + 4);
+            data.id = "##";
+            data.id += object->getName();
+            strcpy(data.name, object->getName().c_str());
+        }
+
+        ObjectData& data = m_objectData[object];
+        data.active = true;
+        
+        PushItemWidth(-1);
+        InputText(data.id.c_str(), data.name, 64);
+        PopItemWidth();
+
+        if (IsItemDeactivatedAfterEdit())
+        {
+            object->setName(data.name);
+            if (strcmp(object->getName().c_str(), data.name) != 0)
+            {
+                strcpy(data.name, object->getName().c_str());
+            }
+            std::cout << object->getName() << std::endl;
+        }
+        
+        //Text(object->getName().c_str());
         NextColumn();
 
         if (open)
@@ -123,5 +161,24 @@ void ObjectInspector::showObjectTree(ZigZag::Object* object)
             }
             TreePop();
         }
+    }
+}
+
+
+void ObjectInspector::clearUnusedObjectData()
+{
+    std::vector<ZigZag::Object*> toRemove;
+
+    for (auto& [object, data] : m_objectData)
+    {
+        if (!data.active)
+        {
+            toRemove.push_back(object);
+        }
+    }
+
+    for (auto object : toRemove)
+    {
+        m_objectData.erase(object);
     }
 }

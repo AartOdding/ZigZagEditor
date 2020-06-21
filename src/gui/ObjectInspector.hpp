@@ -2,7 +2,10 @@
 
 #include <string>
 #include <string_view>
-#include <unordered_set>
+#include <unordered_map>
+#include <utility>
+
+#include <ZigZag/ObjectSelection.hpp>
 
 namespace ZigZag
 {
@@ -24,11 +27,22 @@ private:
 
     void showObjectTree(ZigZag::Object* object);
 
+    void clearUnusedObjectData();
+
+    std::string m_windowName;
+    
     ZigZag::Object* m_rootObject;
     ZigZag::Object* m_editedObject;
-    
-    std::string m_windowName;
 
-    std::unordered_set<ZigZag::Object*> m_selectedObjects;
+    ZigZag::ObjectSelection m_objectSelection;
+
+    struct ObjectData
+    {
+        char name[64];
+        std::string id;
+        bool active;
+    };
+
+    std::unordered_map<ZigZag::Object*, ObjectData> m_objectData;
 
 };
