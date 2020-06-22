@@ -12,6 +12,8 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
+#include <imgui_node_editor.h>
+
 #include "library/dataInputs/GenericInput.hpp"
 #include "library/dataSources/TextureData.hpp"
 
@@ -40,7 +42,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 }
 
 namespace zz = ZigZag;
-
+namespace ne = ax::NodeEditor;
 
 
 int main(int, char**)
@@ -88,10 +90,11 @@ int main(int, char**)
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
 
-    GLFWwindow* window = glfwCreateWindow(1280, 720, "Dear ImGui GLFW+OpenGL3 example", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(1280, 720, "ZigZag", nullptr, nullptr);
 
     if (!window)
     {
+        glfwTerminate();
         return 1;
     }
 
@@ -146,6 +149,10 @@ int main(int, char**)
     ObjectInspector inspector{ "Inspector" };
     inspector.setRootObject(&op1);
 
+    ne::Config cfg;
+    cfg.
+    auto nodeContext = ne::CreateEditor();
+
     // Main loop
     while (!glfwWindowShouldClose(window))
     {
@@ -160,6 +167,40 @@ int main(int, char**)
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
+
+        ne::SetCurrentEditor(nodeContext);
+
+        ne::Begin("My Editor");
+
+        int uniqueId = 1;
+
+        // Start drawing nodes.
+        ne::BeginNode(uniqueId++);
+        ImGui::Text("Node A");
+        ne::BeginPin(uniqueId++, ne::PinKind::Input);
+        ImGui::Text("-> In");
+        ne::EndPin();
+        ImGui::SameLine();
+        ne::BeginPin(uniqueId++, ne::PinKind::Output);
+        ImGui::Text("Out ->");
+        ne::EndPin();
+        ne::EndNode();
+
+        //ne::NavigateToContent();
+
+        // Start drawing nodes.
+        ne::BeginNode(uniqueId++);
+        ImGui::Text("Node B");
+        ne::BeginPin(uniqueId++, ne::PinKind::Input);
+        ImGui::Text("-> In");
+        ne::EndPin();
+        ImGui::SameLine();
+        ne::BeginPin(uniqueId++, ne::PinKind::Output);
+        ImGui::Text("Out ->");
+        ne::EndPin();
+        ne::EndNode();
+
+        ne::End();
 
         // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
         if (show_demo_window)
@@ -211,6 +252,8 @@ int main(int, char**)
 
         glfwSwapBuffers(window);
     }
+
+    ne::DestroyEditor(nodeContext);
 
     // Cleanup
     ImGui_ImplOpenGL3_Shutdown();

@@ -5,6 +5,8 @@ set(CMAKE_CXX_STANDARD 17)
 project(ZigZag VERSION 0.1.0)
 
 
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/external/imgui-node-editor/Support/CMakeModules)
+
 
 add_executable(ZigZag
     src/main.cpp
@@ -32,6 +34,10 @@ target_include_directories(ZigZag PUBLIC external/glm)
 # IMGUI
 add_subdirectory(external/imgui)
 target_link_libraries(ZigZag imgui)
+
+# IMGUI-NODE-EDITOR
+add_subdirectory(external/imgui-node-editor/NodeEditor)
+target_link_libraries(ZigZag imgui_node_editor)
 
 # ZIGZAG CORE
 add_subdirectory(external/ZigZagCore)
