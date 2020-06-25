@@ -58,6 +58,7 @@ void ObjectInspector::draw()
             {
                 auto newObject = factory->create(type);
                 newObject->setParent(m_editedObject);
+                newObject->setDeleteByParent(true);
 
                 if (!GetIO().KeyShift)
                 {

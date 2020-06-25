@@ -42,7 +42,42 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 }
 
 namespace zz = ZigZag;
-namespace ne = ax::NodeEditor;
+namespace ImNode = ax::NodeEditor;
+
+void menuBar()
+{
+    if (ImGui::BeginMenuBar())
+    {
+        if (ImGui::BeginMenu("File"))
+        {
+            if (ImGui::MenuItem("Save", "CTRL+S")) {}
+            if (ImGui::MenuItem("Open", "CTRL+O")) {}  // Disabled item
+            if (ImGui::MenuItem("New", "CTRL+N")) {}  // Disabled item
+            ImGui::EndMenu();
+        }
+        if (ImGui::BeginMenu("Edit"))
+        {
+            if (ImGui::MenuItem("Undo", "CTRL+Z")) {}
+            if (ImGui::MenuItem("Redo", "CTRL+Y", false, false)) {}  // Disabled item
+            ImGui::Separator();
+            if (ImGui::MenuItem("Cut", "CTRL+X")) {}
+            if (ImGui::MenuItem("Copy", "CTRL+C")) {}
+            if (ImGui::MenuItem("Paste", "CTRL+V")) {}
+            ImGui::EndMenu();
+        }
+        if (ImGui::BeginMenu("View"))
+        {
+            if (ImGui::MenuItem("Undo", "CTRL+Z")) {}
+            if (ImGui::MenuItem("Redo", "CTRL+Y", false, false)) {}  // Disabled item
+            ImGui::Separator();
+            if (ImGui::MenuItem("Cut", "CTRL+X")) {}
+            if (ImGui::MenuItem("Copy", "CTRL+C")) {}
+            if (ImGui::MenuItem("Paste", "CTRL+V")) {}
+            ImGui::EndMenu();
+        }
+        ImGui::EndMenuBar();
+    }
+}
 
 
 int main(int, char**)
@@ -110,6 +145,7 @@ int main(int, char**)
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+    io.IniFilename = nullptr;
 
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
@@ -149,9 +185,9 @@ int main(int, char**)
     ObjectInspector inspector{ "Inspector" };
     inspector.setRootObject(&op1);
 
-    ne::Config cfg;
-    cfg.
-    auto nodeContext = ne::CreateEditor();
+    ImNode::Config cfg;
+    cfg.SettingsFile = nullptr;
+    auto nodeContext = ImNode::CreateEditor(&cfg);
 
     // Main loop
     while (!glfwWindowShouldClose(window))
@@ -168,76 +204,62 @@ int main(int, char**)
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        ne::SetCurrentEditor(nodeContext);
+        ImNode::SetCurrentEditor(nodeContext);
 
-        ne::Begin("My Editor");
+        //ImGui::SetCursorPos({0, 0});
+        //
+        ImGuiWindowFlags f = ImGuiWindowFlags_NoTitleBar
+            | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize
+            | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse
+            | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_MenuBar
+            | ImGuiWindowFlags_NoBringToFrontOnFocus;
+
+        int width, height;
+        glfwGetFramebufferSize(window, &width, &height);
+
+        ImGui::SetNextWindowPos({0, 0});
+        ImGui::SetNextWindowSize(ImVec2(width, height));
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0);
+        ImGui::Begin("Network", 0, f);
+        
+        menuBar();
+
+        ImNode::Begin("My Editor", { 0, 0 });
 
         int uniqueId = 1;
 
         // Start drawing nodes.
-        ne::BeginNode(uniqueId++);
+        ImNode::BeginNode(uniqueId++);
         ImGui::Text("Node A");
-        ne::BeginPin(uniqueId++, ne::PinKind::Input);
+        ImNode::BeginPin(uniqueId++, ImNode::PinKind::Input);
         ImGui::Text("-> In");
-        ne::EndPin();
+        ImNode::EndPin();
         ImGui::SameLine();
-        ne::BeginPin(uniqueId++, ne::PinKind::Output);
+        ImNode::BeginPin(uniqueId++, ImNode::PinKind::Output);
         ImGui::Text("Out ->");
-        ne::EndPin();
-        ne::EndNode();
+        ImNode::EndPin();
+        ImNode::EndNode();
 
-        //ne::NavigateToContent();
+        //ImNode::NavigateToContent();
 
         // Start drawing nodes.
-        ne::BeginNode(uniqueId++);
+        ImNode::BeginNode(uniqueId++);
         ImGui::Text("Node B");
-        ne::BeginPin(uniqueId++, ne::PinKind::Input);
+        ImNode::BeginPin(uniqueId++, ImNode::PinKind::Input);
         ImGui::Text("-> In");
-        ne::EndPin();
+        ImNode::EndPin();
         ImGui::SameLine();
-        ne::BeginPin(uniqueId++, ne::PinKind::Output);
+        ImNode::BeginPin(uniqueId++, ImNode::PinKind::Output);
         ImGui::Text("Out ->");
-        ne::EndPin();
-        ne::EndNode();
+        ImNode::EndPin();
+        ImNode::EndNode();
 
-        ne::End();
+        ImNode::End();
 
-        // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
-        if (show_demo_window)
-            ImGui::ShowDemoWindow(&show_demo_window);
+        ImGui::End();
+        ImGui::PopStyleVar(1);
 
-        // 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
-        {
-            static float f = 0.0f;
-            static int counter = 0;
-
-            ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
-
-            ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-            ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
-            ImGui::Checkbox("Another Window", &show_another_window);
-
-            ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-            ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
-
-            if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-                counter++;
-            ImGui::SameLine();
-            ImGui::Text("counter = %d", counter);
-
-            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-            ImGui::End();
-        }
-
-        // 3. Show another simple window.
-        if (show_another_window)
-        {
-            ImGui::Begin("Another Window", &show_another_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-            ImGui::Text("Hello from another window!");
-            if (ImGui::Button("Close Me"))
-                show_another_window = false;
-            ImGui::End();
-        }
+        ImGui::ShowDemoWindow(&show_demo_window);
 
         inspector.draw();
 
@@ -253,7 +275,7 @@ int main(int, char**)
         glfwSwapBuffers(window);
     }
 
-    ne::DestroyEditor(nodeContext);
+    ImNode::DestroyEditor(nodeContext);
 
     // Cleanup
     ImGui_ImplOpenGL3_Shutdown();
