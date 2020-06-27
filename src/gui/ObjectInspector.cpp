@@ -26,7 +26,7 @@ void ObjectInspector::setRootObject(ZigZag::Object* rootObject)
 }
 
 
-void ObjectInspector::draw()
+void ObjectInspector::draw(bool* p_open)
 {
     m_objectSelection.clearInvalidObjects();
 
@@ -35,7 +35,7 @@ void ObjectInspector::draw()
         data.active = false;
     }
 
-    Begin(m_windowName.c_str());
+    Begin(m_windowName.c_str(), p_open);
 
     if (Button("Add Child"))
     {

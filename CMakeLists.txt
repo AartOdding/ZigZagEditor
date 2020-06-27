@@ -9,9 +9,12 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/external/imgui-node-ed
 
 
 add_executable(ZigZag
+    src/Application.cpp
     src/main.cpp
+    src/app/Action.cpp
+    src/gui/MainMenu.cpp
     src/gui/ObjectInspector.cpp
-    #external/imgui/imgui/examples/example_glfw_opengl3/main.cpp
+    src/gui/Viewport.cpp
 )
 
 target_include_directories(ZigZag PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

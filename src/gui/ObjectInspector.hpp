@@ -21,7 +21,7 @@ public:
 
     void setRootObject(ZigZag::Object* rootObject);
 
-    void draw();
+    void draw(bool* p_open);
 
 private:
 
