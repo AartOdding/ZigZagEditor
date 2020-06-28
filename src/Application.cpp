@@ -62,6 +62,18 @@ Application::Application()
 
 void Application::draw()
 {
+    auto tabColor = ImVec4(0.3f, 0.3f, 0.3f, 1.0f);
+    auto tabColorActiveNoFocus = ImVec4(0.42f, 0.42f, 0.42f, 1.0f);
+    auto backgroundColor = ImGui::GetStyleColorVec4(ImGuiCol_MenuBarBg);
+    ImGui::PushStyleColor(ImGuiCol_Tab, tabColor);
+    ImGui::PushStyleColor(ImGuiCol_TabUnfocused, tabColor);
+    ImGui::PushStyleColor(ImGuiCol_TabUnfocusedActive, tabColorActiveNoFocus);
+    ImGui::PushStyleColor(ImGuiCol_WindowBg, backgroundColor);
+    ImGui::PushStyleColor(ImGuiCol_TitleBg, backgroundColor);
+    ImGui::PushStyleColor(ImGuiCol_TitleBgActive, backgroundColor);
+    ImGui::PushStyleColor(ImGuiCol_TitleBgCollapsed, backgroundColor);
+    ImGui::PushStyleColor(ImGuiCol_Separator, backgroundColor);
+
     m_mainMenu.draw();
     ImGui::DockSpaceOverViewport(nullptr, ImGuiDockNodeFlags_NoWindowMenuButton | ImGuiDockNodeFlags_NoCloseButton);
     
@@ -91,4 +103,6 @@ void Application::draw()
         ImGui::End();
         m_windowActions->imguiStyleWindowOpen.setState(open);
     }
+
+    ImGui::PopStyleColor(8);
 }

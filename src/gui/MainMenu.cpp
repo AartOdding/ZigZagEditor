@@ -13,6 +13,7 @@ MainMenu::MainMenu(const std::shared_ptr<WindowActions>& windowActions)
 
 void MainMenu::draw()
 {
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
     ImGui::BeginMainMenuBar();
 
     if (ImGui::BeginMenu("File"))
@@ -56,4 +57,5 @@ void MainMenu::draw()
     }
 
     ImGui::EndMainMenuBar();
+    ImGui::PopStyleVar();
 }
