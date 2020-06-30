@@ -2,6 +2,8 @@
 
 #include <memory>
 
+#include <ZigZag/BaseOperator.hpp>
+
 #include "app/WindowActions.hpp"
 #include "gui/MainMenu.hpp"
 #include "gui/ObjectInspector.hpp"
@@ -29,5 +31,7 @@ private:
 
     Viewport m_viewport;
     ObjectInspector m_objectInspector{ "Inspector" };
+
+    ZigZag::BaseOperator m_rootOperator{ nullptr, "project" };
 
 };

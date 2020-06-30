@@ -17,27 +17,40 @@ Viewport::~Viewport()
 }
 
 
-void Viewport::draw(bool* p_open)
+void Viewport::setScope(ZigZag::BaseOperator* scope)
+{
+    m_scope = scope;
+}
+
+void Viewport::draw(bool* open)
 {
     ImGui::PushID(this);
-    ImGui::Begin("Graph Editor", p_open);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0, 0 });
+    ImGui::Begin("Graph Editor", open);
 
     ImNode::SetCurrentEditor(m_editorContext);
     ImNode::Begin("Graph Editor");
 
-        ImNode::BeginNode(0);
-        ImGui::Text("Node A");
-        ImNode::BeginPin(1, ImNode::PinKind::Input);
-        ImGui::Text("-> In");
-        ImNode::EndPin();
-        ImGui::SameLine();
-        ImNode::BeginPin(2, ImNode::PinKind::Output);
-        ImGui::Text("Out ->");
-        ImNode::EndPin();
-        ImNode::EndNode();
+    if (m_scope)
+    {
+        for (auto op : m_scope->getChildOperators())
+        {
+            ImNode::BeginNode((uint64_t)op);
+            ImGui::Text(op->getName().c_str());
+            ImNode::BeginPin(1, ImNode::PinKind::Input);
+            ImGui::Text(" ");
+            ImNode::EndPin();
+            ImGui::SameLine();
+            ImNode::BeginPin(2, ImNode::PinKind::Output);
+            ImGui::Text(" ");
+            ImNode::EndPin();
+            ImNode::EndNode();
+        }
+    }
 
     ImNode::End();
 
     ImGui::End();
+    ImGui::PopStyleVar(1);
     ImGui::PopID();
 }

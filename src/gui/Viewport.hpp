@@ -3,6 +3,7 @@
 #include <imgui.h>
 #include <imgui_node_editor.h>
 
+#include <ZigZag/BaseOperator.hpp>
 
 namespace ImNode = ax::NodeEditor;
 
@@ -17,11 +18,15 @@ public:
 
     ~Viewport();
 
-    void draw(bool* p_open);
+    void setScope(ZigZag::BaseOperator* scope);
+
+    void draw(bool* open);
 
 
 private:
 
-    ImNode::EditorContext* m_editorContext;
+    ZigZag::BaseOperator* m_scope{ nullptr };
+    
+    ImNode::EditorContext* m_editorContext{ nullptr };
 
 };

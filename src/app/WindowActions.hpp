@@ -5,8 +5,8 @@
 
 struct WindowActions
 {
-    Action viewportWindowOpen;
-    Action objectInspectorWindowOpen;
+    Action viewportWindowOpen{ true };
+    Action objectInspectorWindowOpen{ true };
     Action imguiDemoWindowOpen;
     Action imguiStyleWindowOpen;
 };

@@ -148,7 +148,7 @@ void ObjectInspector::showObjectTree(ZigZag::Object* object)
             {
                 strcpy(data.name, object->getName().c_str());
             }
-            std::cout << object->getName() << std::endl;
+            std::cout << object->getName() << "\t" << object->getFullName() << std::endl;
         }
         
         //Text(object->getName().c_str());

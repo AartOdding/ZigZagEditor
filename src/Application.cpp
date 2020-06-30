@@ -56,8 +56,8 @@ Application::Application()
     //par2.process();
 
     //std::cout << par1.value() << " " << par2.value() << std::endl;
-
-
+    m_viewport.setScope(&m_rootOperator);
+    m_objectInspector.setRootObject(&m_rootOperator);
 }
 
 void Application::draw()
