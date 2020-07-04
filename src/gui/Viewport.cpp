@@ -37,13 +37,33 @@ void Viewport::draw(bool* open)
         {
             ImNode::BeginNode((uint64_t)op);
             ImGui::Text(op->getName().c_str());
-            ImNode::BeginPin(1, ImNode::PinKind::Input);
-            ImGui::Text(" ");
-            ImNode::EndPin();
-            ImGui::SameLine();
-            ImNode::BeginPin(2, ImNode::PinKind::Output);
-            ImGui::Text(" ");
-            ImNode::EndPin();
+
+            auto& inputs = op->getDataInputs();
+            auto& outputs = op->getDataSources();
+
+            auto max = std::max(inputs.size(), outputs.size());
+
+            for (int i = 0; i < max; ++i)
+            {
+                if (i < inputs.size())
+                {
+                    ImNode::BeginPin((uint64_t)inputs[i], ImNode::PinKind::Input);
+                    ImGui::Text(inputs[i]->getName().c_str());
+                    ImNode::EndPin();
+                }
+                else
+                {
+                    ImGui::Text(" ");
+                }
+                ImGui::SameLine();
+
+                if (i < outputs.size())
+                {
+                    ImNode::BeginPin((uint64_t)outputs[i], ImNode::PinKind::Output);
+                    ImGui::Text(outputs[i]->getName().c_str());
+                    ImNode::EndPin();
+                }
+            }
             ImNode::EndNode();
         }
     }
