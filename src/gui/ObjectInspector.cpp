@@ -1,8 +1,10 @@
 #include "ObjectInspector.hpp"
+#include "app/AddObjectCommand.hpp"
+#include "app/RemoveObjectCommand.hpp"
+#include "app/RenameObjectCommand.hpp"
 
 #include <imgui.h>
 
-#include <ZigZag/Object.hpp>
 #include <ZigZag/ObjectFactory.hpp>
 #include <iostream>
 
@@ -10,11 +12,9 @@ using namespace ImGui;
 using namespace ZigZag;
 
 
-ObjectInspector::ObjectInspector(std::string_view windowName, ZigZag::Object* rootObject)
+ObjectInspector::ObjectInspector(std::string_view windowName, ApplicationState* appState)
     : m_windowName(windowName),
-      m_rootObject(rootObject),
-      m_editedObject(nullptr),
-      m_objectSelection(rootObject)
+      m_appState(appState)
 {
 }
 
@@ -49,16 +49,14 @@ void ObjectInspector::draw(bool* p_open)
     {
         int current = -1;
         auto factory = ObjectFactory::instance();
-        ListBoxHeader("##listbox");
+        ListBoxHeader("##objects");
 
         for (const auto& type : factory->getObjectTypeNames())
         {
             Selectable(type.c_str(), false);
             if (IsItemClicked())
             {
-                auto newObject = factory->create(type);
-                newObject->setParent(m_editedObject);
-                newObject->setDeleteByParent(true);
+                m_appState->commandStack.pushCommand(std::make_unique<AddObjectCommand>(m_editedObject, type));
 
                 if (!GetIO().KeyShift)
                 {
@@ -71,21 +69,37 @@ void ObjectInspector::draw(bool* p_open)
 
         EndPopup();
     }
+
     SameLine();
+
     if (Button("Delete"))
     {
         for (auto obj : m_objectSelection.getSelection())
         {
-            delete obj;
+            m_appState->commandStack.pushCommand(std::make_unique<RemoveObjectCommand>(obj));
         }
     }
 
+    ImGui::PushStyleColor(ImGuiCol_FrameBg, ImGui::GetStyleColorVec4(ImGuiCol_MenuBarBg));
+    ImGui::PushStyleColor(ImGuiCol_Header, ImGui::GetStyleColorVec4(ImGuiCol_Tab));
+    ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImGui::GetStyleColorVec4(ImGuiCol_TabUnfocusedActive));
+    ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImGui::GetStyleColorVec4(ImGuiCol_TabUnfocusedActive));
+
+    ImGui::BeginChildFrame(1343243, ImGui::GetContentRegionAvail());
     Columns(2);
+
+    ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1);
 
     showObjectTree(m_rootObject);
 
-    End();
+    ImGui::PopStyleVar();
 
+    Columns(1);
+    ImGui::EndChildFrame();
+    
+    ImGui::PopStyleColor(4);
+    
+    End();
     clearUnusedObjectData();
 }
 
@@ -119,39 +133,34 @@ void ObjectInspector::showObjectTree(ZigZag::Object* object)
             }
         }
 
-        //auto w = GetColumnWidth();
-        //SameLine(w - 76);
-
         NextColumn();
 
+        bool firstOccurence = m_objectData.count(object) == 0;
+        ObjectData& data = m_objectData[object];
 
-        if (m_objectData.count(object) == 0)
+        if (firstOccurence || strcmp(object->getName().c_str(), data.name) != 0)
         {
-            ObjectData& data = m_objectData[object];
-            data.id.reserve(object->getName().size() + 4);
-            data.id = "##";
-            data.id += object->getName();
             strcpy(data.name, object->getName().c_str());
         }
 
-        ObjectData& data = m_objectData[object];
         data.active = true;
         
         PushItemWidth(-1);
-        InputText(data.id.c_str(), data.name, 64);
+        PushID(object);
+        InputText("##", data.name, 64);
+        PopID();
         PopItemWidth();
 
         if (IsItemDeactivatedAfterEdit())
         {
-            object->setName(data.name);
-            if (strcmp(object->getName().c_str(), data.name) != 0)
+            auto newName = object->getClosestPotentialName(data.name);
+
+            if (object->getName() != newName)
             {
-                strcpy(data.name, object->getName().c_str());
+                m_appState->commandStack.pushCommand(std::make_unique<RenameObjectCommand>(object, newName));
             }
-            std::cout << object->getName() << "\t" << object->getFullName() << std::endl;
         }
         
-        //Text(object->getName().c_str());
         NextColumn();
 
         if (open)

@@ -2,14 +2,14 @@
 
 #include <memory>
 
-#include "../app/WindowActions.hpp"
+#include "../app/ApplicationState.hpp"
 
 
 class MainMenu
 {
 public:
 
-    MainMenu(const std::shared_ptr<WindowActions>& windowActions);
+    MainMenu(ApplicationState* appState);
 
     MainMenu(const MainMenu&) = delete;
     MainMenu(MainMenu&&) = default;
@@ -18,6 +18,6 @@ public:
 
 private:
 
-    std::shared_ptr<WindowActions> m_windowActions;
+    ApplicationState* m_appState;
 
 };

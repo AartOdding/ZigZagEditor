@@ -19,8 +19,7 @@ namespace zz = ZigZag;
 
 
 Application::Application()
-    : m_windowActions(std::make_shared<WindowActions>()),
-      m_mainMenu(m_windowActions)
+    : m_mainMenu(&m_appState)
 {
     //inspector.setRootObject(&op1);
 
@@ -56,8 +55,8 @@ Application::Application()
     //par2.process();
 
     //std::cout << par1.value() << " " << par2.value() << std::endl;
-    m_viewport.setScope(&m_rootOperator);
-    m_objectInspector.setRootObject(&m_rootOperator);
+    m_viewport.setScope(&m_appState.rootOperator);
+    m_objectInspector.setRootObject(&m_appState.rootOperator);
 }
 
 void Application::draw()
@@ -77,31 +76,37 @@ void Application::draw()
     m_mainMenu.draw();
     ImGui::DockSpaceOverViewport(nullptr, ImGuiDockNodeFlags_NoWindowMenuButton | ImGuiDockNodeFlags_NoCloseButton);
     
-    if (m_windowActions->viewportWindowOpen.getState())
+    if (m_appState.windowActions.viewportWindowOpen.getState())
     {
         bool open = true;
         m_viewport.draw(&open);
-        m_windowActions->viewportWindowOpen.setState(open);
+        m_appState.windowActions.viewportWindowOpen.setState(open);
     }
-    if (m_windowActions->objectInspectorWindowOpen.getState())
+    if (m_appState.windowActions.objectInspectorWindowOpen.getState())
     {
         bool open = true;
         m_objectInspector.draw(&open);
-        m_windowActions->objectInspectorWindowOpen.setState(open);
+        m_appState.windowActions.objectInspectorWindowOpen.setState(open);
     }
-    if (m_windowActions->imguiDemoWindowOpen.getState())
+    if (m_appState.windowActions.historyWindowOpen.getState())
+    {
+        bool open = true;
+        m_historyView.draw(&open);
+        m_appState.windowActions.historyWindowOpen.setState(open);
+    }
+    if (m_appState.windowActions.imguiDemoWindowOpen.getState())
     {
         bool open = true;
         ImGui::ShowDemoWindow(&open);
-        m_windowActions->imguiDemoWindowOpen.setState(open);
+        m_appState.windowActions.imguiDemoWindowOpen.setState(open);
     }
-    if (m_windowActions->imguiStyleWindowOpen.getState())
+    if (m_appState.windowActions.imguiStyleWindowOpen.getState())
     {
         bool open = true;
         ImGui::Begin("Style Editor", &open); // Style editor is not inside of a window by defualt.
         ImGui::ShowStyleEditor();
         ImGui::End();
-        m_windowActions->imguiStyleWindowOpen.setState(open);
+        m_appState.windowActions.imguiStyleWindowOpen.setState(open);
     }
 
     ImGui::PopStyleColor(8);

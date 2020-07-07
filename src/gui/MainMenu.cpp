@@ -4,8 +4,8 @@
 
 
 
-MainMenu::MainMenu(const std::shared_ptr<WindowActions>& windowActions)
-    : m_windowActions(windowActions)
+MainMenu::MainMenu(ApplicationState* appState)
+    : m_appState(appState)
 {
 
 }
@@ -35,23 +35,27 @@ void MainMenu::draw()
     }
     if (ImGui::BeginMenu("View"))
     {
-        ImGui::MenuItem("Recentre", nullptr, false, m_windowActions->viewportWindowOpen.getState());
+        ImGui::MenuItem("Recentre", nullptr, false, m_appState->windowActions.viewportWindowOpen.getState());
         ImGui::Separator();
-        if (ImGui::MenuItem("Viewport", nullptr, m_windowActions->viewportWindowOpen.getState()))
+        if (ImGui::MenuItem("Viewport", nullptr, m_appState->windowActions.viewportWindowOpen.getState()))
         {
-            m_windowActions->viewportWindowOpen.setState(true);
+            m_appState->windowActions.viewportWindowOpen.setState(true);
         }
-        if (ImGui::MenuItem("Object Inspector", nullptr, m_windowActions->objectInspectorWindowOpen.getState()))
+        if (ImGui::MenuItem("Object Inspector", nullptr, m_appState->windowActions.objectInspectorWindowOpen.getState()))
         {
-            m_windowActions->objectInspectorWindowOpen.setState(true);
+            m_appState->windowActions.objectInspectorWindowOpen.setState(true);
         }
-        if (ImGui::MenuItem("ImGui Demo", nullptr, m_windowActions->imguiDemoWindowOpen.getState()))
+        if (ImGui::MenuItem("History", nullptr, m_appState->windowActions.historyWindowOpen.getState()))
         {
-            m_windowActions->imguiDemoWindowOpen.setState(true);
+            m_appState->windowActions.historyWindowOpen.setState(true);
         }
-        if (ImGui::MenuItem("ImGui Style", nullptr, m_windowActions->imguiStyleWindowOpen.getState()))
+        if (ImGui::MenuItem("ImGui Demo", nullptr, m_appState->windowActions.imguiDemoWindowOpen.getState()))
         {
-            m_windowActions->imguiStyleWindowOpen.setState(true);
+            m_appState->windowActions.imguiDemoWindowOpen.setState(true);
+        }
+        if (ImGui::MenuItem("ImGui Style", nullptr, m_appState->windowActions.imguiStyleWindowOpen.getState()))
+        {
+            m_appState->windowActions.imguiStyleWindowOpen.setState(true);
         }
         ImGui::EndMenu();
     }

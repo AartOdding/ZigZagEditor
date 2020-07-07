@@ -2,14 +2,13 @@
 
 #include <memory>
 
-#include <ZigZag/BaseOperator.hpp>
+#include "app/ApplicationState.hpp"
 
-#include "app/WindowActions.hpp"
+#include "gui/HistoryView.hpp"
 #include "gui/MainMenu.hpp"
 #include "gui/ObjectInspector.hpp"
 #include "gui/Viewport.hpp"
 
-struct GLFWwindow;
 
 
 class Application
@@ -25,13 +24,12 @@ public:
 
 private:
 
-    std::shared_ptr<WindowActions> m_windowActions;
+    ApplicationState m_appState;
 
     MainMenu m_mainMenu;
 
     Viewport m_viewport;
-    ObjectInspector m_objectInspector{ "Inspector" };
-
-    ZigZag::BaseOperator m_rootOperator{ nullptr, "project" };
+    ObjectInspector m_objectInspector{ "Inspector", &m_appState };
+    HistoryView m_historyView{ "History", &m_appState };
 
 };

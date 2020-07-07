@@ -5,19 +5,18 @@
 #include <unordered_map>
 #include <utility>
 
+#include <ZigZag/Object.hpp>
 #include <ZigZag/ObjectSelection.hpp>
 
-namespace ZigZag
-{
-    class Object;
-}
+#include "../app/ApplicationState.hpp"
+
 
 
 class ObjectInspector
 {
 public:
 
-    ObjectInspector(std::string_view windowName, ZigZag::Object* rootObject = nullptr);
+    ObjectInspector(std::string_view windowName, ApplicationState* appState);
 
     void setRootObject(ZigZag::Object* rootObject);
 
@@ -30,16 +29,17 @@ private:
     void clearUnusedObjectData();
 
     std::string m_windowName;
-    
-    ZigZag::Object* m_rootObject;
-    ZigZag::Object* m_editedObject;
 
-    ZigZag::ObjectSelection m_objectSelection;
+    ApplicationState* m_appState;
+    
+    ZigZag::Object* m_rootObject{ nullptr };
+    ZigZag::Object* m_editedObject{ nullptr };
+
+    ZigZag::ObjectSelection m_objectSelection{ nullptr };
 
     struct ObjectData
     {
         char name[64];
-        std::string id;
         bool active;
     };
 
