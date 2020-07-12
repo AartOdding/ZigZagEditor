@@ -43,7 +43,7 @@ void Viewport::draw(bool* open)
     {
         for (auto op : m_scope->getChildOperators())
         {
-            ImNode::BeginNode((uint64_t)op);
+            ImNode::BeginNode(ImNode::NodeId(static_cast<ZigZag::Object*>(op)));
             auto localPos = ImGui::GetCursorPos();
             ImGui::Dummy({ 100, 100 });
             ImGui::SetCursorPos({ localPos.x + 10, localPos.y + 10 });
@@ -58,16 +58,19 @@ void Viewport::draw(bool* open)
             {
                 int y = 30 + i * 30;
                 ImGui::SetCursorPos({ localPos.x, localPos.y + y });
-                ImNode::BeginPin((uint64_t)inputs[i], ImNode::PinKind::Input);
+                ImNode::BeginPin(
+                    ImNode::PinId(static_cast<ZigZag::Object*>(inputs[i])),
+                    ImNode::PinKind::Input);
                 ImGui::Dummy({ 20, 20 });
-                //ImGui::Text(inputs[i]->getName().c_str());
                 ImNode::EndPin();
             }
             for (int i = 0; i < outputs.size(); ++i)
             {
                 int y = 30 + i * 30;
                 ImGui::SetCursorPos({ localPos.x + 80, localPos.y + y });
-                ImNode::BeginPin((uint64_t)outputs[i], ImNode::PinKind::Output);
+                ImNode::BeginPin(
+                    ImNode::PinId(static_cast<ZigZag::Object*>(outputs[i])), 
+                    ImNode::PinKind::Output);
                 ImGui::Dummy({ 20, 20 });
                 ImNode::EndPin();
             }
@@ -80,7 +83,10 @@ void Viewport::draw(bool* open)
                 for (auto input : output->getConnectedInputs())
                 {
                     // use input for link id because input can only have one conection.
-                    ImNode::Link((uint64_t)input, (uint64_t)output, (uint64_t)input);
+                    ImNode::Link(
+                        ImNode::LinkId(static_cast<ZigZag::Object*>(input)), 
+                        ImNode::PinId(static_cast<ZigZag::Object*>(output)), 
+                        ImNode::PinId(static_cast<ZigZag::Object*>(input)));
                 }
             }
         }
@@ -88,29 +94,34 @@ void Viewport::draw(bool* open)
 
     if (ImNode::BeginCreate())
     {
-        ImNode::PinId inputId, outputId;
+        ImNode::PinId startId, finishId;
 
-        if (ImNode::QueryNewLink(&inputId, &outputId))
+        // The order of the output and input in QueryNewLink is undefined. Therefore we need to test
+        // if there is a output and an input.
+        if (ImNode::QueryNewLink(&startId, &finishId))
         {
-            static ZigZag::BaseDataInput* prevIn = nullptr;
-            static ZigZag::BaseDataSource* prevOut = nullptr;
-
-            auto input = inputId.AsPointer<ZigZag::BaseDataInput>();
-            auto output = outputId.AsPointer<ZigZag::BaseDataSource>();
-
-            if (input != prevIn || output != prevOut)
-            {
-                prevIn = input;
-                prevOut = output;
-                std::cout << input << "\t" << output << std::endl;
-            }
-
             // AcceptNewItem returns true if the mouse is released
             if (ImNode::AcceptNewItem())
             {
-                std::cout << "connected " << input << "\t" << output << std::endl;
-                connect(output, input);
+                auto start = startId.AsPointer<ZigZag::Object>();
+                auto finish = finishId.AsPointer<ZigZag::Object>();
+
+                if (auto startSource = dynamic_cast<ZigZag::BaseDataSource*>(start))
+                {
+                    if (auto finishInput = dynamic_cast<ZigZag::BaseDataInput*>(finish))
+                    {
+                        connect(startSource, finishInput);
+                    }
+                }
+                else if (auto startInput = dynamic_cast<ZigZag::BaseDataInput*>(start))
+                {
+                    if (auto finishSource = dynamic_cast<ZigZag::BaseDataSource*>(finish))
+                    {
+                        connect(finishSource, startInput);
+                    }
+                }
             }
+
         }
     }
     ImNode::EndCreate();
