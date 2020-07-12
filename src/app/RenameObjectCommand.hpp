@@ -20,7 +20,7 @@ public:
 	void undo() final;
 
 	const std::string& typeName() final;
-	const std::string& getDescription() final;
+	const std::string& description() final;
 
 private:
 

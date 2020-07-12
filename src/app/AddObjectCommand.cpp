@@ -55,7 +55,7 @@ const std::string& AddObjectCommand::typeName()
 	return name;
 }
 
-const std::string& AddObjectCommand::getDescription()
+const std::string& AddObjectCommand::description()
 {
 	return m_description;
 }

@@ -14,7 +14,11 @@ public:
 	CommandStack() = default;
 	CommandStack(const CommandStack&) = delete;
 
-	void pushCommand(std::unique_ptr<Command>&& command);
+	template <typename T, typename ... Args>
+	void push(Args&& ... args)
+	{
+		pushCommand(std::make_unique<T>(std::forward<Args>(args) ...));
+	}
 
 	bool undo();
 	bool redo();
@@ -33,6 +37,7 @@ public:
 private:
 
 	void resetTopToCurrent();
+	void pushCommand(std::unique_ptr<Command>&& command);
 
 	// Index to one above the last done command.
 	int m_index = 0;

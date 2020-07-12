@@ -35,7 +35,7 @@ const std::string& RenameObjectCommand::typeName()
 	return name;
 }
 
-const std::string& RenameObjectCommand::getDescription()
+const std::string& RenameObjectCommand::description()
 {
 	return m_description;
 }

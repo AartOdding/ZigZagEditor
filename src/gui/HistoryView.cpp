@@ -47,7 +47,7 @@ void HistoryView::draw(bool* p_open)
             {
                 ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyleColorVec4(ImGuiCol_TextDisabled));
             }
-            Selectable(commands[i]->getDescription().c_str());
+            Selectable(commands[i]->description().c_str());
 
             if (i > current)
             {

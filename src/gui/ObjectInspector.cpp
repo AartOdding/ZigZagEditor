@@ -56,7 +56,8 @@ void ObjectInspector::draw(bool* p_open)
             Selectable(type.c_str(), false);
             if (IsItemClicked())
             {
-                m_appState->commandStack.pushCommand(std::make_unique<AddObjectCommand>(m_editedObject, type));
+                //m_appState->commandStack.pushCommand(std::make_unique<AddObjectCommand>(m_editedObject, type));
+                m_appState->commandStack.push<AddObjectCommand>(m_editedObject, type);
 
                 if (!GetIO().KeyShift)
                 {
@@ -76,7 +77,8 @@ void ObjectInspector::draw(bool* p_open)
     {
         for (auto obj : m_objectSelection.getSelection())
         {
-            m_appState->commandStack.pushCommand(std::make_unique<RemoveObjectCommand>(obj));
+            //m_appState->commandStack.pushCommand(std::make_unique<RemoveObjectCommand>(obj));
+            m_appState->commandStack.push<RemoveObjectCommand>(obj);
         }
     }
 
@@ -157,7 +159,7 @@ void ObjectInspector::showObjectTree(ZigZag::Object* object)
 
             if (object->getName() != newName)
             {
-                m_appState->commandStack.pushCommand(std::make_unique<RenameObjectCommand>(object, newName));
+                m_appState->commandStack.push<RenameObjectCommand>(object, newName);
             }
         }
         

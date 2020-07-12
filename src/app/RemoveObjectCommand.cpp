@@ -45,7 +45,7 @@ const std::string& RemoveObjectCommand::typeName()
 	return name;
 }
 
-const std::string& RemoveObjectCommand::getDescription()
+const std::string& RemoveObjectCommand::description()
 {
 	return m_description;
 }

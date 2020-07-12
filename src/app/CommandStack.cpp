@@ -8,16 +8,9 @@ void CommandStack::pushCommand(std::unique_ptr<Command>&& command)
 	{
 		resetTopToCurrent();
 
-		if (!m_commandStack.empty() && m_commandStack.back()->absorb(*command))
-		{
-			command.reset(nullptr);
-		}
-		else
-		{
-			m_commandStack.push_back(std::move(command));
-			m_commandStack.back()->redo();
-			m_index++;
-		}
+		m_commandStack.push_back(std::move(command));
+		m_commandStack.back()->redo();
+		m_index++;
 	}
 }
 
