@@ -5,6 +5,8 @@
 
 #include <ZigZag/BaseOperator.hpp>
 
+#include "app/ApplicationState.hpp"
+
 namespace ImNode = ax::NodeEditor;
 
 
@@ -13,7 +15,7 @@ class Viewport
 {
 public:
 
-    Viewport();
+    Viewport(std::string_view windowName, ApplicationState* appState);
     Viewport(const Viewport&) = delete;
     Viewport(Viewport&&) = delete;
 
@@ -26,8 +28,12 @@ public:
 
 private:
 
-    ZigZag::BaseOperator* m_scope{ nullptr };
+    std::string m_windowName;
+
+    ApplicationState* m_appState;
+
+    ZigZag::BaseOperator* m_scope;
     
-    ImNode::EditorContext* m_editorContext{ nullptr };
+    ImNode::EditorContext* m_editorContext;
 
 };

@@ -19,42 +19,9 @@ namespace zz = ZigZag;
 
 
 Application::Application()
-    : m_mainMenu(&m_appState)
 {
-    //inspector.setRootObject(&op1);
-
-    ///------------------------
-
-
     registerTypes();
 
-    auto i1 = zz::ObjectFactory::instance()->create("IntParameter");
-    std::cout << i1->typeName() << std::endl;
-
-    zz::BaseOperator op1(nullptr, "op1");
-    IntParameter par1{ &op1 };
-    IntParameter par2{ &op1 };
-
-    TextureData tex1(nullptr, "text1");
-    GenericInput<TextureData> textIn1(nullptr, "texIn1");
-
-    std::cout << par1.typeName() << std::endl;
-    std::cout << par1.value() << " " << par2.value() << std::endl;
-
-    connect(&par1, &par2);
-
-    //par1.consume(100);
-    par1 = 100;
-    std::cout << par1.value() << " " << par2.value() << std::endl;
-
-    par2.process();
-    //par1.process();
-
-    std::cout << par1.value() << " " << par2.value() << std::endl;
-
-    //par2.process();
-
-    //std::cout << par1.value() << " " << par2.value() << std::endl;
     m_viewport.setScope(&m_appState.rootOperator);
     m_objectInspector.setRootObject(&m_appState.rootOperator);
 }

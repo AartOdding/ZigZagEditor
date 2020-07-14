@@ -15,6 +15,8 @@ SET(HEADERS
     src/app/AddObjectCommand.hpp
     src/app/Command.hpp
     src/app/CommandStack.hpp
+    src/app/ConnectCommand.hpp
+    src/app/DisconnectCommand.hpp
     src/app/RemoveObjectCommand.hpp
     src/app/RenameObjectCommand.hpp
     src/app/WindowActions.hpp
@@ -32,6 +34,8 @@ SET(SOURCES
     src/app/Action.cpp
     src/app/AddObjectCommand.cpp
     src/app/CommandStack.cpp
+    src/app/ConnectCommand.cpp
+    src/app/DisconnectCommand.cpp
     src/app/RemoveObjectCommand.cpp
     src/app/RenameObjectCommand.cpp
 

@@ -26,9 +26,9 @@ private:
 
     ApplicationState m_appState;
 
-    MainMenu m_mainMenu;
+    MainMenu m_mainMenu{ &m_appState };
 
-    Viewport m_viewport;
+    Viewport m_viewport{ "Editor", &m_appState };
     ObjectInspector m_objectInspector{ "Inspector", &m_appState };
     HistoryView m_historyView{ "History", &m_appState };
 

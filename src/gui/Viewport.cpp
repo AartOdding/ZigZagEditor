@@ -1,9 +1,14 @@
 #include "Viewport.hpp"
-
+#include "app/ConnectCommand.hpp"
+#include "app/DisconnectCommand.hpp"
+#include "app/RemoveObjectCommand.hpp"
 
 #include <iostream>
 
-Viewport::Viewport()
+Viewport::Viewport(std::string_view windowName, ApplicationState* appState)
+    : m_windowName(windowName),
+      m_appState(appState),
+      m_scope(&appState->rootOperator)
 {
     ImNode::Config cfg;
     cfg.SettingsFile = nullptr;
@@ -26,10 +31,10 @@ void Viewport::draw(bool* open)
 {
     ImGui::PushID(this);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0, 0 });
-    ImGui::Begin("Graph Editor", open);
+    ImGui::Begin(m_windowName.c_str(), open);
 
     ImNode::SetCurrentEditor(m_editorContext);
-    ImNode::Begin("Graph Editor");
+    ImNode::Begin(m_windowName.c_str());
 
     ImNode::PushStyleVar(ImNode::StyleVar_NodePadding, {0, 0, 0, 0});
     ImNode::PushStyleVar(ImNode::StyleVar_NodeRounding, 3);
@@ -110,14 +115,14 @@ void Viewport::draw(bool* open)
                 {
                     if (auto finishInput = dynamic_cast<ZigZag::BaseDataInput*>(finish))
                     {
-                        connect(startSource, finishInput);
+                        m_appState->commandStack.push<ConnectDataCommand>(startSource, finishInput);
                     }
                 }
                 else if (auto startInput = dynamic_cast<ZigZag::BaseDataInput*>(start))
                 {
                     if (auto finishSource = dynamic_cast<ZigZag::BaseDataSource*>(finish))
                     {
-                        connect(finishSource, startInput);
+                        m_appState->commandStack.push<ConnectDataCommand>(finishSource, startInput);
                     }
                 }
             }
@@ -125,6 +130,37 @@ void Viewport::draw(bool* open)
         }
     }
     ImNode::EndCreate();
+
+    if (ImNode::BeginDelete())
+    {
+        ImNode::LinkId linkId;
+        ImNode::PinId startId, finishId;
+
+        if (ImNode::QueryDeletedLink(&linkId))
+        {
+            if (ImNode::AcceptDeletedItem())
+            {
+                auto input = linkId.AsPointer<ZigZag::BaseDataInput>();
+                m_appState->commandStack.push<DisconnectDataCommand>(input->getConnectedOutput(), input);
+            }
+        }
+    }
+    ImNode::EndDelete();
+
+    if (ImNode::BeginDelete())
+    {
+        ImNode::NodeId nodeId;
+        
+        if (ImNode::QueryDeletedNode(&nodeId))
+        {
+            if (ImNode::AcceptDeletedItem())
+            {
+                m_appState->commandStack.push<RemoveObjectCommand>(nodeId.AsPointer<ZigZag::BaseOperator>());
+            }
+        }
+    }
+    ImNode::EndDelete();
+
 
     //ImNode::PopStyleColor(1);
     ImNode::PopStyleVar(5);

@@ -8,7 +8,7 @@
 #include <ZigZag/Object.hpp>
 #include <ZigZag/ObjectSelection.hpp>
 
-#include "../app/ApplicationState.hpp"
+#include "app/ApplicationState.hpp"
 
 
 
