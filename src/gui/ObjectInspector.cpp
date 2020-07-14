@@ -110,6 +110,8 @@ void ObjectInspector::showObjectTree(ZigZag::Object* object)
 {
     if (object)
     {
+        PushID(object);
+
         AlignTextToFramePadding();
         ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_DefaultOpen;
         flags |= ImGuiTreeNodeFlags_OpenOnDoubleClick;
@@ -148,9 +150,7 @@ void ObjectInspector::showObjectTree(ZigZag::Object* object)
         data.active = true;
         
         PushItemWidth(-1);
-        PushID(object);
         InputText("##", data.name, 64);
-        PopID();
         PopItemWidth();
 
         if (IsItemDeactivatedAfterEdit())
@@ -164,6 +164,8 @@ void ObjectInspector::showObjectTree(ZigZag::Object* object)
         }
         
         NextColumn();
+
+        PopID();
 
         if (open)
         {
