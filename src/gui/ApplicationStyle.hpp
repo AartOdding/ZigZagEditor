@@ -13,14 +13,9 @@ class ApplicationStyle
 {
 public:
 
-	void pushStyle(const std::string& groupName) const;
-	void popStyle(const std::string& groupName) const;
+	void push(const std::string& groupName) const;
+	void pop(const std::string& groupName) const;
 	
-	/*
-	 * In all the set... functions it is important that the group to which the style option is being added,
-	 * is not currently in use. This is because then a different amount of options will be popped from the
-	 * imgui style stack, than that were on the stack.
-	 */
 	void setColor(const std::string& groupName, ImGuiCol colorId, unsigned char r, unsigned char g, unsigned char b, unsigned char a);
 	void setColor(const std::string& groupName, ImGuiCol colorId, const std::string& colorConstant);
 
@@ -38,7 +33,8 @@ private:
 		std::vector<std::pair<int, std::string>> colorsFromConstants;
 		std::vector<std::pair<int, float>> sizes1D;
 		std::vector<std::pair<int, ImVec2>> sizes2D;
-		mutable int useCount = 0;
+		mutable int colorPopCount, sizePopCount;
+		mutable bool active = false;
 	};
 
 	std::unordered_map<std::string, StyleGroup> m_styleGroups;

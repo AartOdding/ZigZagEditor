@@ -4,20 +4,35 @@
 
 
 
-void ApplicationStyle::pushStyle(const std::string& groupName) const
+void ApplicationStyle::push(const std::string& groupName) const
 {
 	auto it = m_styleGroups.find(groupName);
 
-	if (it != m_styleGroups.end())
+	if (it != m_styleGroups.end() && !it->second.active)
 	{
+		// we need to store how many variables need to be popped, because we could add/ remove
+		// variables from the style that are still on the imgui style stack.
+		it->second.colorPopCount = it->second.colors.size() + it->second.colorsFromConstants.size();
+		it->second.sizePopCount = it->second.sizes1D.size() + it->second.sizes2D.size();
+		it->second.active = true;
+
 		for (const auto& [id, color] : it->second.colors)
 		{
 			ImGui::PushStyleColor(id, color);
 		}
 		for (const auto& [id, constant] : it->second.colorsFromConstants)
 		{
-			// Will throw if constant cannot be found.
-			ImGui::PushStyleColor(id, m_colorConstants.at(constant));
+			auto constantIt = m_colorConstants.find(constant);
+
+			if (constantIt == m_colorConstants.end())
+			{
+				assert(false); // Stop in debug.
+				--it->second.colorPopCount; // Pop one less because we cant push.
+			}
+			else
+			{
+				ImGui::PushStyleColor(id, constantIt->second);
+			}
 		}
 		for (const auto& [id, val] : it->second.sizes1D)
 		{
@@ -27,70 +42,49 @@ void ApplicationStyle::pushStyle(const std::string& groupName) const
 		{
 			ImGui::PushStyleVar(id, val);
 		}
-		it->second.useCount += 1;
 	}
 }
 
 
-void ApplicationStyle::popStyle(const std::string& groupName) const
+void ApplicationStyle::pop(const std::string& groupName) const
 {
 	auto it = m_styleGroups.find(groupName);
 
 	if (it != m_styleGroups.end())
 	{
-		ImGui::PopStyleColor(it->second.colors.size() + it->second.colorsFromConstants.size());
+		ImGui::PopStyleColor(it->second.colorPopCount);
 		ImGui::PopStyleVar(it->second.sizes1D.size() + it->second.sizes2D.size());
-		it->second.useCount -= 1;
+		it->second.active = false;
 	}
 }
 
 
 void ApplicationStyle::setColor(const std::string& groupName, ImGuiCol colorId, unsigned char r, unsigned char g, unsigned char b, unsigned char a)
 {
-	auto& group = m_styleGroups[groupName];
-	assert(group.useCount == 0);
-
-	if (group.useCount == 0)
-	{
-		group.colors.push_back({ colorId, IM_COL32(r, g, b, a) });
-	}
+	m_styleGroups[groupName].colors.push_back({ colorId, IM_COL32(r, g, b, a) });
 }
 
 
 void ApplicationStyle::setColor(const std::string& groupName, ImGuiCol colorId, const std::string& colorConstant)
 {
-	auto& group = m_styleGroups[groupName];
-	assert(group.useCount == 0);
 	assert(m_colorConstants.find(colorConstant) != m_colorConstants.end());
 
-	if (group.useCount == 0 && m_colorConstants.find(colorConstant) != m_colorConstants.end())
+	if (m_colorConstants.find(colorConstant) != m_colorConstants.end())
 	{
-		group.colorsFromConstants.push_back({ colorId, colorConstant });
+		m_styleGroups[groupName].colorsFromConstants.push_back({ colorId, colorConstant });
 	}
 }
 
 
 void ApplicationStyle::setSize(const std::string& groupName, ImGuiStyleVar sizeId, float value)
 {
-	auto& group = m_styleGroups[groupName];
-	assert(group.useCount == 0);
-
-	if (group.useCount == 0)
-	{
-		group.sizes1D.push_back({ sizeId, value });
-	}
+	m_styleGroups[groupName].sizes1D.push_back({ sizeId, value });
 }
 
 
 void ApplicationStyle::setSize(const std::string& groupName, ImGuiStyleVar sizeId, float x, float y)
 {
-	auto& group = m_styleGroups[groupName];
-	assert(group.useCount == 0);
-
-	if (group.useCount == 0)
-	{
-		group.sizes2D.push_back({ sizeId, { x, y } });
-	}
+	m_styleGroups[groupName].sizes2D.push_back({ sizeId, { x, y } });
 }
 
 
@@ -106,10 +100,6 @@ void ApplicationStyle::removeColorConstant(const std::string& name)
 	 * When removing the constant we need to find all the places where it is used,
 	 * and swap the use of the constant to usage of the value in the constant. only
 	 * after this we can delete the constant.
-	 * In all the set... functions it is not allowed to set a style option when the 
-	 * style group of that option is currently in use. In this case that is not a
-	 * problem because we remove as many style options as options are added, so the 
-	 * quantity stays the same.
 	 */
 	auto it = m_colorConstants.find(name);
 	assert(it != m_colorConstants.end());
