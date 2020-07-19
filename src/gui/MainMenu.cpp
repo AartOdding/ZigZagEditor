@@ -37,11 +37,11 @@ void MainMenu::draw()
     {
         ImGui::MenuItem("Recentre", nullptr, false, m_appState->windowActions.viewportWindowOpen.getState());
         ImGui::Separator();
-        if (ImGui::MenuItem("Viewport", nullptr, m_appState->windowActions.viewportWindowOpen.getState()))
+        if (ImGui::MenuItem("Editor", nullptr, m_appState->windowActions.viewportWindowOpen.getState()))
         {
             m_appState->windowActions.viewportWindowOpen.setState(true);
         }
-        if (ImGui::MenuItem("Object Inspector", nullptr, m_appState->windowActions.objectInspectorWindowOpen.getState()))
+        if (ImGui::MenuItem("Project Hierarchy", nullptr, m_appState->windowActions.objectInspectorWindowOpen.getState()))
         {
             m_appState->windowActions.objectInspectorWindowOpen.setState(true);
         }

@@ -30,7 +30,7 @@ private:
     MainMenu m_mainMenu{ &m_appState };
 
     Viewport m_viewport{ "Editor", &m_appState };
-    ObjectInspector m_objectInspector{ "Inspector", &m_appState };
+    ObjectInspector m_objectInspector{ "Hierarchy", &m_appState };
     HistoryView m_historyView{ "History", &m_appState };
     RenderOrderWindow m_renderOrderWindow{ "Render Order", &m_appState };
 
