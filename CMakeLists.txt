@@ -21,6 +21,7 @@ SET(HEADERS
     src/app/RenameObjectCommand.hpp
     src/app/WindowActions.hpp
 
+    src/gui/ApplicationStyle.hpp
     src/gui/HistoryView.hpp
     src/gui/MainMenu.hpp
     src/gui/ObjectInspector.hpp
@@ -40,6 +41,7 @@ SET(SOURCES
     src/app/RemoveObjectCommand.cpp
     src/app/RenameObjectCommand.cpp
 
+    src/gui/ApplicationStyle.cpp
     src/gui/HistoryView.cpp
     src/gui/MainMenu.cpp
     src/gui/ObjectInspector.cpp
