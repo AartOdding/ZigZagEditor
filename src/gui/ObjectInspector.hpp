@@ -18,7 +18,7 @@ public:
 
     ObjectInspector(std::string_view windowName, ApplicationState* appState);
 
-    void setRootObject(ZigZag::Object* rootObject);
+    void setScope(ZigZag::Object* rootObject);
 
     void draw(bool* p_open);
 
@@ -36,6 +36,7 @@ private:
     ZigZag::Object* m_editedObject{ nullptr };
 
     ZigZag::ObjectSelection m_objectSelection{ nullptr };
+    ZigZag::CallbackId m_callbackId{ 0 };
 
     struct ObjectData
     {

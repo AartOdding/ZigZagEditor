@@ -49,6 +49,11 @@ void MainMenu::draw()
         {
             m_appState->windowActions.historyWindowOpen.setState(true);
         }
+        if (ImGui::MenuItem("Render Order", nullptr, m_appState->windowActions.renderOrderWindowOpen.getState()))
+        {
+            m_appState->windowActions.renderOrderWindowOpen.setState(true);
+        }
+        ImGui::Separator();
         if (ImGui::MenuItem("ImGui Demo", nullptr, m_appState->windowActions.imguiDemoWindowOpen.getState()))
         {
             m_appState->windowActions.imguiDemoWindowOpen.setState(true);

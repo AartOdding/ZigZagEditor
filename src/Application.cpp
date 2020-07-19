@@ -23,7 +23,7 @@ Application::Application()
     registerTypes();
 
     m_viewport.setScope(&m_appState.rootOperator);
-    m_objectInspector.setRootObject(&m_appState.rootOperator);
+    m_objectInspector.setScope(&m_appState.rootOperator);
 }
 
 void Application::draw()
@@ -60,6 +60,12 @@ void Application::draw()
         bool open = true;
         m_historyView.draw(&open);
         m_appState.windowActions.historyWindowOpen.setState(open);
+    }
+    if (m_appState.windowActions.renderOrderWindowOpen.getState())
+    {
+        bool open = true;
+        m_renderOrderWindow.draw(&open);
+        m_appState.windowActions.renderOrderWindowOpen.setState(open);
     }
     if (m_appState.windowActions.imguiDemoWindowOpen.getState())
     {

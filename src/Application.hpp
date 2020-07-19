@@ -7,6 +7,7 @@
 #include "gui/HistoryView.hpp"
 #include "gui/MainMenu.hpp"
 #include "gui/ObjectInspector.hpp"
+#include "gui/RenderOrderWindow.hpp"
 #include "gui/Viewport.hpp"
 
 
@@ -31,5 +32,6 @@ private:
     Viewport m_viewport{ "Editor", &m_appState };
     ObjectInspector m_objectInspector{ "Inspector", &m_appState };
     HistoryView m_historyView{ "History", &m_appState };
+    RenderOrderWindow m_renderOrderWindow{ "Render Order", &m_appState };
 
 };

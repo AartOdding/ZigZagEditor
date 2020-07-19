@@ -24,6 +24,7 @@ SET(HEADERS
     src/gui/HistoryView.hpp
     src/gui/MainMenu.hpp
     src/gui/ObjectInspector.hpp
+    src/gui/RenderOrderWindow.hpp
     src/gui/Viewport.hpp
 )
 
@@ -42,6 +43,7 @@ SET(SOURCES
     src/gui/HistoryView.cpp
     src/gui/MainMenu.cpp
     src/gui/ObjectInspector.cpp
+    src/gui/RenderOrderWindow.cpp
     src/gui/Viewport.cpp
 )
 

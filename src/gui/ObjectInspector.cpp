@@ -19,10 +19,27 @@ ObjectInspector::ObjectInspector(std::string_view windowName, ApplicationState* 
 }
 
 
-void ObjectInspector::setRootObject(ZigZag::Object* rootObject)
+void ObjectInspector::setScope(ZigZag::Object* rootObject)
 {
+    if (m_rootObject)
+    {
+        m_rootObject->deregisterChildrenCallback(m_callbackId);
+    }
     m_rootObject = rootObject;
     m_objectSelection.setRootObject(rootObject);
+
+    m_callbackId = m_rootObject->registerChildrenCallback(
+        [](ZigZag::Object* child, bool added) 
+        {
+            if (added)
+            {
+                std::cout << "adding " << child->getName() << std::endl;
+            }
+            else
+            {
+                std::cout << "removing " << child->getName() << std::endl;
+            }
+        });
 }
 
 
