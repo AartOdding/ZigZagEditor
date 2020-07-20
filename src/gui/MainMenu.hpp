@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include "../app/ApplicationState.hpp"
+#include "app/ApplicationState.hpp"
 
 
 class MainMenu

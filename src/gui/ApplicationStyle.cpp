@@ -88,6 +88,12 @@ void ApplicationStyle::setSize(const std::string& groupName, ImGuiStyleVar sizeI
 }
 
 
+void ApplicationStyle::setColorConstant(const std::string& name, ImVec4 color)
+{
+	m_colorConstants[name] = ImGui::ColorConvertFloat4ToU32(color);
+}
+
+
 void ApplicationStyle::setColorConstant(const std::string& name, unsigned char r, unsigned char g, unsigned char b, unsigned char a)
 {
 	m_colorConstants[name] = IM_COL32(r, g, b, a);
@@ -129,4 +135,10 @@ void ApplicationStyle::removeColorConstant(const std::string& name)
 		}
 		m_colorConstants.erase(name);
 	}
+}
+
+
+const std::unordered_map<std::string, std::uint32_t>& ApplicationStyle::getColorConstants()
+{
+	return m_colorConstants;
 }

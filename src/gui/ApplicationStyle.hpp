@@ -22,8 +22,11 @@ public:
 	void setSize(const std::string& groupName, ImGuiStyleVar sizeId, float value);
 	void setSize(const std::string& groupName, ImGuiStyleVar sizeId, float x, float y);
 
+	void setColorConstant(const std::string& name, ImVec4 color);
 	void setColorConstant(const std::string& name, unsigned char r, unsigned char g, unsigned char b, unsigned char a);
 	void removeColorConstant(const std::string& name);
+
+	const std::unordered_map<std::string, std::uint32_t>& getColorConstants();
 
 private:
 

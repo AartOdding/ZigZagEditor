@@ -13,7 +13,7 @@ MainMenu::MainMenu(ApplicationState* appState)
 
 void MainMenu::draw()
 {
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
+    //ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
     ImGui::BeginMainMenuBar();
 
     if (ImGui::BeginMenu("File"))
@@ -53,6 +53,10 @@ void MainMenu::draw()
         {
             m_appState->windowActions.renderOrderWindowOpen.setState(true);
         }
+        if (ImGui::MenuItem("Style Editor", nullptr, m_appState->windowActions.styleEditorWindowOpen.getState()))
+        {
+            m_appState->windowActions.styleEditorWindowOpen.setState(true);
+        }
         ImGui::Separator();
         if (ImGui::MenuItem("ImGui Demo", nullptr, m_appState->windowActions.imguiDemoWindowOpen.getState()))
         {
@@ -66,5 +70,5 @@ void MainMenu::draw()
     }
 
     ImGui::EndMainMenuBar();
-    ImGui::PopStyleVar();
+    //ImGui::PopStyleVar();
 }

@@ -31,10 +31,10 @@ void HistoryView::draw(bool* p_open)
     }
 
     //ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1);
-    ImGui::PushStyleColor(ImGuiCol_FrameBg, ImGui::GetStyleColorVec4(ImGuiCol_MenuBarBg));
-    ImGui::PushStyleColor(ImGuiCol_Header, ImGui::GetStyleColorVec4(ImGuiCol_Tab));
-    ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImGui::GetStyleColorVec4(ImGuiCol_TabUnfocusedActive));
-    ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImGui::GetStyleColorVec4(ImGuiCol_TabUnfocusedActive));
+    //ImGui::PushStyleColor(ImGuiCol_FrameBg, ImGui::GetStyleColorVec4(ImGuiCol_MenuBarBg));
+    //ImGui::PushStyleColor(ImGuiCol_Header, ImGui::GetStyleColorVec4(ImGuiCol_Tab));
+    //ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImGui::GetStyleColorVec4(ImGuiCol_TabUnfocusedActive));
+    //ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImGui::GetStyleColorVec4(ImGuiCol_TabUnfocusedActive));
 
     if (ListBoxHeader("##history", ImGui::GetContentRegionAvail()))
     {
@@ -58,7 +58,7 @@ void HistoryView::draw(bool* p_open)
         ListBoxFooter();
     }
 
-    ImGui::PopStyleColor(4);
+    //ImGui::PopStyleColor(4);
     //ImGui::PopStyleVar();
 
 	End();

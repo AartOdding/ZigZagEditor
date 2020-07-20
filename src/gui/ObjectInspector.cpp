@@ -99,24 +99,24 @@ void ObjectInspector::draw(bool* p_open)
         }
     }
 
-    ImGui::PushStyleColor(ImGuiCol_FrameBg, ImGui::GetStyleColorVec4(ImGuiCol_MenuBarBg));
-    ImGui::PushStyleColor(ImGuiCol_Header, ImGui::GetStyleColorVec4(ImGuiCol_Tab));
-    ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImGui::GetStyleColorVec4(ImGuiCol_TabUnfocusedActive));
-    ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImGui::GetStyleColorVec4(ImGuiCol_TabUnfocusedActive));
+    //ImGui::PushStyleColor(ImGuiCol_FrameBg, ImGui::GetStyleColorVec4(ImGuiCol_MenuBarBg));
+    //ImGui::PushStyleColor(ImGuiCol_Header, ImGui::GetStyleColorVec4(ImGuiCol_Tab));
+    //ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImGui::GetStyleColorVec4(ImGuiCol_TabUnfocusedActive));
+    //ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImGui::GetStyleColorVec4(ImGuiCol_TabUnfocusedActive));
 
     ImGui::BeginChildFrame(1343243, ImGui::GetContentRegionAvail());
     Columns(2);
 
-    ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1);
+    //ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1);
 
     showObjectTree(m_rootObject);
 
-    ImGui::PopStyleVar();
+    //ImGui::PopStyleVar();
 
     Columns(1);
     ImGui::EndChildFrame();
     
-    ImGui::PopStyleColor(4);
+    //ImGui::PopStyleColor(4);
     
     End();
     clearUnusedObjectData();

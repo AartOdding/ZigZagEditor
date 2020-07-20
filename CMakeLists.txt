@@ -26,6 +26,7 @@ SET(HEADERS
     src/gui/MainMenu.hpp
     src/gui/ObjectInspector.hpp
     src/gui/RenderOrderWindow.hpp
+    src/gui/StyleEditorWindow.hpp
     src/gui/Viewport.hpp
 )
 
@@ -46,6 +47,7 @@ SET(SOURCES
     src/gui/MainMenu.cpp
     src/gui/ObjectInspector.cpp
     src/gui/RenderOrderWindow.cpp
+    src/gui/StyleEditorWindow.cpp
     src/gui/Viewport.cpp
 )
 

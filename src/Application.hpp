@@ -8,6 +8,7 @@
 #include "gui/MainMenu.hpp"
 #include "gui/ObjectInspector.hpp"
 #include "gui/RenderOrderWindow.hpp"
+#include "gui/StyleEditorWindow.hpp"
 #include "gui/Viewport.hpp"
 
 
@@ -33,5 +34,6 @@ private:
     ObjectInspector m_objectInspector{ "Hierarchy", &m_appState };
     HistoryView m_historyView{ "History", &m_appState };
     RenderOrderWindow m_renderOrderWindow{ "Render Order", &m_appState };
+    StyleEditorWindow m_styleEditorWindow{ "Style Editor", &m_appState };
 
 };

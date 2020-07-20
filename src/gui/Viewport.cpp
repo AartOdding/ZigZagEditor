@@ -30,17 +30,17 @@ void Viewport::setScope(ZigZag::BaseOperator* scope)
 void Viewport::draw(bool* open)
 {
     ImGui::PushID(this);
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0, 0 });
+    //ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0, 0 });
     ImGui::Begin(m_windowName.c_str(), open);
 
     ImNode::SetCurrentEditor(m_editorContext);
     ImNode::Begin(m_windowName.c_str());
 
-    ImNode::PushStyleVar(ImNode::StyleVar_NodePadding, {0, 0, 0, 0});
-    ImNode::PushStyleVar(ImNode::StyleVar_NodeRounding, 3);
-    ImNode::PushStyleVar(ImNode::StyleVar_NodeBorderWidth, 0);
-    ImNode::PushStyleVar(ImNode::StyleVar_HoveredNodeBorderWidth, 0);
-    ImNode::PushStyleVar(ImNode::StyleVar_SelectedNodeBorderWidth, 0);
+    //ImNode::PushStyleVar(ImNode::StyleVar_NodePadding, {0, 0, 0, 0});
+    //ImNode::PushStyleVar(ImNode::StyleVar_NodeRounding, 3);
+    //ImNode::PushStyleVar(ImNode::StyleVar_NodeBorderWidth, 0);
+    //ImNode::PushStyleVar(ImNode::StyleVar_HoveredNodeBorderWidth, 0);
+    //ImNode::PushStyleVar(ImNode::StyleVar_SelectedNodeBorderWidth, 0);
 
     //ImNode::PushStyleColor(ImNode::StyleColor_NodeBg, { 1, 1, 1, 0 });
 
@@ -163,10 +163,10 @@ void Viewport::draw(bool* open)
 
 
     //ImNode::PopStyleColor(1);
-    ImNode::PopStyleVar(5);
+    //ImNode::PopStyleVar(5);
     ImNode::End();
 
     ImGui::End();
-    ImGui::PopStyleVar(1);
+    //ImGui::PopStyleVar(1);
     ImGui::PopID();
 }

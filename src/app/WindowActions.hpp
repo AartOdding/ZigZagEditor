@@ -9,6 +9,7 @@ struct WindowActions
     Action objectInspectorWindowOpen{ true };
     Action historyWindowOpen{ true };
     Action renderOrderWindowOpen{ true };
+    Action styleEditorWindowOpen{ true };
     Action imguiDemoWindowOpen;
     Action imguiStyleWindowOpen;
 };
