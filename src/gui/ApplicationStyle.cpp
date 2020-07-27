@@ -4,64 +4,50 @@
 
 
 
-void ApplicationStyle::push(const std::string& groupName) const
-{
-	auto it = m_styleGroups.find(groupName);
-
-	if (it != m_styleGroups.end() && !it->second.active)
-	{
-		// we need to store how many variables need to be popped, because we could add/ remove
-		// variables from the style that are still on the imgui style stack.
-		it->second.colorPopCount = it->second.colors.size() + it->second.colorsFromConstants.size();
-		it->second.sizePopCount = it->second.sizes1D.size() + it->second.sizes2D.size();
-		it->second.active = true;
-
-		for (const auto& [id, color] : it->second.colors)
-		{
-			ImGui::PushStyleColor(id, color);
-		}
-		for (const auto& [id, constant] : it->second.colorsFromConstants)
-		{
-			auto constantIt = m_colorConstants.find(constant);
-
-			if (constantIt == m_colorConstants.end())
-			{
-				assert(false); // Stop in debug.
-				--it->second.colorPopCount; // Pop one less because we cant push.
-			}
-			else
-			{
-				ImGui::PushStyleColor(id, constantIt->second);
-			}
-		}
-		for (const auto& [id, val] : it->second.sizes1D)
-		{
-			ImGui::PushStyleVar(id, val);
-		}
-		for (const auto& [id, val] : it->second.sizes2D)
-		{
-			ImGui::PushStyleVar(id, val);
-		}
-	}
-}
-
-
-void ApplicationStyle::pop(const std::string& groupName) const
+void ApplicationStyle::push(const std::string& groupName)
 {
 	auto it = m_styleGroups.find(groupName);
 
 	if (it != m_styleGroups.end())
 	{
-		ImGui::PopStyleColor(it->second.colorPopCount);
-		ImGui::PopStyleVar(it->second.sizes1D.size() + it->second.sizes2D.size());
-		it->second.active = false;
+		assert(!isActive(it->second));
+		assert(matchesStack(it->second));
+
+		if (!isActive(it->second) && matchesStack(it->second))
+		{
+			applyStyleGroup(it->second);
+			int colorPopCount = it->second.colorsFromValues.size() + it->second.colorsFromConstants.size();
+			int sizePopCOunt = it->second.sizes1D.size() + it->second.sizes2D.size();
+			m_styleGroupStack.push_back({ &it->second, colorPopCount, sizePopCOunt });
+		}
+	}
+	else
+	{
+		m_styleGroupStack.push_back({ &createStyleGroup(groupName), 0, 0 });
+	}
+}
+
+
+void ApplicationStyle::pop(const std::string& groupName)
+{
+	auto it = m_styleGroups.find(groupName);
+
+	assert(it != m_styleGroups.end());
+	assert(!m_styleGroupStack.empty());
+	assert(m_styleGroupStack.back().group == &it->second);
+
+	if (it != m_styleGroups.end() && !m_styleGroupStack.empty() && m_styleGroupStack.back().group == &it->second)
+	{
+		ImGui::PopStyleColor(m_styleGroupStack.back().colorPopCount);
+		ImGui::PopStyleVar(m_styleGroupStack.back().sizePopCount);
+		m_styleGroupStack.pop_back();
 	}
 }
 
 
 void ApplicationStyle::setColor(const std::string& groupName, ImGuiCol colorId, unsigned char r, unsigned char g, unsigned char b, unsigned char a)
 {
-	m_styleGroups[groupName].colors.push_back({ colorId, IM_COL32(r, g, b, a) });
+	m_styleGroups[groupName].colorsFromValues.push_back({ colorId, IM_COL32(r, g, b, a) });
 }
 
 
@@ -121,7 +107,7 @@ void ApplicationStyle::removeColorConstant(const std::string& name)
 			{
 				if (colorConstant == name)
 				{
-					group.colors.push_back({ colorId, colorValue });
+					group.colorsFromValues.push_back({ colorId, colorValue });
 				}
 			}
 			// Iterate backwards for safe removal.
@@ -141,4 +127,92 @@ void ApplicationStyle::removeColorConstant(const std::string& name)
 const std::unordered_map<std::string, std::uint32_t>& ApplicationStyle::getColorConstants()
 {
 	return m_colorConstants;
+}
+
+
+const std::unordered_map<std::string, ApplicationStyle::StyleGroup>& ApplicationStyle::getStyleGroups()
+{
+	return m_styleGroups;
+}
+
+
+ApplicationStyle::StyleGroup& ApplicationStyle::createStyleGroup(const std::string& name)
+{
+	assert(m_styleGroups.find(name) == m_styleGroups.end());
+
+	std::vector<StyleGroup*> priorStyleStack;
+	priorStyleStack.reserve(m_styleGroupStack.size());
+
+	for (auto& frame : m_styleGroupStack)
+	{
+		priorStyleStack.emplace_back(frame.group);
+	}
+
+	auto& newStyleGroup = m_styleGroups[name];
+	newStyleGroup.priorStyleStack = std::move(priorStyleStack);
+	return newStyleGroup;
+}
+
+
+void ApplicationStyle::applyStyleGroup(const StyleGroup& group)
+{
+	for (const auto& [id, color] : group.colorsFromValues)
+	{
+		ImGui::PushStyleColor(id, color);
+	}
+	for (const auto& [constantId, constantName] : group.colorsFromConstants)
+	{
+		auto constantIt = m_colorConstants.find(constantName);
+
+		if (constantIt == m_colorConstants.end())
+		{
+			assert(false); // Stop in debug.
+			ImGui::PushStyleColor(constantId, 0); // in release just push 0
+		}
+		else
+		{
+			ImGui::PushStyleColor(constantId, constantIt->second);
+		}
+	}
+	for (const auto& [id, val] : group.sizes1D)
+	{
+		ImGui::PushStyleVar(id, val);
+	}
+	for (const auto& [id, val] : group.sizes2D)
+	{
+		ImGui::PushStyleVar(id, val);
+	}
+}
+
+
+bool ApplicationStyle::isActive(const StyleGroup& group) const
+{
+	for (const auto& frame : m_styleGroupStack)
+	{
+		if (frame.group == &group)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+
+bool ApplicationStyle::matchesStack(const StyleGroup& group) const
+{
+	if (m_styleGroupStack.size() == group.priorStyleStack.size())
+	{
+		for (size_t i = 0; i < m_styleGroupStack.size(); ++i)
+		{
+			if (m_styleGroupStack.at(i).group != group.priorStyleStack.at(i))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }

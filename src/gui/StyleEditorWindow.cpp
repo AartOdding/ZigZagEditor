@@ -4,6 +4,7 @@
 
 using namespace ImGui;
 
+static auto colorEditFlags = ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_Uint8;
 
 
 StyleEditorWindow::StyleEditorWindow(std::string_view windowName, ApplicationState* appState)
@@ -17,9 +18,46 @@ StyleEditorWindow::StyleEditorWindow(std::string_view windowName, ApplicationSta
 void StyleEditorWindow::draw(bool* p_open)
 {
 	Begin(m_windowName.c_str(), p_open);
+	m_appState->style.push("StyleEditorWindow");
 
-	auto colorEditFlags = ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_Uint8;
+	Columns(2);
 
+	drawColorConstantList();
+
+	NextColumn();
+
+	if (BeginCombo("##groupsCombo", m_activeColorGroup.c_str()))
+	{
+		for (auto& [name, group] : m_appState->style.getStyleGroups())
+		{
+			bool selected = name == m_activeColorGroup;
+
+			if (Selectable(name.c_str(), selected))
+			{
+				m_activeColorGroup = name;
+			}
+		}
+		EndCombo();
+	}
+
+	if (Button("Add color"))
+	{
+
+	}
+	
+	if (Button("Add size"))
+	{
+
+	}
+
+
+	m_appState->style.pop("StyleEditorWindow");
+	End();
+}
+
+
+void StyleEditorWindow::drawColorConstantList()
+{
 	if (Button("Add color"))
 	{
 		OpenPopup("add color");
@@ -30,7 +68,7 @@ void StyleEditorWindow::draw(bool* p_open)
 
 		SameLine();
 		ColorEdit4("##color", &m_newColorValue.x, colorEditFlags);
-		
+
 		SameLine();
 		if (Button("Add"))
 		{
@@ -79,7 +117,7 @@ void StyleEditorWindow::draw(bool* p_open)
 		EndPopup();
 	}
 
-	
+
 	for (auto& [name, color] : m_appState->style.getColorConstants())
 	{
 		auto colorFloat = ColorConvertU32ToFloat4(color);
@@ -91,6 +129,5 @@ void StyleEditorWindow::draw(bool* p_open)
 			m_appState->style.setColorConstant(name, colorFloat);
 		}
 	}
-
-	End();
 }
+

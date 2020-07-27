@@ -40,7 +40,7 @@ void Application::draw()
     //ImGui::PushStyleColor(ImGuiCol_TitleBgCollapsed, backgroundColor);
     //ImGui::PushStyleColor(ImGuiCol_Separator, backgroundColor);
 
-    m_appState.style.push("global");
+    m_appState.style.push("Application");
 
     m_mainMenu.draw();
     ImGui::DockSpaceOverViewport(nullptr, ImGuiDockNodeFlags_NoWindowMenuButton | ImGuiDockNodeFlags_NoCloseButton);
@@ -90,7 +90,7 @@ void Application::draw()
         m_appState.windowActions.imguiStyleWindowOpen.setState(open);
     }
 
-    m_appState.style.pop("global");
+    m_appState.style.pop("Application");
 
     //ImGui::PopStyleColor(8);
 }

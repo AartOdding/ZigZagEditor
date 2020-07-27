@@ -18,6 +18,8 @@ public:
 
 private:
 
+	void drawColorConstantList();
+
 	std::string m_windowName;
 
 	ApplicationState* m_appState;
@@ -26,5 +28,7 @@ private:
 	char m_newColorName[64] = "";
 
 	std::string m_colorNameToRemove = "";
+
+	std::string m_activeColorGroup = "";
 
 };

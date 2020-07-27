@@ -35,6 +35,8 @@ void RenderOrderWindow::draw(bool* p_open)
 	}
 
 	ImGui::Begin(m_windowName.c_str(), p_open, ImGuiWindowFlags_HorizontalScrollbar);
+	m_appState->style.push("RenderOrderWindow");
+
 	auto basePos = ImGui::GetCursorPos();
 
 	for (int bin = 0; bin < binCount; ++bin)
@@ -47,5 +49,6 @@ void RenderOrderWindow::draw(bool* p_open)
 		}
 	}
 
+	m_appState->style.pop("RenderOrderWindow");
 	ImGui::End();
 }
