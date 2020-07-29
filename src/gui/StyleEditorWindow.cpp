@@ -28,15 +28,15 @@ void StyleEditorWindow::draw(bool* p_open)
 
 	if (BeginCombo("##groupsCombo", m_activeColorGroup.c_str()))
 	{
-		for (auto& [name, group] : m_appState->style.getStyleGroups())
-		{
-			bool selected = name == m_activeColorGroup;
+		//for (auto& [name, group] : m_appState->style.getStyleGroups())
+		//{
+		//	bool selected = name == m_activeColorGroup;
 
-			if (Selectable(name.c_str(), selected))
-			{
-				m_activeColorGroup = name;
-			}
-		}
+		//	if (Selectable(name.c_str(), selected))
+		//	{
+		//		m_activeColorGroup = name;
+		//	}
+		//}
 		EndCombo();
 	}
 
@@ -74,7 +74,7 @@ void StyleEditorWindow::drawColorConstantList()
 		{
 			if (m_newColorName[0] != 0)
 			{
-				m_appState->style.setColorConstant(m_newColorName, m_newColorValue);
+				//m_appState->style.setColorConstant(m_newColorName, m_newColorValue);
 				m_newColorName[0] = 0;
 				m_newColorValue = { 0, 0, 0, 1 };
 			}
@@ -126,8 +126,13 @@ void StyleEditorWindow::drawColorConstantList()
 
 		if (colorInt != color)
 		{
-			m_appState->style.setColorConstant(name, colorFloat);
+			//m_appState->style.setColorConstant(name, colorFloat);
 		}
 	}
 }
 
+
+void StyleEditorWindow::drawGroupList()
+{
+
+}

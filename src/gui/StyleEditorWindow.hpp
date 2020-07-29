@@ -19,6 +19,7 @@ public:
 private:
 
 	void drawColorConstantList();
+	void drawGroupList();
 
 	std::string m_windowName;
 

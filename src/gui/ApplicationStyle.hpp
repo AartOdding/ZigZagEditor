@@ -1,44 +1,103 @@
 #pragma once
 
 #include <cstdint>
-#include <string_view>
+#include <memory>
+#include <string>
 #include <unordered_map>
-#include <variant>
 #include <vector>
 
 #include <imgui.h>
+
+
+class ApplicationStyle;
+
+
+class StyleGroup
+{
+public:
+
+	struct ImGuiColorRule
+	{
+		ImGuiCol_ colorId;
+		std::uint32_t colorValue;
+		std::string colorConstant;
+		bool colorStoredInValue;
+	};
+
+	struct ImGuiSizeRule
+	{
+		ImGuiStyleVar_ sizeId;
+		float size1;
+		float size2;
+		bool sizeIs1D;
+	};
+
+	StyleGroup(ApplicationStyle* applicationStyle, const char* name, StyleGroup* parent);
+
+	const std::string& getName() const;
+
+	StyleGroup* getParent();
+	const StyleGroup* getParent() const;
+
+	StyleGroup* getChild(const char* name);
+	const StyleGroup* getChild(const char* name) const;
+
+	const std::vector<StyleGroup*>& getChildren();
+	const std::vector<const StyleGroup*>& getChildren() const;
+
+	const std::vector<ImGuiColorRule>& getImGuiColorRules() const;
+	const std::vector<ImGuiSizeRule>& getImGuiSizeRules() const;
+
+	void setColor(ImGuiCol_ colorId, std::uint32_t colorValue);
+	void setColor(ImGuiCol_ colorId, const std::string& colorConstant);
+
+	void setSize(ImGuiStyleVar_ sizeId, float value);
+	void setSize(ImGuiStyleVar_ sizeId, float x, float y);
+
+private:
+
+	StyleGroup() = delete;
+	StyleGroup(const StyleGroup&) = delete;
+	StyleGroup(StyleGroup&&) = delete;
+
+	void insertChild(StyleGroup* child);
+
+	ApplicationStyle* const m_applicationStyle;
+	const std::string m_name;
+	StyleGroup* const m_parent;
+
+	std::vector<StyleGroup*> m_children;
+	std::vector<const StyleGroup*> m_childrenConst;
+
+	std::vector<ImGuiColorRule> m_ImGuiColorRules;
+	std::vector<ImGuiSizeRule> m_ImGuiSizeRules;
+};
+
 
 
 class ApplicationStyle
 {
 public:
 
-	struct StyleGroup
-	{
-		std::vector<StyleGroup*> priorStyleStack;
-		std::vector<std::pair<int, std::uint32_t>> colorsFromValues;
-		std::vector<std::pair<int, std::string>> colorsFromConstants;
-		std::vector<std::pair<int, float>> sizes1D;
-		std::vector<std::pair<int, ImVec2>> sizes2D;
-	};
+	void push(const char* groupName);
+	void pop(const char* groupName);
 
-	void push(const std::string& groupName);
-	void pop(const std::string& groupName);
-
-	void setColor(const std::string& groupName, ImGuiCol colorId, unsigned char r, unsigned char g, unsigned char b, unsigned char a);
-	void setColor(const std::string& groupName, ImGuiCol colorId, const std::string& colorConstant);
-
-	void setSize(const std::string& groupName, ImGuiStyleVar sizeId, float value);
-	void setSize(const std::string& groupName, ImGuiStyleVar sizeId, float x, float y);
-
-	void setColorConstant(const std::string& name, ImVec4 color);
-	void setColorConstant(const std::string& name, unsigned char r, unsigned char g, unsigned char b, unsigned char a);
+	void setColorConstant(const std::string& name, std::uint32_t value);
 	void removeColorConstant(const std::string& name);
 
+	const StyleGroup* getRootStyleGroup() const;
 	const std::unordered_map<std::string, std::uint32_t>& getColorConstants();
-	const std::unordered_map<std::string, StyleGroup>&    getStyleGroups();
 
 private:
+
+	StyleGroup* createGroup(const char* groupName);
+	void pushAndApplyGroup(StyleGroup* group);
+
+
+	std::vector<std::unique_ptr<StyleGroup>> m_styleGroups; // only needed for ownership
+	std::unordered_map<std::string, std::uint32_t> m_colorConstants;
+
+	StyleGroup* m_rootStyleGroup = nullptr;
 
 	// we need to store how many variables need to be popped, because we could add/ remove
 	// variables from the style that are still on the imgui style stack.
@@ -47,14 +106,6 @@ private:
 		StyleGroup* group;
 		int colorPopCount, sizePopCount;
 	};
-
-	StyleGroup& createStyleGroup(const std::string& name);
-	void applyStyleGroup(const StyleGroup& group);
-	bool isActive(const StyleGroup& group) const;
-	bool matchesStack(const StyleGroup& group) const;
-
-	std::unordered_map<std::string, StyleGroup> m_styleGroups;
-	std::unordered_map<std::string, std::uint32_t> m_colorConstants;
 
 	std::vector<StyleStackFrame> m_styleGroupStack;
 
