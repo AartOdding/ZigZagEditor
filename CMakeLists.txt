@@ -78,6 +78,11 @@ target_link_libraries(ZigZag imgui)
 add_subdirectory(external/imgui-node-editor/NodeEditor)
 target_link_libraries(ZigZag imgui_node_editor)
 
+# PUGIXML
+add_library(pugixml STATIC "${CMAKE_CURRENT_SOURCE_DIR}/external/pugixml/src/pugixml.cpp")
+target_include_directories(pugixml PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/external/pugixml/src")
+target_link_libraries(ZigZag pugixml)
+
 # ZIGZAG CORE
 add_subdirectory(external/ZigZagCore)
 target_link_libraries(ZigZag ZigZagCore)
