@@ -91,8 +91,7 @@ const std::vector<StyleGroup::ImGuiSizeRule>& StyleGroup::getImGuiSizeRules() co
 
 void StyleGroup::setColor(ImGuiCol_ colorId, std::uint32_t colorValue)
 {
-	auto pos = std::lower_bound(m_ImGuiColorRules.begin(), m_ImGuiColorRules.end(),
-		colorId, [](const ImGuiColorRule& lhs, ImGuiCol_ rhs) { return lhs.colorId < rhs; });
+	auto pos = getColorPos(colorId);
 
 	if (pos == m_ImGuiColorRules.end() || (pos != m_ImGuiColorRules.end() && pos->colorId != colorId))
 	{
@@ -108,8 +107,7 @@ void StyleGroup::setColor(ImGuiCol_ colorId, std::uint32_t colorValue)
 
 void StyleGroup::setColor(ImGuiCol_ colorId, const std::string& colorConstant)
 {
-	auto pos = std::lower_bound(m_ImGuiColorRules.begin(), m_ImGuiColorRules.end(),
-		colorId, [](const ImGuiColorRule& lhs, ImGuiCol_ rhs) { return lhs.colorId < rhs; });
+	auto pos = getColorPos(colorId);
 
 	if (pos == m_ImGuiColorRules.end() || (pos != m_ImGuiColorRules.end() && pos->colorId != colorId))
 	{
@@ -125,8 +123,7 @@ void StyleGroup::setColor(ImGuiCol_ colorId, const std::string& colorConstant)
 
 void StyleGroup::setSize(ImGuiStyleVar_ sizeId, float value)
 {
-	auto pos = std::lower_bound(m_ImGuiSizeRules.begin(), m_ImGuiSizeRules.end(),
-		sizeId, [](const ImGuiSizeRule& lhs, ImGuiStyleVar_ rhs) { return lhs.sizeId < rhs; });
+	auto pos = getSizePos(sizeId);
 
 	if (pos == m_ImGuiSizeRules.end() || (pos != m_ImGuiSizeRules.end() && pos->sizeId != sizeId))
 	{
@@ -142,8 +139,7 @@ void StyleGroup::setSize(ImGuiStyleVar_ sizeId, float value)
 
 void StyleGroup::setSize(ImGuiStyleVar_ sizeId, float x, float y)
 {
-	auto pos = std::lower_bound(m_ImGuiSizeRules.begin(), m_ImGuiSizeRules.end(),
-		sizeId, [](const ImGuiSizeRule& lhs, ImGuiStyleVar_ rhs) { return lhs.sizeId < rhs; });
+	auto pos = getSizePos(sizeId);
 
 	if (pos == m_ImGuiSizeRules.end() || (pos != m_ImGuiSizeRules.end() && pos->sizeId != sizeId))
 	{
@@ -154,6 +150,64 @@ void StyleGroup::setSize(ImGuiStyleVar_ sizeId, float x, float y)
 	{
 		*pos = { sizeId, x, y, false };
 	}
+}
+
+
+std::uint32_t StyleGroup::getColorValue(ImGuiCol_ colorId) const
+{
+	auto rule = getRuleForColor(colorId);
+
+	if (rule)
+	{
+		if (rule->colorStoredInValue)
+		{
+			return rule->colorValue;
+		}
+		else
+		{
+			return m_applicationStyle->getColorConstantValue(rule->colorConstant);
+		}
+	}
+	else
+	{
+		return ImGui::ColorConvertFloat4ToU32({ 0, 0, 0, 1 });
+	}
+}
+
+
+bool StyleGroup::hasRuleForColor(ImGuiCol_ colorId) const
+{
+	return getRuleForColor(colorId);
+}
+
+
+const StyleGroup::ImGuiColorRule* StyleGroup::getRuleForColor(ImGuiCol_ colorId) const
+{
+	auto it = getColorPos(colorId);
+
+	if (it == m_ImGuiColorRules.end() || (it != m_ImGuiColorRules.end() && it->colorId != colorId))
+	{
+		return nullptr;
+	}
+	return &(*it);
+}
+
+
+bool StyleGroup::hasRuleForSize(ImGuiStyleVar_ sizeId) const
+{
+	return getRuleForSize(sizeId);
+}
+
+
+const StyleGroup::ImGuiSizeRule* StyleGroup::getRuleForSize(ImGuiStyleVar_ sizeId) const
+{
+	auto it = getSizePos(sizeId);
+
+	if (it == m_ImGuiSizeRules.end() || (it != m_ImGuiSizeRules.end() && it->sizeId != sizeId))
+	{
+		return nullptr;
+	}
+	return &(*it);
 }
 
 
@@ -173,6 +227,34 @@ void StyleGroup::insertChild(StyleGroup* child)
 		m_children.insert(pos, child);
 		m_childrenConst.insert(posConst, child);
 	}
+}
+
+
+std::vector<StyleGroup::ImGuiColorRule>::iterator StyleGroup::getColorPos(ImGuiCol_ colorId)
+{
+	return std::lower_bound(m_ImGuiColorRules.begin(), m_ImGuiColorRules.end(),
+		colorId, [](const ImGuiColorRule& lhs, ImGuiCol_ rhs) { return lhs.colorId < rhs; });
+}
+
+
+std::vector<StyleGroup::ImGuiColorRule>::const_iterator StyleGroup::getColorPos(ImGuiCol_ colorId) const
+{
+	return std::lower_bound(m_ImGuiColorRules.begin(), m_ImGuiColorRules.end(),
+		colorId, [](const ImGuiColorRule& lhs, ImGuiCol_ rhs) { return lhs.colorId < rhs; });
+}
+
+
+std::vector<StyleGroup::ImGuiSizeRule>::iterator StyleGroup::getSizePos(ImGuiStyleVar_ sizeId)
+{
+	return std::lower_bound(m_ImGuiSizeRules.begin(), m_ImGuiSizeRules.end(),
+		sizeId, [](const ImGuiSizeRule& lhs, ImGuiStyleVar_ rhs) { return lhs.sizeId < rhs; });
+}
+
+
+std::vector<StyleGroup::ImGuiSizeRule>::const_iterator StyleGroup::getSizePos(ImGuiStyleVar_ sizeId) const
+{
+	return std::lower_bound(m_ImGuiSizeRules.begin(), m_ImGuiSizeRules.end(),
+		sizeId, [](const ImGuiSizeRule& lhs, ImGuiStyleVar_ rhs) { return lhs.sizeId < rhs; });
 }
 
 
@@ -264,9 +346,30 @@ void ApplicationStyle::removeColorConstant(const std::string& name)
 }
 
 
-const std::unordered_map<std::string, std::uint32_t>& ApplicationStyle::getColorConstants()
+std::uint32_t ApplicationStyle::getColorConstantValue(const std::string& constantName) const
+{
+	auto it = m_colorConstants.find(constantName);
+
+	if (it != m_colorConstants.end())
+	{
+		return it->second;
+	}
+	else
+	{
+		return ImGui::ColorConvertFloat4ToU32({ 0, 0, 0, 1 });
+	}
+}
+
+
+const std::unordered_map<std::string, std::uint32_t>& ApplicationStyle::getColorConstants() const
 {
 	return m_colorConstants;
+}
+
+
+StyleGroup* ApplicationStyle::getRootStyleGroup()
+{
+	return m_rootStyleGroup;
 }
 
 

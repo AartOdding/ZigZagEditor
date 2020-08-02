@@ -54,6 +54,14 @@ public:
 	void setSize(ImGuiStyleVar_ sizeId, float value);
 	void setSize(ImGuiStyleVar_ sizeId, float x, float y);
 
+	std::uint32_t getColorValue(ImGuiCol_ colorId) const;
+
+	bool hasRuleForColor(ImGuiCol_ colorId) const;
+	const ImGuiColorRule* getRuleForColor(ImGuiCol_ colorId) const;
+
+	bool hasRuleForSize(ImGuiStyleVar_ sizeId) const;
+	const ImGuiSizeRule* getRuleForSize(ImGuiStyleVar_ sizeId) const;
+
 private:
 
 	StyleGroup() = delete;
@@ -61,6 +69,11 @@ private:
 	StyleGroup(StyleGroup&&) = delete;
 
 	void insertChild(StyleGroup* child);
+
+	std::vector<ImGuiColorRule>::iterator getColorPos(ImGuiCol_ colorId);
+	std::vector<ImGuiColorRule>::const_iterator getColorPos(ImGuiCol_ colorId) const;
+	std::vector<ImGuiSizeRule>::iterator getSizePos(ImGuiStyleVar_ sizeId);
+	std::vector<ImGuiSizeRule>::const_iterator getSizePos(ImGuiStyleVar_ sizeId) const;
 
 	ApplicationStyle* const m_applicationStyle;
 	const std::string m_name;
@@ -85,8 +98,11 @@ public:
 	void setColorConstant(const std::string& name, std::uint32_t value);
 	void removeColorConstant(const std::string& name);
 
+	StyleGroup* getRootStyleGroup();
 	const StyleGroup* getRootStyleGroup() const;
-	const std::unordered_map<std::string, std::uint32_t>& getColorConstants();
+
+	std::uint32_t getColorConstantValue(const std::string& constantName) const;
+	const std::unordered_map<std::string, std::uint32_t>& getColorConstants() const;
 
 private:
 

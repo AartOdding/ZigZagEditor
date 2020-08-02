@@ -66,24 +66,26 @@ void ObjectInspector::draw(bool* p_open)
     {
         int current = -1;
         auto factory = ObjectFactory::instance();
-        ListBoxHeader("##objects");
 
-        for (const auto& type : factory->getObjectTypeNames())
+        if (ListBoxHeader("##objects"))
         {
-            Selectable(type.c_str(), false);
-            if (IsItemClicked())
+            for (const auto& type : factory->getObjectTypeNames())
             {
-                //m_appState->commandStack.pushCommand(std::make_unique<AddObjectCommand>(m_editedObject, type));
-                m_appState->commandStack.push<AddObjectCommand>(m_editedObject, type);
-
-                if (!GetIO().KeyShift)
+                Selectable(type.c_str(), false);
+                if (IsItemClicked())
                 {
-                    CloseCurrentPopup();
+                    //m_appState->commandStack.pushCommand(std::make_unique<AddObjectCommand>(m_editedObject, type));
+                    m_appState->commandStack.push<AddObjectCommand>(m_editedObject, type);
+
+                    if (!GetIO().KeyShift)
+                    {
+                        CloseCurrentPopup();
+                    }
                 }
             }
-        }
 
-        ListBoxFooter();
+            ListBoxFooter();
+        }
 
         EndPopup();
     }
