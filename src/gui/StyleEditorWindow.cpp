@@ -31,6 +31,11 @@ void StyleEditorWindow::draw(bool* p_open)
 	}
 	drawColorVariablesEditorPopup();
 
+	if (Button("Store to disk"))
+	{
+		m_appState->style.store("test_Style.xml");
+	}
+
 
 	m_appState->style.push("StyleGroupSelector");
 	drawGroupListItem(m_appState->style.getRootStyleGroup());
@@ -77,13 +82,14 @@ void StyleEditorWindow::drawAddColorRulePopup()
 				SameLine();
 				auto dummySize = GetItemRectSize();
 				auto cursorPos = GetCursorPos();
-				if (src == StyleGroup::ValueSource::Inherited) Text(">>");
-				//if (src == StyleGroup::ValueSource::Inherited) Text("^");
+				AlignTextToFramePadding();
+				if (src == StyleGroup::RuleSource::Inherited) Text(">>");
 				SetCursorPos(cursorPos);
 				Dummy(dummySize);
 				SameLine();
+				AlignTextToFramePadding();
 
-				if (src != StyleGroup::ValueSource::Self)
+				if (src != StyleGroup::RuleSource::Self)
 				{
 					auto disabledCol = GetStyleColorVec4(ImGuiCol_TextDisabled);
 					PushStyleColor(ImGuiCol_Text, disabledCol);
@@ -92,41 +98,10 @@ void StyleEditorWindow::drawAddColorRulePopup()
 				{
 					m_colorIdBeingAdded = static_cast<ImGuiCol_>(i);
 				}
-				if (src != StyleGroup::ValueSource::Self)
+				if (src != StyleGroup::RuleSource::Self)
 				{
 					PopStyleColor(1);
 				}
-
-
-				//bool colorPreviewDrawn = false;
-				//auto rule = m_selectedGroup->getRuleForColor(static_cast<ImGuiCol_>(i));
-
-				//if (rule)
-				//{
-				//	ImVec4 col = ColorConvertU32ToFloat4(m_selectedGroup->getColorValue(rule->colorId));
-				//	ColorEdit4("##color", &col.x, colorEditFlagsViewOnly);
-				//	m_colorPreviewSize = GetItemRectSize();
-				//	colorPreviewDrawn = true;
-				//}
-				//if (!colorPreviewDrawn)
-				//{
-				//	Dummy(m_colorPreviewSize);
-				//}
-				//SameLine();
-
-				//if (!colorPreviewDrawn)
-				//{
-				//	auto disabledCol = GetStyleColorVec4(ImGuiCol_TextDisabled);
-				//	PushStyleColor(ImGuiCol_Text, disabledCol);
-				//}
-				//if (Selectable(ImGui::GetStyleColorName(i), m_colorIdBeingAdded == i))
-				//{
-				//	m_colorIdBeingAdded = static_cast<ImGuiCol_>(i);
-				//}
-				//if (!colorPreviewDrawn)
-				//{
-				//	PopStyleColor(1);
-				//}
 				PopID();
 			}
 		}
@@ -170,7 +145,7 @@ void StyleEditorWindow::drawAddColorRulePopup()
 
 	// The variable color preview
 
-	auto& colors = m_appState->style.getColorConstants();
+	auto& colors = m_appState->style.getColorVariables();
 	auto it = colors.find(m_colorBeingAddedSelectedVariable);
 	ImVec4 color{ 0, 0, 0, 1 };
 
@@ -188,10 +163,10 @@ void StyleEditorWindow::drawAddColorRulePopup()
 
 	SetNextItemWidth(GetContentRegionAvailWidth());
 
-	if (BeginCombo("##constants", m_colorBeingAddedSelectedVariable.c_str()))
+	if (BeginCombo("##variables", m_colorBeingAddedSelectedVariable.c_str()))
 	{
 		m_colorBeingAddedIsVariable = true;
-		for (auto& [name, color] : m_appState->style.getColorConstants())
+		for (auto& [name, color] : m_appState->style.getColorVariables())
 		{
 			auto colorVec4 = ColorConvertU32ToFloat4(color);
 			PushID(&name);
@@ -210,7 +185,7 @@ void StyleEditorWindow::drawAddColorRulePopup()
 
 	if (m_selectedGroup)
 	{
-		auto rule = m_selectedGroup->getRuleForColor(m_colorIdBeingAdded);
+		auto rule = m_selectedGroup->getColorRule(m_colorIdBeingAdded);
 		const char* text = rule ? "Update" : "Create";
 
 		if (Button(rule ? "Update" : "Create") && m_selectedGroup)
@@ -261,7 +236,7 @@ void StyleEditorWindow::drawColorVariablesEditorPopup()
 			{
 				if (m_newColorVariableName[0] != 0)
 				{
-					m_appState->style.setColorConstant(m_newColorVariableName, ColorConvertFloat4ToU32(m_newColorVariableValue));
+					m_appState->style.setColorVariable(m_newColorVariableName, ColorConvertFloat4ToU32(m_newColorVariableValue));
 					m_newColorVariableName[0] = 0;
 					m_newColorVariableValue = { 0, 0, 0, 1 };
 				}
@@ -281,7 +256,7 @@ void StyleEditorWindow::drawColorVariablesEditorPopup()
 		{
 			if (BeginCombo("##combo", m_colorNameToRemove.c_str()))
 			{
-				for (auto& [name, color] : m_appState->style.getColorConstants())
+				for (auto& [name, color] : m_appState->style.getColorVariables())
 				{
 					if (Selectable(name.c_str(), name == m_colorNameToRemove))
 					{
@@ -295,7 +270,7 @@ void StyleEditorWindow::drawColorVariablesEditorPopup()
 			{
 				if (m_colorNameToRemove != "")
 				{
-					m_appState->style.removeColorConstant(m_colorNameToRemove);
+					m_appState->style.removeColorVariable(m_colorNameToRemove);
 					m_colorNameToRemove = "";
 				}
 				CloseCurrentPopup();
@@ -303,7 +278,7 @@ void StyleEditorWindow::drawColorVariablesEditorPopup()
 			EndPopup();
 		}
 
-		for (auto& [name, color] : m_appState->style.getColorConstants())
+		for (auto& [name, color] : m_appState->style.getColorVariables())
 		{
 			auto colorFloat = ColorConvertU32ToFloat4(color);
 			ColorEdit4(name.c_str(), &colorFloat.x, colorEditFlagsColorOnly);
@@ -311,7 +286,7 @@ void StyleEditorWindow::drawColorVariablesEditorPopup()
 
 			if (colorInt != color)
 			{
-				m_appState->style.setColorConstant(name, colorInt);
+				m_appState->style.setColorVariable(name, colorInt);
 			}
 		}
 

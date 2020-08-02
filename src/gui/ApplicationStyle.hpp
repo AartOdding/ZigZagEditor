@@ -10,33 +10,45 @@
 
 
 class ApplicationStyle;
+namespace pugi
+{
+	class xml_node;
+}
 
 
 class StyleGroup
 {
 public:
 
-	struct ImGuiColorRule
+	enum class RuleCategory
 	{
-		ImGuiCol_ colorId;
-		std::uint32_t colorValue;
-		std::string colorConstant;
-		bool colorStoredInValue;
+		ImGuiRule,
+		NodeEditorRule,
+		ZigZagRule
 	};
 
-	struct ImGuiSizeRule
-	{
-		ImGuiStyleVar_ sizeId;
-		float size1;
-		float size2;
-		bool sizeIs1D;
-	};
-
-	enum class ValueSource
+	enum class RuleSource
 	{
 		Self,
 		Inherited,
 		NoRule
+	};
+
+	struct ImGuiColorRule
+	{
+		RuleCategory category;
+		int colorId;
+		std::uint32_t colorValue;
+		std::string colorVariable;
+		bool useVariable;
+	};
+
+	struct ImGuiSizeRule
+	{
+		RuleCategory category;
+		int sizeId;
+		ImVec4 size;
+		int numDimensions;
 	};
 
 	StyleGroup(ApplicationStyle* applicationStyle, const char* name, StyleGroup* parent);
@@ -52,24 +64,24 @@ public:
 	const std::vector<StyleGroup*>& getChildren();
 	const std::vector<const StyleGroup*>& getChildren() const;
 
-	const std::vector<ImGuiColorRule>& getImGuiColorRules() const;
-	const std::vector<ImGuiSizeRule>& getImGuiSizeRules() const;
+	const std::vector<ImGuiColorRule>& getColorRules() const;
+	const std::vector<ImGuiSizeRule>& getSizeRules() const;
 
 	void setColor(ImGuiCol_ colorId, std::uint32_t colorValue);
-	void setColor(ImGuiCol_ colorId, const std::string& colorConstant);
+	void setColor(ImGuiCol_ colorId, const std::string& colorVariable);
 	void removeColor(ImGuiCol_ colorId);
 
 	void setSize(ImGuiStyleVar_ sizeId, float value);
 	void setSize(ImGuiStyleVar_ sizeId, float x, float y);
 	void removeSize(ImGuiStyleVar_ sizeId);
 
-	std::pair<std::uint32_t, ValueSource> getColorValue(ImGuiCol_ colorId) const;
+	std::pair<std::uint32_t, RuleSource> getColorValue(ImGuiCol_ colorId) const;
 
-	bool hasRuleForColor(ImGuiCol_ colorId) const;
-	const ImGuiColorRule* getRuleForColor(ImGuiCol_ colorId) const;
+	bool hasColorRule(ImGuiCol_ colorId) const;
+	const ImGuiColorRule* getColorRule(ImGuiCol_ colorId) const;
 
-	bool hasRuleForSize(ImGuiStyleVar_ sizeId) const;
-	const ImGuiSizeRule* getRuleForSize(ImGuiStyleVar_ sizeId) const;
+	bool hasSizeRule(ImGuiStyleVar_ sizeId) const;
+	const ImGuiSizeRule* getSizeRule(ImGuiStyleVar_ sizeId) const;
 
 private:
 
@@ -104,23 +116,28 @@ public:
 	void push(const char* groupName);
 	void pop(const char* groupName);
 
-	void setColorConstant(const std::string& name, std::uint32_t value);
-	void removeColorConstant(const std::string& name);
+	bool load(const std::string& fileName);
+	void store(const std::string& fileName) const;
+
+	void setColorVariable(const std::string& name, std::uint32_t value);
+	void removeColorVariable(const std::string& name);
 
 	StyleGroup* getRootStyleGroup();
 	const StyleGroup* getRootStyleGroup() const;
 
-	std::uint32_t getColorConstantValue(const std::string& constantName) const;
-	const std::unordered_map<std::string, std::uint32_t>& getColorConstants() const;
+	std::uint32_t getVariableValue(const std::string& variableName) const;
+	const std::unordered_map<std::string, std::uint32_t>& getColorVariables() const;
 
 private:
 
 	StyleGroup* createGroup(const char* groupName);
 	void pushAndApplyGroup(StyleGroup* group);
+	void storeGroup(StyleGroup* group, pugi::xml_node& node) const;
+	void storeColorVariables(pugi::xml_node& node) const;
 
 
 	std::vector<std::unique_ptr<StyleGroup>> m_styleGroups; // only needed for ownership
-	std::unordered_map<std::string, std::uint32_t> m_colorConstants;
+	std::unordered_map<std::string, std::uint32_t> m_colorVariables;
 
 	StyleGroup* m_rootStyleGroup = nullptr;
 

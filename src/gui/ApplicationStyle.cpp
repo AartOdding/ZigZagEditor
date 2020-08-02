@@ -1,10 +1,161 @@
 #include "ApplicationStyle.hpp"
 
+#include <array>
+#include <bit>
 #include <cassert>
 #include <cstring>
+#include <iostream>
 #include <iterator>
 
+#include <pugixml.hpp>
+
+using namespace pugi;
 using namespace ImGui;
+
+
+namespace
+{
+
+	static_assert(ImGuiCol_COUNT == 50);
+	// If this assert fails, colors have been added/removed from ImGui, If this is the case
+	// the following array need to be updated as well, and the hardcoded value in the 
+	// static_assert as well.
+
+	constexpr std::array<const char*, ImGuiCol_COUNT> imGuiColorIdStrings
+	{
+		"ImGuiCol_Text",
+		"ImGuiCol_TextDisabled",
+		"ImGuiCol_WindowBg",              // Background of normal windows
+		"ImGuiCol_ChildBg",               // Background of child windows
+		"ImGuiCol_PopupBg",               // Background of popups, menus, tooltips windows
+		"ImGuiCol_Border",
+		"ImGuiCol_BorderShadow",
+		"ImGuiCol_FrameBg",               // Background of checkbox, radio button, plot, slider, text input
+		"ImGuiCol_FrameBgHovered",
+		"ImGuiCol_FrameBgActive",
+		"ImGuiCol_TitleBg",
+		"ImGuiCol_TitleBgActive",
+		"ImGuiCol_TitleBgCollapsed",
+		"ImGuiCol_MenuBarBg",
+		"ImGuiCol_ScrollbarBg",
+		"ImGuiCol_ScrollbarGrab",
+		"ImGuiCol_ScrollbarGrabHovered",
+		"ImGuiCol_ScrollbarGrabActive",
+		"ImGuiCol_CheckMark",
+		"ImGuiCol_SliderGrab",
+		"ImGuiCol_SliderGrabActive",
+		"ImGuiCol_Button",
+		"ImGuiCol_ButtonHovered",
+		"ImGuiCol_ButtonActive",
+		"ImGuiCol_Header",                // Header* colors are used for CollapsingHeader, TreeNode, Selectable, MenuItem
+		"ImGuiCol_HeaderHovered",
+		"ImGuiCol_HeaderActive",
+		"ImGuiCol_Separator",
+		"ImGuiCol_SeparatorHovered",
+		"ImGuiCol_SeparatorActive",
+		"ImGuiCol_ResizeGrip",
+		"ImGuiCol_ResizeGripHovered",
+		"ImGuiCol_ResizeGripActive",
+		"ImGuiCol_Tab",
+		"ImGuiCol_TabHovered",
+		"ImGuiCol_TabActive",
+		"ImGuiCol_TabUnfocused",
+		"ImGuiCol_TabUnfocusedActive",
+		"ImGuiCol_DockingPreview",        // Preview overlay color when about to docking something
+		"ImGuiCol_DockingEmptyBg",        // Background color for empty node (e.g. CentralNode with no window docked into it)
+		"ImGuiCol_PlotLines",
+		"ImGuiCol_PlotLinesHovered",
+		"ImGuiCol_PlotHistogram",
+		"ImGuiCol_PlotHistogramHovered",
+		"ImGuiCol_TextSelectedBg",
+		"ImGuiCol_DragDropTarget",
+		"ImGuiCol_NavHighlight",          // Gamepad/keyboard: current highlighted item
+		"ImGuiCol_NavWindowingHighlight", // Highlight window when using CTRL+TAB
+		"ImGuiCol_NavWindowingDimBg",     // Darken/colorize entire screen behind the CTRL+TAB window list, when active
+		"ImGuiCol_ModalWindowDimBg"
+	};
+
+	const char* writeRuleCategory(StyleGroup::RuleCategory cat)
+	{
+		switch (cat)
+		{
+		case StyleGroup::RuleCategory::NodeEditorRule:
+			return "NodeEditorRule";
+		case StyleGroup::RuleCategory::ZigZagRule:
+			return "ZigZagRule";
+		default:
+			return "ImGuiRule";
+		}
+	}
+
+	StyleGroup::RuleCategory readRuleCategory(const char* string)
+	{
+		if (strcmp(string, "NodeEditorRule") == 0)
+		{
+			return StyleGroup::RuleCategory::NodeEditorRule;
+		}
+		if (strcmp(string, "ZigZagRule") == 0)
+		{
+			return StyleGroup::RuleCategory::ZigZagRule;
+		}
+		return StyleGroup::RuleCategory::ImGuiRule;
+	}
+
+	const char* writeImGuiColorId(ImGuiCol colorId)
+	{
+		return GetStyleColorName(colorId);
+	}
+
+	ImGuiCol readImGuiColorId(const char* string)
+	{
+		for (int i = 0; i < ImGuiCol_COUNT; ++i)
+		{
+			if (strcmp(string, imGuiColorIdStrings[i]) == 0)
+			{
+				return i;
+			}
+		}
+		return 0;
+	}
+
+	std::string writeHexColor(std::uint32_t color)
+	{
+		constexpr static std::array<char, 16> characters{ '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
+		unsigned char bytes[4];
+		memcpy(bytes, &color, 4);
+
+		std::string result = "#";
+		// No reserving of space, assuming string uses SSO.
+
+		static_assert(std::endian::native == std::endian::little || std::endian::native == std::endian::big);
+
+		if constexpr (std::endian::native == std::endian::little)
+		{
+			for (int i = 0; i < 4; ++i)
+			{
+				unsigned char msbits = bytes[i] >> 4;
+				unsigned char lsbits = bytes[i] & 0b00001111;
+
+				result.push_back(characters[msbits]);
+				result.push_back(characters[lsbits]);
+			}
+		}
+		else if constexpr (std::endian::native == std::endian::big)
+		{
+			for (int i = 3; i >= 0; --i)
+			{
+				unsigned char msbits = bytes[i] >> 4;
+				unsigned char lsbits = bytes[i] & 0b00001111;
+
+				result.push_back(characters[msbits]);
+				result.push_back(characters[lsbits]);
+			}
+		}
+
+		return result;
+	}
+
+}
 
 
 StyleGroup::StyleGroup(ApplicationStyle* appStyle, const char* name, StyleGroup* parent)
@@ -77,13 +228,13 @@ const std::vector<const StyleGroup*>& StyleGroup::getChildren() const
 }
 
 
-const std::vector<StyleGroup::ImGuiColorRule>& StyleGroup::getImGuiColorRules() const
+const std::vector<StyleGroup::ImGuiColorRule>& StyleGroup::getColorRules() const
 {
 	return m_ImGuiColorRules;
 }
 
 
-const std::vector<StyleGroup::ImGuiSizeRule>& StyleGroup::getImGuiSizeRules() const
+const std::vector<StyleGroup::ImGuiSizeRule>& StyleGroup::getSizeRules() const
 {
 	return m_ImGuiSizeRules;
 }
@@ -93,30 +244,28 @@ void StyleGroup::setColor(ImGuiCol_ colorId, std::uint32_t colorValue)
 {
 	auto pos = getColorPos(colorId);
 
-	if (pos == m_ImGuiColorRules.end() || (pos != m_ImGuiColorRules.end() && pos->colorId != colorId))
+	if (pos != m_ImGuiColorRules.end() && pos->colorId == colorId)
 	{
-		// if there is no rule for given colorId yet
-		m_ImGuiColorRules.insert(pos, { colorId, colorValue, std::string(), true });
+		*pos = { RuleCategory::ImGuiRule, colorId, colorValue, std::string(), true };
 	}
 	else
 	{
-		*pos = { colorId, colorValue, std::string(), true };
+		m_ImGuiColorRules.insert(pos, { RuleCategory::ImGuiRule, colorId, colorValue, std::string(), true });
 	}
 }
 
 
-void StyleGroup::setColor(ImGuiCol_ colorId, const std::string& colorConstant)
+void StyleGroup::setColor(ImGuiCol_ colorId, const std::string& colorVariable)
 {
 	auto pos = getColorPos(colorId);
 
-	if (pos == m_ImGuiColorRules.end() || (pos != m_ImGuiColorRules.end() && pos->colorId != colorId))
+	if (pos != m_ImGuiColorRules.end() && pos->colorId == colorId)
 	{
-		// if there is no rule for given colorId yet
-		m_ImGuiColorRules.insert(pos, { colorId, 0, colorConstant, true });
+		*pos = { RuleCategory::ImGuiRule, colorId, 0, colorVariable, true };
 	}
 	else
 	{
-		*pos = { colorId, 0, colorConstant, true };
+		m_ImGuiColorRules.insert(pos, { RuleCategory::ImGuiRule, colorId, 0, colorVariable, true });
 	}
 }
 
@@ -136,14 +285,28 @@ void StyleGroup::setSize(ImGuiStyleVar_ sizeId, float value)
 {
 	auto pos = getSizePos(sizeId);
 
-	if (pos == m_ImGuiSizeRules.end() || (pos != m_ImGuiSizeRules.end() && pos->sizeId != sizeId))
+	if (pos != m_ImGuiSizeRules.end() && pos->sizeId == sizeId)
 	{
-		// if there is no rule for given colorId yet
-		m_ImGuiSizeRules.insert(pos, { sizeId, value, 0.0f, true });
+		*pos = { RuleCategory::ImGuiRule, sizeId, ImVec4(value, 0, 0, 0), 1 };
 	}
 	else
 	{
-		*pos = { sizeId, value, 0.0f, true };
+		m_ImGuiSizeRules.insert(pos, { RuleCategory::ImGuiRule, sizeId, ImVec4(value, 0, 0, 0), 1 });
+	}
+}
+
+
+void StyleGroup::setSize(ImGuiStyleVar_ sizeId, float x, float y)
+{
+	auto pos = getSizePos(sizeId);
+
+	if (pos != m_ImGuiSizeRules.end() && pos->sizeId == sizeId)
+	{
+		*pos = { RuleCategory::ImGuiRule, sizeId, ImVec4(x, y, 0, 0), 2 };
+	}
+	else
+	{
+		m_ImGuiSizeRules.insert(pos, { RuleCategory::ImGuiRule, sizeId, ImVec4(x, y, 0, 0), 2 });
 	}
 }
 
@@ -159,35 +322,19 @@ void StyleGroup::removeSize(ImGuiStyleVar_ sizeId)
 }
 
 
-void StyleGroup::setSize(ImGuiStyleVar_ sizeId, float x, float y)
+std::pair<std::uint32_t, StyleGroup::RuleSource> StyleGroup::getColorValue(ImGuiCol_ colorId) const
 {
-	auto pos = getSizePos(sizeId);
-
-	if (pos == m_ImGuiSizeRules.end() || (pos != m_ImGuiSizeRules.end() && pos->sizeId != sizeId))
-	{
-		// if there is no rule for given colorId yet
-		m_ImGuiSizeRules.insert(pos, { sizeId, x, y, false });
-	}
-	else
-	{
-		*pos = { sizeId, x, y, false };
-	}
-}
-
-
-std::pair<std::uint32_t, StyleGroup::ValueSource> StyleGroup::getColorValue(ImGuiCol_ colorId) const
-{
-	auto rule = getRuleForColor(colorId);
+	auto rule = getColorRule(colorId);
 
 	if (rule)
 	{
-		if (rule->colorStoredInValue)
+		if (rule->useVariable)
 		{
-			return { rule->colorValue, ValueSource::Self };
+			return { rule->colorValue, RuleSource::Self };
 		}
 		else
 		{
-			return { m_applicationStyle->getColorConstantValue(rule->colorConstant), ValueSource::Self };
+			return { m_applicationStyle->getVariableValue(rule->colorVariable), RuleSource::Self };
 		}
 	}
 	else
@@ -195,23 +342,23 @@ std::pair<std::uint32_t, StyleGroup::ValueSource> StyleGroup::getColorValue(ImGu
 		if (m_parent)
 		{
 			auto [col, src] = m_parent->getColorValue(colorId);
-			return {col, src == ValueSource::NoRule ? ValueSource::NoRule : ValueSource::Inherited };
+			return {col, src == RuleSource::NoRule ? RuleSource::NoRule : RuleSource::Inherited };
 		}
 		else
 		{
-			return { ColorConvertFloat4ToU32(GetStyleColorVec4(colorId)), ValueSource::NoRule };
+			return { ColorConvertFloat4ToU32(GetStyleColorVec4(colorId)), RuleSource::NoRule };
 		}
 	}
 }
 
 
-bool StyleGroup::hasRuleForColor(ImGuiCol_ colorId) const
+bool StyleGroup::hasColorRule(ImGuiCol_ colorId) const
 {
-	return getRuleForColor(colorId);
+	return getColorRule(colorId);
 }
 
 
-const StyleGroup::ImGuiColorRule* StyleGroup::getRuleForColor(ImGuiCol_ colorId) const
+const StyleGroup::ImGuiColorRule* StyleGroup::getColorRule(ImGuiCol_ colorId) const
 {
 	auto it = getColorPos(colorId);
 
@@ -223,13 +370,13 @@ const StyleGroup::ImGuiColorRule* StyleGroup::getRuleForColor(ImGuiCol_ colorId)
 }
 
 
-bool StyleGroup::hasRuleForSize(ImGuiStyleVar_ sizeId) const
+bool StyleGroup::hasSizeRule(ImGuiStyleVar_ sizeId) const
 {
-	return getRuleForSize(sizeId);
+	return getSizeRule(sizeId);
 }
 
 
-const StyleGroup::ImGuiSizeRule* StyleGroup::getRuleForSize(ImGuiStyleVar_ sizeId) const
+const StyleGroup::ImGuiSizeRule* StyleGroup::getSizeRule(ImGuiStyleVar_ sizeId) const
 {
 	auto it = getSizePos(sizeId);
 
@@ -340,47 +487,124 @@ void ApplicationStyle::pop(const char* groupName)
 }
 
 
-void ApplicationStyle::setColorConstant(const std::string& name, std::uint32_t value)
+bool ApplicationStyle::load(const std::string& fileName)
 {
-	m_colorConstants[name] = value;
+	return true;
 }
 
 
-void ApplicationStyle::removeColorConstant(const std::string& name)
+void ApplicationStyle::store(const std::string& fileName) const
+{
+	xml_document document;
+	auto node = document.append_child("ApplicationStyle");
+
+	storeColorVariables(node);
+
+	if (m_rootStyleGroup)
+	{
+		storeGroup(m_rootStyleGroup, node);
+	}
+
+	if (!document.save_file(fileName.c_str()))
+	{
+		std::cerr << "Error saving style: " << fileName << std::endl;
+	}
+}
+
+
+void ApplicationStyle::storeGroup(StyleGroup* group, pugi::xml_node& node) const
+{
+	auto thisNode = node.append_child("StyleGroup");
+	thisNode.append_attribute("name").set_value(group->getName().c_str());
+
+	if (!group->getColorRules().empty())
+	{
+		auto colorRulesNode = thisNode.append_child("ColorRules");
+		for (const auto& rule : group->getColorRules())
+		{
+			auto colorRuleNode = colorRulesNode.append_child("ColorRule");
+			colorRuleNode.append_child("Category").append_child(node_pcdata).set_value(writeRuleCategory(rule.category));
+			if (rule.category == StyleGroup::RuleCategory::ImGuiRule)
+			{
+				colorRuleNode.append_child("ColorId").append_child(node_pcdata).set_value(writeImGuiColorId(rule.colorId));
+			}
+			else if (rule.category == StyleGroup::RuleCategory::NodeEditorRule)
+			{
+				assert(false);
+			}
+			else if (rule.category == StyleGroup::RuleCategory::ZigZagRule)
+			{
+				assert(false);
+			}
+			colorRuleNode.append_child("ColorVariable").append_child(node_pcdata).set_value(rule.colorVariable.c_str());
+			colorRuleNode.append_child("ColorValue").append_child(node_pcdata).set_value(writeHexColor(rule.colorValue).c_str());
+			colorRuleNode.append_child("UseVariable").append_child(node_pcdata).set_value(rule.useVariable ? "true" : "false");
+		}
+	}
+	if (!group->getChildren().empty())
+	{
+		auto childrenNode = thisNode.append_child("Children");
+		for (auto child : group->getChildren())
+		{
+			storeGroup(child, childrenNode);
+		}
+	}
+}
+
+
+void ApplicationStyle::storeColorVariables(pugi::xml_node& node) const
+{
+	auto colorVariablesNode = node.append_child("ColorVariables");
+	for (const auto& [name, value] : m_colorVariables)
+	{
+		auto colorVariableNode = colorVariablesNode.append_child("ColorVariable");
+		colorVariableNode.append_attribute("name").set_value(name.c_str());
+		colorVariableNode.append_child(node_pcdata).set_value(writeHexColor(value).c_str());
+	}
+}
+
+
+void ApplicationStyle::setColorVariable(const std::string& name, std::uint32_t value)
+{
+	m_colorVariables[name] = value;
+}
+
+
+void ApplicationStyle::removeColorVariable(const std::string& name)
 {
 	/*
-	 * When removing the constant we need to find all the places where it is used,
-	 * and swap the use of the constant to usage of the value in the constant. only
-	 * after this we can delete the constant.
+	 * When removing the variable we need to find all the places where it is used,
+	 * and swap the use of the variable to usage of the value in the variable. only
+	 * after this we can delete the variable.
 	 */
-	auto it = m_colorConstants.find(name);
-	assert(it != m_colorConstants.end());
+	auto it = m_colorVariables.find(name);
+	assert(it != m_colorVariables.end());
 
-	if (it != m_colorConstants.end())
+	if (it != m_colorVariables.end())
 	{
 		auto colorValue = it->second;
 
 		for (auto& group : m_styleGroups)
 		{
-			// Convert all places where the constant is used to the color value:
-			for (auto& colorRule : group->getImGuiColorRules())
+			// Convert all places where the variable is used to the color value:
+			for (auto& colorRule : group->getColorRules())
 			{
-				if (!colorRule.colorStoredInValue && colorRule.colorConstant == name)
+				if (!colorRule.useVariable && colorRule.colorVariable == name)
 				{
-					group->setColor(colorRule.colorId, colorValue);
+					group->setColor(static_cast<ImGuiCol_>(colorRule.colorId), colorValue);
 				}
 			}
 		}
-		m_colorConstants.erase(name);
+		m_colorVariables.erase(name);
 	}
 }
 
 
-std::uint32_t ApplicationStyle::getColorConstantValue(const std::string& constantName) const
+std::uint32_t ApplicationStyle::getVariableValue(const std::string& variableName) const
 {
-	auto it = m_colorConstants.find(constantName);
+	auto it = m_colorVariables.find(variableName);
 
-	if (it != m_colorConstants.end())
+	if (it != m_colorVariables.end())
 	{
 		return it->second;
 	}
@@ -391,9 +615,9 @@ std::uint32_t ApplicationStyle::getColorConstantValue(const std::string& constan
 }
 
 
-const std::unordered_map<std::string, std::uint32_t>& ApplicationStyle::getColorConstants() const
+const std::unordered_map<std::string, std::uint32_t>& ApplicationStyle::getColorVariables() const
 {
-	return m_colorConstants;
+	return m_colorVariables;
 }
 
 
@@ -429,40 +653,40 @@ void ApplicationStyle::pushAndApplyGroup(StyleGroup* group)
 	assert(group);
 	if (group)
 	{
-		for (const auto& colorRule : group->getImGuiColorRules())
+		for (const auto& colorRule : group->getColorRules())
 		{
-			if (colorRule.colorStoredInValue)
+			if (colorRule.useVariable)
 			{
 				ImGui::PushStyleColor(colorRule.colorId, colorRule.colorValue);
 			}
 			else
 			{
-				auto constantIt = m_colorConstants.find(colorRule.colorConstant);
+				auto variableIt = m_colorVariables.find(colorRule.colorVariable);
 
-				if (constantIt == m_colorConstants.end())
+				if (variableIt == m_colorVariables.end())
 				{
 					assert(false); // Stop in debug.
 					ImGui::PushStyleColor(colorRule.colorId, 0); // in release just push 0
 				}
 				else
 				{
-					ImGui::PushStyleColor(colorRule.colorId, constantIt->second);
+					ImGui::PushStyleColor(colorRule.colorId, variableIt->second);
 				}
 			}
 		}
-		for (const auto& sizeRule : group->getImGuiSizeRules())
+		for (const auto& sizeRule : group->getSizeRules())
 		{
-			if (sizeRule.sizeIs1D)
+			if (sizeRule.numDimensions == 1)
 			{
-				ImGui::PushStyleVar(sizeRule.sizeId, sizeRule.size1);
+				ImGui::PushStyleVar(sizeRule.sizeId, sizeRule.size.x);
 			}
-			else
+			else if (sizeRule.numDimensions == 2)
 			{
-				ImGui::PushStyleVar(sizeRule.sizeId, { sizeRule.size1, sizeRule.size2 });
+				ImGui::PushStyleVar(sizeRule.sizeId, { sizeRule.size.x, sizeRule.size.y });
 			}
 		}
-		int numColorRules = group->getImGuiColorRules().size();
-		int numSizeRules = group->getImGuiSizeRules().size();
+		int numColorRules = group->getColorRules().size();
+		int numSizeRules = group->getSizeRules().size();
 		m_styleGroupStack.push_back({ group, numColorRules, numSizeRules });
 	}
 }
