@@ -32,6 +32,13 @@ public:
 		bool sizeIs1D;
 	};
 
+	enum class ValueSource
+	{
+		Self,
+		Inherited,
+		NoRule
+	};
+
 	StyleGroup(ApplicationStyle* applicationStyle, const char* name, StyleGroup* parent);
 
 	const std::string& getName() const;
@@ -50,11 +57,13 @@ public:
 
 	void setColor(ImGuiCol_ colorId, std::uint32_t colorValue);
 	void setColor(ImGuiCol_ colorId, const std::string& colorConstant);
+	void removeColor(ImGuiCol_ colorId);
 
 	void setSize(ImGuiStyleVar_ sizeId, float value);
 	void setSize(ImGuiStyleVar_ sizeId, float x, float y);
+	void removeSize(ImGuiStyleVar_ sizeId);
 
-	std::uint32_t getColorValue(ImGuiCol_ colorId) const;
+	std::pair<std::uint32_t, ValueSource> getColorValue(ImGuiCol_ colorId) const;
 
 	bool hasRuleForColor(ImGuiCol_ colorId) const;
 	const ImGuiColorRule* getRuleForColor(ImGuiCol_ colorId) const;

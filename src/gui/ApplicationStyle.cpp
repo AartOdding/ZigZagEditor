@@ -4,7 +4,7 @@
 #include <cstring>
 #include <iterator>
 
-
+using namespace ImGui;
 
 
 StyleGroup::StyleGroup(ApplicationStyle* appStyle, const char* name, StyleGroup* parent)
@@ -121,6 +121,17 @@ void StyleGroup::setColor(ImGuiCol_ colorId, const std::string& colorConstant)
 }
 
 
+void StyleGroup::removeColor(ImGuiCol_ colorId)
+{
+	auto pos = getColorPos(colorId);
+
+	if (pos != m_ImGuiColorRules.end() && pos->colorId == colorId)
+	{
+		m_ImGuiColorRules.erase(pos);
+	}
+}
+
+
 void StyleGroup::setSize(ImGuiStyleVar_ sizeId, float value)
 {
 	auto pos = getSizePos(sizeId);
@@ -133,6 +144,17 @@ void StyleGroup::setSize(ImGuiStyleVar_ sizeId, float value)
 	else
 	{
 		*pos = { sizeId, value, 0.0f, true };
+	}
+}
+
+
+void StyleGroup::removeSize(ImGuiStyleVar_ sizeId)
+{
+	auto pos = getSizePos(sizeId);
+
+	if (pos != m_ImGuiSizeRules.end() && pos->sizeId != sizeId)
+	{
+		m_ImGuiSizeRules.erase(pos);
 	}
 }
 
@@ -153,7 +175,7 @@ void StyleGroup::setSize(ImGuiStyleVar_ sizeId, float x, float y)
 }
 
 
-std::uint32_t StyleGroup::getColorValue(ImGuiCol_ colorId) const
+std::pair<std::uint32_t, StyleGroup::ValueSource> StyleGroup::getColorValue(ImGuiCol_ colorId) const
 {
 	auto rule = getRuleForColor(colorId);
 
@@ -161,16 +183,24 @@ std::uint32_t StyleGroup::getColorValue(ImGuiCol_ colorId) const
 	{
 		if (rule->colorStoredInValue)
 		{
-			return rule->colorValue;
+			return { rule->colorValue, ValueSource::Self };
 		}
 		else
 		{
-			return m_applicationStyle->getColorConstantValue(rule->colorConstant);
+			return { m_applicationStyle->getColorConstantValue(rule->colorConstant), ValueSource::Self };
 		}
 	}
 	else
 	{
-		return ImGui::ColorConvertFloat4ToU32({ 0, 0, 0, 1 });
+		if (m_parent)
+		{
+			auto [col, src] = m_parent->getColorValue(colorId);
+			return {col, src == ValueSource::NoRule ? ValueSource::NoRule : ValueSource::Inherited };
+		}
+		else
+		{
+			return { ColorConvertFloat4ToU32(GetStyleColorVec4(colorId)), ValueSource::NoRule };
+		}
 	}
 }
 

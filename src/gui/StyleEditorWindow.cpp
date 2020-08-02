@@ -14,7 +14,7 @@ ImVec2 StyleEditorWindow::m_colorPreviewSize{ 10, 10 };
 
 StyleEditorWindow::StyleEditorWindow(std::string_view windowName, ApplicationState* appState)
 	: m_windowName(windowName),
-	m_appState(appState)
+	  m_appState(appState)
 {
 	assert(m_appState);
 }
@@ -63,46 +63,73 @@ void StyleEditorWindow::drawAddColorRulePopup()
 {
 	Columns(2);
 
-	if (ListBoxHeader("##ids", { GetContentRegionAvailWidth(), 460 }))
+	if (ListBoxHeader("##ids", GetContentRegionAvail()))
 	{
-		for (int i = 0; i < ImGuiCol_COUNT; ++i)
+		if (m_selectedGroup)
 		{
-			PushID(i);
-			bool colorPreviewDrawn = false;
-			if (m_selectedGroup)
+			for (int i = 0; i < ImGuiCol_COUNT; ++i)
 			{
-				auto rule = m_selectedGroup->getRuleForColor(static_cast<ImGuiCol_>(i));
+				PushID(i);
 
-				if (rule)
+				auto [col, src] = m_selectedGroup->getColorValue(static_cast<ImGuiCol_>(i));
+				auto col4 = ColorConvertU32ToFloat4(col);
+				ColorEdit4("##color", &col4.x, colorEditFlagsViewOnly);
+				SameLine();
+				auto dummySize = GetItemRectSize();
+				auto cursorPos = GetCursorPos();
+				if (src == StyleGroup::ValueSource::Inherited) Text(">>");
+				//if (src == StyleGroup::ValueSource::Inherited) Text("^");
+				SetCursorPos(cursorPos);
+				Dummy(dummySize);
+				SameLine();
+
+				if (src != StyleGroup::ValueSource::Self)
 				{
-					ImVec4 col = ColorConvertU32ToFloat4(m_selectedGroup->getColorValue(rule->colorId));
-					ColorEdit4("##color", &col.x, colorEditFlagsViewOnly);
-					m_colorPreviewSize = GetItemRectSize();
-					colorPreviewDrawn = true;
+					auto disabledCol = GetStyleColorVec4(ImGuiCol_TextDisabled);
+					PushStyleColor(ImGuiCol_Text, disabledCol);
 				}
-			}
-			if (!colorPreviewDrawn)
-			{
-				Dummy(m_colorPreviewSize);
-			}
-			SameLine();
+				if (Selectable(ImGui::GetStyleColorName(i), m_colorIdBeingAdded == i))
+				{
+					m_colorIdBeingAdded = static_cast<ImGuiCol_>(i);
+				}
+				if (src != StyleGroup::ValueSource::Self)
+				{
+					PopStyleColor(1);
+				}
 
-			if (!colorPreviewDrawn)
-			{
-				auto disabledCol = GetStyleColorVec4(ImGuiCol_TextDisabled);
-				PushStyleColor(ImGuiCol_Text, disabledCol);
+
+				//bool colorPreviewDrawn = false;
+				//auto rule = m_selectedGroup->getRuleForColor(static_cast<ImGuiCol_>(i));
+
+				//if (rule)
+				//{
+				//	ImVec4 col = ColorConvertU32ToFloat4(m_selectedGroup->getColorValue(rule->colorId));
+				//	ColorEdit4("##color", &col.x, colorEditFlagsViewOnly);
+				//	m_colorPreviewSize = GetItemRectSize();
+				//	colorPreviewDrawn = true;
+				//}
+				//if (!colorPreviewDrawn)
+				//{
+				//	Dummy(m_colorPreviewSize);
+				//}
+				//SameLine();
+
+				//if (!colorPreviewDrawn)
+				//{
+				//	auto disabledCol = GetStyleColorVec4(ImGuiCol_TextDisabled);
+				//	PushStyleColor(ImGuiCol_Text, disabledCol);
+				//}
+				//if (Selectable(ImGui::GetStyleColorName(i), m_colorIdBeingAdded == i))
+				//{
+				//	m_colorIdBeingAdded = static_cast<ImGuiCol_>(i);
+				//}
+				//if (!colorPreviewDrawn)
+				//{
+				//	PopStyleColor(1);
+				//}
+				PopID();
 			}
-			if (Selectable(ImGui::GetStyleColorName(i), m_colorIdBeingAdded == i))
-			{
-				m_colorIdBeingAdded = static_cast<ImGuiCol_>(i);
-			}
-			if (!colorPreviewDrawn)
-			{
-				PopStyleColor(1);
-			}
-			PopID();
 		}
-
 		ListBoxFooter();
 	}
 
@@ -181,17 +208,34 @@ void StyleEditorWindow::drawAddColorRulePopup()
 		EndCombo();
 	}
 
-	if (Button("Create") && m_selectedGroup)
+	if (m_selectedGroup)
 	{
-		if (m_colorBeingAddedIsVariable)
+		auto rule = m_selectedGroup->getRuleForColor(m_colorIdBeingAdded);
+		const char* text = rule ? "Update" : "Create";
+
+		if (Button(rule ? "Update" : "Create") && m_selectedGroup)
 		{
-			m_selectedGroup->setColor(m_colorIdBeingAdded, m_colorBeingAddedSelectedVariable);
+			if (m_colorBeingAddedIsVariable)
+			{
+				m_selectedGroup->setColor(m_colorIdBeingAdded, m_colorBeingAddedSelectedVariable);
+			}
+			else
+			{
+				m_selectedGroup->setColor(m_colorIdBeingAdded, ColorConvertFloat4ToU32(m_colorBeingAddedValue));
+			}
 		}
-		else
+		if (rule)
 		{
-			m_selectedGroup->setColor(m_colorIdBeingAdded, ColorConvertFloat4ToU32(m_colorBeingAddedValue));
+			SameLine();
+			if (Button("Delete"))
+			{
+				m_selectedGroup->removeColor(m_colorIdBeingAdded);
+			}
 		}
 	}
+
+
+
 }
 
 
