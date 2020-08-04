@@ -127,11 +127,9 @@ namespace
 		std::string result = "#";
 		// No reserving of space, assuming string uses SSO.
 
-		static_assert(std::endian::native == std::endian::little || std::endian::native == std::endian::big);
-
-		if constexpr (std::endian::native == std::endian::little)
+		if constexpr (std::endian::native == std::endian::big)
 		{
-			for (int i = 0; i < 4; ++i)
+			for (int i = 3; i >= 0; --i)
 			{
 				unsigned char msbits = bytes[i] >> 4;
 				unsigned char lsbits = bytes[i] & 0b00001111;
@@ -140,9 +138,9 @@ namespace
 				result.push_back(characters[lsbits]);
 			}
 		}
-		else if constexpr (std::endian::native == std::endian::big)
+		else
 		{
-			for (int i = 3; i >= 0; --i)
+			for (int i = 0; i < 4; ++i)
 			{
 				unsigned char msbits = bytes[i] >> 4;
 				unsigned char lsbits = bytes[i] & 0b00001111;
@@ -154,6 +152,39 @@ namespace
 
 		return result;
 	}
+
+	std::uint32_t readHexColor(std::string_view colorString)
+	{
+		constexpr static std::array<char, 16> characters{ '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
+		
+		if (colorString.size() == 9)
+		{
+			if constexpr (std::endian::native == std::endian::little)
+			{
+				for (int i = 0; i < 4; ++i)
+				{
+					unsigned char msbits = bytes[i] >> 4;
+					unsigned char lsbits = bytes[i] & 0b00001111;
+
+					result.push_back(characters[msbits]);
+					result.push_back(characters[lsbits]);
+				}
+			}
+			else if constexpr (std::endian::native == std::endian::big)
+			{
+				for (int i = 3; i >= 0; --i)
+				{
+					unsigned char msbits = bytes[i] >> 4;
+					unsigned char lsbits = bytes[i] & 0b00001111;
+
+					result.push_back(characters[msbits]);
+					result.push_back(characters[lsbits]);
+				}
+			}
+		}
+		return 0;
+	}
+
 
 }
 
