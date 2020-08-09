@@ -11,11 +11,8 @@
 #include "app/style/StyleGroup.hpp"
 
 
-class ApplicationStyle;
-namespace pugi
-{
-	class xml_node;
-}
+using json = nlohmann::json;
+
 
 class StyleGroup;
 
@@ -30,7 +27,7 @@ public:
 	void store(const std::string& fileName) const;
 
 	void setColorVariable(const std::string& name, ImVec4 value);
-	void removeColorVariable(const std::string& name);
+	void clearColorVariable(const std::string& name);
 
 	StyleGroup* getRootStyleGroup();
 	const StyleGroup* getRootStyleGroup() const;
@@ -42,8 +39,9 @@ private:
 
 	StyleGroup* createGroup(const char* groupName);
 	void pushAndApplyGroup(StyleGroup* group);
-	void storeGroup(StyleGroup* group, pugi::xml_node& node) const;
-	void storeColorVariables(pugi::xml_node& node) const;
+	//void storeGroup(StyleGroup* group, json::json& json) const;
+	
+	void storeColorVariables(json& json) const;
 
 
 	std::vector<std::unique_ptr<StyleGroup>> m_styleGroups; // only needed for ownership

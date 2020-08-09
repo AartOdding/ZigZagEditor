@@ -1,5 +1,5 @@
-#include "ApplicationStyle.hpp"
-#include "StyleGroup.hpp"
+#include "app/style/ApplicationStyle.hpp"
+#include "app/style/StyleGroup.hpp"
 
 #include <array>
 #include <bit>
@@ -8,168 +8,9 @@
 #include <iostream>
 #include <iterator>
 
-#include <pugixml.hpp>
 
-using namespace pugi;
 using namespace ImGui;
 
-
-namespace
-{
-
-	static_assert(ImGuiCol_COUNT == 50);
-	// If this assert fails, colors have been added/removed from ImGui, If this is the case
-	// the following array need to be updated as well, and the hardcoded value in the 
-	// static_assert as well.
-
-	constexpr std::array<const char*, ImGuiCol_COUNT> imGuiColorIdStrings
-	{
-		"ImGuiCol_Text",
-		"ImGuiCol_TextDisabled",
-		"ImGuiCol_WindowBg",              // Background of normal windows
-		"ImGuiCol_ChildBg",               // Background of child windows
-		"ImGuiCol_PopupBg",               // Background of popups, menus, tooltips windows
-		"ImGuiCol_Border",
-		"ImGuiCol_BorderShadow",
-		"ImGuiCol_FrameBg",               // Background of checkbox, radio button, plot, slider, text input
-		"ImGuiCol_FrameBgHovered",
-		"ImGuiCol_FrameBgActive",
-		"ImGuiCol_TitleBg",
-		"ImGuiCol_TitleBgActive",
-		"ImGuiCol_TitleBgCollapsed",
-		"ImGuiCol_MenuBarBg",
-		"ImGuiCol_ScrollbarBg",
-		"ImGuiCol_ScrollbarGrab",
-		"ImGuiCol_ScrollbarGrabHovered",
-		"ImGuiCol_ScrollbarGrabActive",
-		"ImGuiCol_CheckMark",
-		"ImGuiCol_SliderGrab",
-		"ImGuiCol_SliderGrabActive",
-		"ImGuiCol_Button",
-		"ImGuiCol_ButtonHovered",
-		"ImGuiCol_ButtonActive",
-		"ImGuiCol_Header",                // Header* colors are used for CollapsingHeader, TreeNode, Selectable, MenuItem
-		"ImGuiCol_HeaderHovered",
-		"ImGuiCol_HeaderActive",
-		"ImGuiCol_Separator",
-		"ImGuiCol_SeparatorHovered",
-		"ImGuiCol_SeparatorActive",
-		"ImGuiCol_ResizeGrip",
-		"ImGuiCol_ResizeGripHovered",
-		"ImGuiCol_ResizeGripActive",
-		"ImGuiCol_Tab",
-		"ImGuiCol_TabHovered",
-		"ImGuiCol_TabActive",
-		"ImGuiCol_TabUnfocused",
-		"ImGuiCol_TabUnfocusedActive",
-		"ImGuiCol_DockingPreview",        // Preview overlay color when about to docking something
-		"ImGuiCol_DockingEmptyBg",        // Background color for empty node (e.g. CentralNode with no window docked into it)
-		"ImGuiCol_PlotLines",
-		"ImGuiCol_PlotLinesHovered",
-		"ImGuiCol_PlotHistogram",
-		"ImGuiCol_PlotHistogramHovered",
-		"ImGuiCol_TextSelectedBg",
-		"ImGuiCol_DragDropTarget",
-		"ImGuiCol_NavHighlight",          // Gamepad/keyboard: current highlighted item
-		"ImGuiCol_NavWindowingHighlight", // Highlight window when using CTRL+TAB
-		"ImGuiCol_NavWindowingDimBg",     // Darken/colorize entire screen behind the CTRL+TAB window list, when active
-		"ImGuiCol_ModalWindowDimBg"
-	};
-
-	const char* writeRuleCategory(StyleGroup::RuleCategory cat)
-	{
-		switch (cat)
-		{
-		case StyleGroup::RuleCategory::NodeEditorRule:
-			return "NodeEditorRule";
-		case StyleGroup::RuleCategory::ZigZagRule:
-			return "ZigZagRule";
-		default:
-			return "ImGuiRule";
-		}
-	}
-
-	StyleGroup::RuleCategory readRuleCategory(const char* string)
-	{
-		if (strcmp(string, "NodeEditorRule") == 0)
-		{
-			return StyleGroup::RuleCategory::NodeEditorRule;
-		}
-		if (strcmp(string, "ZigZagRule") == 0)
-		{
-			return StyleGroup::RuleCategory::ZigZagRule;
-		}
-		return StyleGroup::RuleCategory::ImGuiRule;
-	}
-
-	const char* writeImGuiColorId(ImGuiCol colorId)
-	{
-		return GetStyleColorName(colorId);
-	}
-
-	ImGuiCol readImGuiColorId(const char* string)
-	{
-		for (int i = 0; i < ImGuiCol_COUNT; ++i)
-		{
-			if (strcmp(string, imGuiColorIdStrings[i]) == 0)
-			{
-				return i;
-			}
-		}
-		return 0;
-	}
-
-	std::string writeHexColor(ImVec4 color)
-	{
-		constexpr static std::array<char, 16> characters{ '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
-
-		std::array<unsigned char, 4> bytes;
-		bytes[0] = color.x * 255.0f;
-		bytes[1] = color.y * 255.0f;
-		bytes[2] = color.z * 255.0f;
-		bytes[3] = color.w * 255.0f;
-
-		std::string result = "#";
-
-		for (int i = 0; i < 4; ++i)
-		{
-			unsigned char msbits = bytes[i] >> 4;
-			unsigned char lsbits = bytes[i] & 0b00001111;
-			result.push_back(characters[msbits]);
-			result.push_back(characters[lsbits]);
-		}
-		return result;
-	}
-
-	// string doesnt need to be null terminated, but atleast 9 characters long.
-	ImVec4 readHexColor(const char* string)
-	{
-		ImVec4 result{ 0, 0, 0, 1 };
-
-		auto charValue = [](char character) -> int
-		{ 
-			if      (character >= '0' && character <= '9') return  character - '0';
-			else if (character >= 'a' && character <= 'f') return (character - 'a') + 10;
-			else if (character >= 'A' && character <= 'F') return (character - 'A') + 10;
-			return 0;
-		};
-
-		if (string[0] == '#')
-		{
-			int r = charValue(string[1]) * 16 + charValue(string[2]);
-			int g = charValue(string[3]) * 16 + charValue(string[4]);
-			int b = charValue(string[5]) * 16 + charValue(string[6]);
-			int a = charValue(string[7]) * 16 + charValue(string[8]);
-			result = { r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f };
-		}
-		return result;
-	}
-
-
-}
-
-
-//-----------------------------------------------------------------------------
 
 
 void ApplicationStyle::push(const char* groupName)
@@ -229,23 +70,23 @@ bool ApplicationStyle::load(const std::string& fileName)
 
 void ApplicationStyle::store(const std::string& fileName) const
 {
-	xml_document document;
-	auto node = document.append_child("ApplicationStyle");
+	//xml_document document;
+	//auto node = document.append_child("ApplicationStyle");
 
-	storeColorVariables(node);
+	//storeColorVariables(node);
 
-	if (m_rootStyleGroup)
-	{
-		storeGroup(m_rootStyleGroup, node);
-	}
+	// if (m_rootStyleGroup)
+	// {
+	// 	storeGroup(m_rootStyleGroup, node);
+	// }
 
-	if (!document.save_file(fileName.c_str()))
-	{
-		std::cerr << "Error saving style: " << fileName << std::endl;
-	}
+	// if (!document.save_file(fileName.c_str()))
+	// {
+	// 	std::cerr << "Error saving style: " << fileName << std::endl;
+	// }
 }
 
-
+/*
 void ApplicationStyle::storeGroup(StyleGroup* group, pugi::xml_node& node) const
 {
 	auto thisNode = node.append_child("StyleGroup");
@@ -283,18 +124,18 @@ void ApplicationStyle::storeGroup(StyleGroup* group, pugi::xml_node& node) const
 			storeGroup(child, childrenNode);
 		}
 	}
-}
+}*/
 
 
-void ApplicationStyle::storeColorVariables(pugi::xml_node& node) const
+void ApplicationStyle::storeColorVariables(json& json) const
 {
-	auto colorVariablesNode = node.append_child("ColorVariables");
-	for (const auto& [name, value] : m_colorVariables)
-	{
-		auto colorVariableNode = colorVariablesNode.append_child("ColorVariable");
-		colorVariableNode.append_attribute("name").set_value(name.c_str());
-		colorVariableNode.append_child(node_pcdata).set_value(writeHexColor(value).c_str());
-	}
+	// auto colorVariablesNode = node.append_child("ColorVariables");
+	// for (const auto& [name, value] : m_colorVariables)
+	// {
+	// 	auto colorVariableNode = colorVariablesNode.append_child("ColorVariable");
+	// 	colorVariableNode.append_attribute("name").set_value(name.c_str());
+	// 	colorVariableNode.append_child(node_pcdata).set_value(writeHexColor(value).c_str());
+	// }
 }
 
 
@@ -304,7 +145,7 @@ void ApplicationStyle::setColorVariable(const std::string& name, ImVec4 value)
 }
 
 
-void ApplicationStyle::removeColorVariable(const std::string& name)
+void ApplicationStyle::clearColorVariable(const std::string& name)
 {
 	/*
 	 * When removing the variable we need to find all the places where it is used,

@@ -271,7 +271,7 @@ void StyleEditorWindow::drawColorVariablesEditorPopup()
 			{
 				if (m_colorNameToRemove != "")
 				{
-					m_appState->style.removeColorVariable(m_colorNameToRemove);
+					m_appState->style.clearColorVariable(m_colorNameToRemove);
 					m_colorNameToRemove = "";
 				}
 				CloseCurrentPopup();
