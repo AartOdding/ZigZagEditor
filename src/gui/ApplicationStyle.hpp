@@ -34,16 +34,16 @@ public:
 		NoRule
 	};
 
-	struct ImGuiColorRule
+	struct ColorRule
 	{
 		RuleCategory category;
 		int colorId;
-		std::uint32_t colorValue;
+		ImVec4 colorValue;
 		std::string colorVariable;
 		bool useVariable;
 	};
 
-	struct ImGuiSizeRule
+	struct SizeRule
 	{
 		RuleCategory category;
 		int sizeId;
@@ -64,10 +64,10 @@ public:
 	const std::vector<StyleGroup*>& getChildren();
 	const std::vector<const StyleGroup*>& getChildren() const;
 
-	const std::vector<ImGuiColorRule>& getColorRules() const;
-	const std::vector<ImGuiSizeRule>& getSizeRules() const;
+	const std::vector<ColorRule>& getColorRules() const;
+	const std::vector<SizeRule>& getSizeRules() const;
 
-	void setColor(ImGuiCol_ colorId, std::uint32_t colorValue);
+	void setColor(ImGuiCol_ colorId, ImVec4 colorValue);
 	void setColor(ImGuiCol_ colorId, const std::string& colorVariable);
 	void removeColor(ImGuiCol_ colorId);
 
@@ -75,13 +75,13 @@ public:
 	void setSize(ImGuiStyleVar_ sizeId, float x, float y);
 	void removeSize(ImGuiStyleVar_ sizeId);
 
-	std::pair<std::uint32_t, RuleSource> getColorValue(ImGuiCol_ colorId) const;
+	std::pair<ImVec4, RuleSource> getColorValue(ImGuiCol_ colorId) const;
 
 	bool hasColorRule(ImGuiCol_ colorId) const;
-	const ImGuiColorRule* getColorRule(ImGuiCol_ colorId) const;
+	const ColorRule* getColorRule(ImGuiCol_ colorId) const;
 
 	bool hasSizeRule(ImGuiStyleVar_ sizeId) const;
-	const ImGuiSizeRule* getSizeRule(ImGuiStyleVar_ sizeId) const;
+	const SizeRule* getSizeRule(ImGuiStyleVar_ sizeId) const;
 
 private:
 
@@ -91,10 +91,10 @@ private:
 
 	void insertChild(StyleGroup* child);
 
-	std::vector<ImGuiColorRule>::iterator getColorPos(ImGuiCol_ colorId);
-	std::vector<ImGuiColorRule>::const_iterator getColorPos(ImGuiCol_ colorId) const;
-	std::vector<ImGuiSizeRule>::iterator getSizePos(ImGuiStyleVar_ sizeId);
-	std::vector<ImGuiSizeRule>::const_iterator getSizePos(ImGuiStyleVar_ sizeId) const;
+	std::vector<ColorRule>::iterator getColorPos(ImGuiCol_ colorId);
+	std::vector<ColorRule>::const_iterator getColorPos(ImGuiCol_ colorId) const;
+	std::vector<SizeRule>::iterator getSizePos(ImGuiStyleVar_ sizeId);
+	std::vector<SizeRule>::const_iterator getSizePos(ImGuiStyleVar_ sizeId) const;
 
 	ApplicationStyle* const m_applicationStyle;
 	const std::string m_name;
@@ -103,8 +103,8 @@ private:
 	std::vector<StyleGroup*> m_children;
 	std::vector<const StyleGroup*> m_childrenConst;
 
-	std::vector<ImGuiColorRule> m_ImGuiColorRules;
-	std::vector<ImGuiSizeRule> m_ImGuiSizeRules;
+	std::vector<ColorRule> m_ImGuiColorRules;
+	std::vector<SizeRule> m_ImGuiSizeRules;
 };
 
 
@@ -119,14 +119,14 @@ public:
 	bool load(const std::string& fileName);
 	void store(const std::string& fileName) const;
 
-	void setColorVariable(const std::string& name, std::uint32_t value);
+	void setColorVariable(const std::string& name, ImVec4 value);
 	void removeColorVariable(const std::string& name);
 
 	StyleGroup* getRootStyleGroup();
 	const StyleGroup* getRootStyleGroup() const;
 
-	std::uint32_t getVariableValue(const std::string& variableName) const;
-	const std::unordered_map<std::string, std::uint32_t>& getColorVariables() const;
+	ImVec4 getVariableValue(const std::string& variableName) const;
+	const std::unordered_map<std::string, ImVec4>& getColorVariables() const;
 
 private:
 
@@ -137,7 +137,7 @@ private:
 
 
 	std::vector<std::unique_ptr<StyleGroup>> m_styleGroups; // only needed for ownership
-	std::unordered_map<std::string, std::uint32_t> m_colorVariables;
+	std::unordered_map<std::string, ImVec4> m_colorVariables;
 
 	StyleGroup* m_rootStyleGroup = nullptr;
 

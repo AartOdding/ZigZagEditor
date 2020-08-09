@@ -77,8 +77,7 @@ void StyleEditorWindow::drawAddColorRulePopup()
 				PushID(i);
 
 				auto [col, src] = m_selectedGroup->getColorValue(static_cast<ImGuiCol_>(i));
-				auto col4 = ColorConvertU32ToFloat4(col);
-				ColorEdit4("##color", &col4.x, colorEditFlagsViewOnly);
+				ColorEdit4("##color", &col.x, colorEditFlagsViewOnly);
 				SameLine();
 				auto dummySize = GetItemRectSize();
 				auto cursorPos = GetCursorPos();
@@ -151,7 +150,7 @@ void StyleEditorWindow::drawAddColorRulePopup()
 
 	if (it != colors.end())
 	{
-		color = ColorConvertU32ToFloat4(colors.at(m_colorBeingAddedSelectedVariable));
+		color = it->second;
 	}
 
 	ColorEdit4("##variablePreview", &color.x, colorEditFlagsViewOnly);
@@ -168,7 +167,7 @@ void StyleEditorWindow::drawAddColorRulePopup()
 		m_colorBeingAddedIsVariable = true;
 		for (auto& [name, color] : m_appState->style.getColorVariables())
 		{
-			auto colorVec4 = ColorConvertU32ToFloat4(color);
+			auto colorVec4 = color;
 			PushID(&name);
 			ColorEdit4("##", &colorVec4.x, colorEditFlagsViewOnly);
 				
@@ -196,7 +195,7 @@ void StyleEditorWindow::drawAddColorRulePopup()
 			}
 			else
 			{
-				m_selectedGroup->setColor(m_colorIdBeingAdded, ColorConvertFloat4ToU32(m_colorBeingAddedValue));
+				m_selectedGroup->setColor(m_colorIdBeingAdded, m_colorBeingAddedValue);
 			}
 		}
 		if (rule)
@@ -236,7 +235,7 @@ void StyleEditorWindow::drawColorVariablesEditorPopup()
 			{
 				if (m_newColorVariableName[0] != 0)
 				{
-					m_appState->style.setColorVariable(m_newColorVariableName, ColorConvertFloat4ToU32(m_newColorVariableValue));
+					m_appState->style.setColorVariable(m_newColorVariableName, m_newColorVariableValue);
 					m_newColorVariableName[0] = 0;
 					m_newColorVariableValue = { 0, 0, 0, 1 };
 				}
@@ -278,15 +277,14 @@ void StyleEditorWindow::drawColorVariablesEditorPopup()
 			EndPopup();
 		}
 
-		for (auto& [name, color] : m_appState->style.getColorVariables())
+		for (auto [name, color] : m_appState->style.getColorVariables())
 		{
-			auto colorFloat = ColorConvertU32ToFloat4(color);
-			ColorEdit4(name.c_str(), &colorFloat.x, colorEditFlagsColorOnly);
-			auto colorInt = ColorConvertFloat4ToU32(colorFloat);
+			auto newColor = color;
+			ColorEdit4(name.c_str(), &newColor.x, colorEditFlagsColorOnly);
 
-			if (colorInt != color)
+			if (newColor.x != color.x || newColor.y != color.y || newColor.z != color.z || newColor.w != color.w)
 			{
-				m_appState->style.setColorVariable(name, colorInt);
+				m_appState->style.setColorVariable(name, newColor);
 			}
 		}
 

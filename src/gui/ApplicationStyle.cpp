@@ -118,71 +118,50 @@ namespace
 		return 0;
 	}
 
-	std::string writeHexColor(std::uint32_t color)
+	std::string writeHexColor(ImVec4 color)
 	{
 		constexpr static std::array<char, 16> characters{ '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
-		unsigned char bytes[4];
-		memcpy(bytes, &color, 4);
+
+		std::array<unsigned char, 4> bytes;
+		bytes[0] = color.x * 255.0f;
+		bytes[1] = color.y * 255.0f;
+		bytes[2] = color.z * 255.0f;
+		bytes[3] = color.w * 255.0f;
 
 		std::string result = "#";
-		// No reserving of space, assuming string uses SSO.
 
-		if constexpr (std::endian::native == std::endian::big)
+		for (int i = 0; i < 4; ++i)
 		{
-			for (int i = 3; i >= 0; --i)
-			{
-				unsigned char msbits = bytes[i] >> 4;
-				unsigned char lsbits = bytes[i] & 0b00001111;
-
-				result.push_back(characters[msbits]);
-				result.push_back(characters[lsbits]);
-			}
+			unsigned char msbits = bytes[i] >> 4;
+			unsigned char lsbits = bytes[i] & 0b00001111;
+			result.push_back(characters[msbits]);
+			result.push_back(characters[lsbits]);
 		}
-		else
-		{
-			for (int i = 0; i < 4; ++i)
-			{
-				unsigned char msbits = bytes[i] >> 4;
-				unsigned char lsbits = bytes[i] & 0b00001111;
-
-				result.push_back(characters[msbits]);
-				result.push_back(characters[lsbits]);
-			}
-		}
-
 		return result;
 	}
 
-	std::uint32_t readHexColor(std::string_view colorString)
+	// string doesnt need to be null terminated, but atleast 9 characters long.
+	ImVec4 readHexColor(const char* string)
 	{
-		constexpr static std::array<char, 16> characters{ '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
-		
-		if (colorString.size() == 9)
+		ImVec4 result{ 0, 0, 0, 1 };
+
+		auto charValue = [](char character) -> int
+		{ 
+			if      (character >= '0' && character <= '9') return  character - '0';
+			else if (character >= 'a' && character <= 'f') return (character - 'a') + 10;
+			else if (character >= 'A' && character <= 'F') return (character - 'A') + 10;
+			return 0;
+		};
+
+		if (string[0] == '#')
 		{
-			if constexpr (std::endian::native == std::endian::little)
-			{
-				for (int i = 0; i < 4; ++i)
-				{
-					unsigned char msbits = bytes[i] >> 4;
-					unsigned char lsbits = bytes[i] & 0b00001111;
-
-					result.push_back(characters[msbits]);
-					result.push_back(characters[lsbits]);
-				}
-			}
-			else if constexpr (std::endian::native == std::endian::big)
-			{
-				for (int i = 3; i >= 0; --i)
-				{
-					unsigned char msbits = bytes[i] >> 4;
-					unsigned char lsbits = bytes[i] & 0b00001111;
-
-					result.push_back(characters[msbits]);
-					result.push_back(characters[lsbits]);
-				}
-			}
+			int r = charValue(string[1]) * 16 + charValue(string[2]);
+			int g = charValue(string[3]) * 16 + charValue(string[4]);
+			int b = charValue(string[5]) * 16 + charValue(string[6]);
+			int a = charValue(string[7]) * 16 + charValue(string[8]);
+			result = { r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f };
 		}
-		return 0;
+		return result;
 	}
 
 
@@ -259,19 +238,19 @@ const std::vector<const StyleGroup*>& StyleGroup::getChildren() const
 }
 
 
-const std::vector<StyleGroup::ImGuiColorRule>& StyleGroup::getColorRules() const
+const std::vector<StyleGroup::ColorRule>& StyleGroup::getColorRules() const
 {
 	return m_ImGuiColorRules;
 }
 
 
-const std::vector<StyleGroup::ImGuiSizeRule>& StyleGroup::getSizeRules() const
+const std::vector<StyleGroup::SizeRule>& StyleGroup::getSizeRules() const
 {
 	return m_ImGuiSizeRules;
 }
 
 
-void StyleGroup::setColor(ImGuiCol_ colorId, std::uint32_t colorValue)
+void StyleGroup::setColor(ImGuiCol_ colorId, ImVec4 colorValue)
 {
 	auto pos = getColorPos(colorId);
 
@@ -292,11 +271,11 @@ void StyleGroup::setColor(ImGuiCol_ colorId, const std::string& colorVariable)
 
 	if (pos != m_ImGuiColorRules.end() && pos->colorId == colorId)
 	{
-		*pos = { RuleCategory::ImGuiRule, colorId, 0, colorVariable, true };
+		*pos = { RuleCategory::ImGuiRule, colorId, {0, 0, 0, 1}, colorVariable, true };
 	}
 	else
 	{
-		m_ImGuiColorRules.insert(pos, { RuleCategory::ImGuiRule, colorId, 0, colorVariable, true });
+		m_ImGuiColorRules.insert(pos, { RuleCategory::ImGuiRule, colorId, {0, 0, 0, 1}, colorVariable, true });
 	}
 }
 
@@ -353,7 +332,7 @@ void StyleGroup::removeSize(ImGuiStyleVar_ sizeId)
 }
 
 
-std::pair<std::uint32_t, StyleGroup::RuleSource> StyleGroup::getColorValue(ImGuiCol_ colorId) const
+std::pair<ImVec4, StyleGroup::RuleSource> StyleGroup::getColorValue(ImGuiCol_ colorId) const
 {
 	auto rule = getColorRule(colorId);
 
@@ -377,7 +356,7 @@ std::pair<std::uint32_t, StyleGroup::RuleSource> StyleGroup::getColorValue(ImGui
 		}
 		else
 		{
-			return { ColorConvertFloat4ToU32(GetStyleColorVec4(colorId)), RuleSource::NoRule };
+			return { GetStyleColorVec4(colorId), RuleSource::NoRule };
 		}
 	}
 }
@@ -389,7 +368,7 @@ bool StyleGroup::hasColorRule(ImGuiCol_ colorId) const
 }
 
 
-const StyleGroup::ImGuiColorRule* StyleGroup::getColorRule(ImGuiCol_ colorId) const
+const StyleGroup::ColorRule* StyleGroup::getColorRule(ImGuiCol_ colorId) const
 {
 	auto it = getColorPos(colorId);
 
@@ -407,7 +386,7 @@ bool StyleGroup::hasSizeRule(ImGuiStyleVar_ sizeId) const
 }
 
 
-const StyleGroup::ImGuiSizeRule* StyleGroup::getSizeRule(ImGuiStyleVar_ sizeId) const
+const StyleGroup::SizeRule* StyleGroup::getSizeRule(ImGuiStyleVar_ sizeId) const
 {
 	auto it = getSizePos(sizeId);
 
@@ -438,31 +417,31 @@ void StyleGroup::insertChild(StyleGroup* child)
 }
 
 
-std::vector<StyleGroup::ImGuiColorRule>::iterator StyleGroup::getColorPos(ImGuiCol_ colorId)
+std::vector<StyleGroup::ColorRule>::iterator StyleGroup::getColorPos(ImGuiCol_ colorId)
 {
 	return std::lower_bound(m_ImGuiColorRules.begin(), m_ImGuiColorRules.end(),
-		colorId, [](const ImGuiColorRule& lhs, ImGuiCol_ rhs) { return lhs.colorId < rhs; });
+		colorId, [](const ColorRule& lhs, ImGuiCol_ rhs) { return lhs.colorId < rhs; });
 }
 
 
-std::vector<StyleGroup::ImGuiColorRule>::const_iterator StyleGroup::getColorPos(ImGuiCol_ colorId) const
+std::vector<StyleGroup::ColorRule>::const_iterator StyleGroup::getColorPos(ImGuiCol_ colorId) const
 {
 	return std::lower_bound(m_ImGuiColorRules.begin(), m_ImGuiColorRules.end(),
-		colorId, [](const ImGuiColorRule& lhs, ImGuiCol_ rhs) { return lhs.colorId < rhs; });
+		colorId, [](const ColorRule& lhs, ImGuiCol_ rhs) { return lhs.colorId < rhs; });
 }
 
 
-std::vector<StyleGroup::ImGuiSizeRule>::iterator StyleGroup::getSizePos(ImGuiStyleVar_ sizeId)
+std::vector<StyleGroup::SizeRule>::iterator StyleGroup::getSizePos(ImGuiStyleVar_ sizeId)
 {
 	return std::lower_bound(m_ImGuiSizeRules.begin(), m_ImGuiSizeRules.end(),
-		sizeId, [](const ImGuiSizeRule& lhs, ImGuiStyleVar_ rhs) { return lhs.sizeId < rhs; });
+		sizeId, [](const SizeRule& lhs, ImGuiStyleVar_ rhs) { return lhs.sizeId < rhs; });
 }
 
 
-std::vector<StyleGroup::ImGuiSizeRule>::const_iterator StyleGroup::getSizePos(ImGuiStyleVar_ sizeId) const
+std::vector<StyleGroup::SizeRule>::const_iterator StyleGroup::getSizePos(ImGuiStyleVar_ sizeId) const
 {
 	return std::lower_bound(m_ImGuiSizeRules.begin(), m_ImGuiSizeRules.end(),
-		sizeId, [](const ImGuiSizeRule& lhs, ImGuiStyleVar_ rhs) { return lhs.sizeId < rhs; });
+		sizeId, [](const SizeRule& lhs, ImGuiStyleVar_ rhs) { return lhs.sizeId < rhs; });
 }
 
 
@@ -595,7 +574,7 @@ void ApplicationStyle::storeColorVariables(pugi::xml_node& node) const
 }
 
 
-void ApplicationStyle::setColorVariable(const std::string& name, std::uint32_t value)
+void ApplicationStyle::setColorVariable(const std::string& name, ImVec4 value)
 {
 	m_colorVariables[name] = value;
 }
@@ -631,7 +610,7 @@ void ApplicationStyle::removeColorVariable(const std::string& name)
 }
 
 
-std::uint32_t ApplicationStyle::getVariableValue(const std::string& variableName) const
+ImVec4 ApplicationStyle::getVariableValue(const std::string& variableName) const
 {
 	auto it = m_colorVariables.find(variableName);
 
@@ -641,12 +620,12 @@ std::uint32_t ApplicationStyle::getVariableValue(const std::string& variableName
 	}
 	else
 	{
-		return ImGui::ColorConvertFloat4ToU32({ 0, 0, 0, 1 });
+		return { 0, 0, 0, 1 };
 	}
 }
 
 
-const std::unordered_map<std::string, std::uint32_t>& ApplicationStyle::getColorVariables() const
+const std::unordered_map<std::string, ImVec4>& ApplicationStyle::getColorVariables() const
 {
 	return m_colorVariables;
 }
