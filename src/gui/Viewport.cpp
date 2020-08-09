@@ -1,7 +1,7 @@
-#include "Viewport.hpp"
-#include "app/ConnectCommand.hpp"
-#include "app/DisconnectCommand.hpp"
-#include "app/RemoveObjectCommand.hpp"
+#include "gui/Viewport.hpp"
+#include "app/command/ConnectCommand.hpp"
+#include "app/command/DisconnectCommand.hpp"
+#include "app/command/RemoveObjectCommand.hpp"
 
 #include <iostream>
 

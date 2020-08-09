@@ -3,8 +3,8 @@
 #include <ZigZag/BaseOperator.hpp>
 
 #include "WindowActions.hpp"
-#include "CommandStack.hpp"
-#include "gui/ApplicationStyle.hpp"
+#include "command/CommandStack.hpp"
+#include "app/style/ApplicationStyle.hpp"
 
 
 struct ApplicationState

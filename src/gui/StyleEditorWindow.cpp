@@ -1,4 +1,6 @@
-#include "StyleEditorWindow.hpp"
+#include "gui/StyleEditorWindow.hpp"
+#include "app/style/ApplicationStyle.hpp"
+#include "app/style/StyleGroup.hpp"
 #include <iostream>
 
 

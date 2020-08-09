@@ -1,7 +1,7 @@
 #include "ObjectInspector.hpp"
-#include "app/AddObjectCommand.hpp"
-#include "app/RemoveObjectCommand.hpp"
-#include "app/RenameObjectCommand.hpp"
+#include "app/command/AddObjectCommand.hpp"
+#include "app/command/RemoveObjectCommand.hpp"
+#include "app/command/RenameObjectCommand.hpp"
 
 #include <imgui.h>
 

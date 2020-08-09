@@ -4,7 +4,7 @@
 #include <ZigZag/ObjectSelection.hpp>
 
 #include "app/ApplicationState.hpp"
-#include "app/CommandStack.hpp"
+#include "app/command/CommandStack.hpp"
 
 
 

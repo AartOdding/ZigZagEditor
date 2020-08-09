@@ -7,51 +7,9 @@ project(ZigZag VERSION 0.1.0)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/external/imgui-node-editor/Support/CMakeModules)
 
-SET(HEADERS
-    src/Application.hpp
-    src/types.hpp
+include("${CMAKE_CURRENT_LIST_DIR}/src/_src_files.cmake")
 
-    src/app/Action.hpp
-    src/app/AddObjectCommand.hpp
-    src/app/Command.hpp
-    src/app/CommandStack.hpp
-    src/app/ConnectCommand.hpp
-    src/app/DisconnectCommand.hpp
-    src/app/RemoveObjectCommand.hpp
-    src/app/RenameObjectCommand.hpp
-    src/app/WindowActions.hpp
-
-    src/gui/ApplicationStyle.hpp
-    src/gui/HistoryView.hpp
-    src/gui/MainMenu.hpp
-    src/gui/ObjectInspector.hpp
-    src/gui/RenderOrderWindow.hpp
-    src/gui/StyleEditorWindow.hpp
-    src/gui/Viewport.hpp
-)
-
-SET(SOURCES
-    src/Application.cpp
-    src/main.cpp
-
-    src/app/Action.cpp
-    src/app/AddObjectCommand.cpp
-    src/app/CommandStack.cpp
-    src/app/ConnectCommand.cpp
-    src/app/DisconnectCommand.cpp
-    src/app/RemoveObjectCommand.cpp
-    src/app/RenameObjectCommand.cpp
-
-    src/gui/ApplicationStyle.cpp
-    src/gui/HistoryView.cpp
-    src/gui/MainMenu.cpp
-    src/gui/ObjectInspector.cpp
-    src/gui/RenderOrderWindow.cpp
-    src/gui/StyleEditorWindow.cpp
-    src/gui/Viewport.cpp
-)
-
-add_executable(ZigZag ${HEADERS} ${SOURCES})
+add_executable(ZigZag ${src_files})
 
 target_include_directories(ZigZag PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
