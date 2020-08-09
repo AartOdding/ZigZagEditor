@@ -16,3 +16,6 @@
 [submodule "external/pugixml"]
 	path = external/pugixml
 	url = https://github.com/zeux/pugixml.git
+[submodule "external/json"]
+	path = external/json
+	url = https://github.com/nlohmann/json.git
