@@ -164,7 +164,7 @@ void ApplicationStyle::clearColorVariable(const std::string& name)
 			// Convert all places where the variable is used to the color value:
 			for (auto& colorRule : group->getColorRules())
 			{
-				if (!colorRule.useVariable && colorRule.colorVariable == name)
+				if (colorRule.useVariable && colorRule.colorVariable == name)
 				{
 					group->setColor(static_cast<ImGuiCol_>(colorRule.colorId), colorValue);
 				}
@@ -232,10 +232,6 @@ void ApplicationStyle::pushAndApplyGroup(StyleGroup* group)
 		{
 			if (colorRule.useVariable)
 			{
-				ImGui::PushStyleColor(colorRule.colorId, colorRule.colorValue);
-			}
-			else
-			{
 				auto variableIt = m_colorVariables.find(colorRule.colorVariable);
 
 				if (variableIt == m_colorVariables.end())
@@ -247,6 +243,10 @@ void ApplicationStyle::pushAndApplyGroup(StyleGroup* group)
 				{
 					ImGui::PushStyleColor(colorRule.colorId, variableIt->second);
 				}
+			}
+			else
+			{
+				ImGui::PushStyleColor(colorRule.colorId, colorRule.colorValue);
 			}
 		}
 		for (const auto& sizeRule : group->getSizeRules())

@@ -93,11 +93,11 @@ void StyleGroup::setColor(ImGuiCol_ colorId, ImVec4 colorValue)
 
 	if (pos != m_ImGuiColorRules.end() && pos->colorId == colorId)
 	{
-		*pos = { StyleRule::RuleTarget::ImGui, colorId, colorValue, std::string(), true };
+		*pos = { StyleRule::RuleTarget::ImGui, colorId, colorValue, std::string(), false };
 	}
 	else
 	{
-		m_ImGuiColorRules.insert(pos, { StyleRule::RuleTarget::ImGui, colorId, colorValue, std::string(), true });
+		m_ImGuiColorRules.insert(pos, { StyleRule::RuleTarget::ImGui, colorId, colorValue, std::string(), false });
 	}
 }
 
@@ -177,11 +177,11 @@ std::pair<ImVec4, StyleGroup::RuleSource> StyleGroup::getColorValue(ImGuiCol_ co
 	{
 		if (rule->useVariable)
 		{
-			return { rule->colorValue, RuleSource::Self };
+			return { m_applicationStyle->getVariableValue(rule->colorVariable), RuleSource::Self };
 		}
 		else
 		{
-			return { m_applicationStyle->getVariableValue(rule->colorVariable), RuleSource::Self };
+			return { rule->colorValue, RuleSource::Self };
 		}
 	}
 	else
