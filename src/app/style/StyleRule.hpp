@@ -26,7 +26,7 @@ namespace StyleRule
 	struct ColorRule
 	{
 		RuleTarget target;
-		int colorId;
+		int ruleId;
 		ImVec4 colorValue;
 		std::string colorVariable;
 		bool useVariable;
@@ -39,7 +39,7 @@ namespace StyleRule
 	struct SizeRule
 	{
 		RuleTarget target;
-		int sizeId;
+		int ruleId;
 		ImVec4 size;
 		int numDimensions;
 	};

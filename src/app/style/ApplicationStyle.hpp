@@ -27,7 +27,7 @@ public:
 	void store(const std::string& fileName) const;
 
 	void setColorVariable(const std::string& name, ImVec4 value);
-	void clearColorVariable(const std::string& name);
+	//void clearColorVariable(const std::string& name);
 
 	StyleGroup* getRootStyleGroup();
 	const StyleGroup* getRootStyleGroup() const;

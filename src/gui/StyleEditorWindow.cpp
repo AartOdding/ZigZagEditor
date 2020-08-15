@@ -78,7 +78,7 @@ void StyleEditorWindow::drawAddColorRulePopup()
 			{
 				PushID(i);
 
-				auto [col, src] = m_selectedGroup->getColorValue(static_cast<ImGuiCol_>(i));
+				auto [col, src] = m_selectedGroup->getColorValue(StyleRule::RuleTarget::ImGui, i);
 				ColorEdit4("##color", &col.x, colorEditFlagsViewOnly);
 				SameLine();
 				auto dummySize = GetItemRectSize();
@@ -186,18 +186,18 @@ void StyleEditorWindow::drawAddColorRulePopup()
 
 	if (m_selectedGroup)
 	{
-		auto rule = m_selectedGroup->getColorRule(m_colorIdBeingAdded);
+		auto rule = m_selectedGroup->getColorRule(StyleRule::RuleTarget::ImGui, m_colorIdBeingAdded);
 		const char* text = rule ? "Update" : "Create";
 
 		if (Button(rule ? "Update" : "Create") && m_selectedGroup)
 		{
 			if (m_colorBeingAddedIsVariable)
 			{
-				m_selectedGroup->setColor(m_colorIdBeingAdded, m_colorBeingAddedSelectedVariable);
+				m_selectedGroup->setColor(StyleRule::RuleTarget::ImGui, m_colorIdBeingAdded, m_colorBeingAddedSelectedVariable);
 			}
 			else
 			{
-				m_selectedGroup->setColor(m_colorIdBeingAdded, m_colorBeingAddedValue);
+				m_selectedGroup->setColor(StyleRule::RuleTarget::ImGui, m_colorIdBeingAdded, m_colorBeingAddedValue);
 			}
 		}
 		if (rule)
@@ -205,13 +205,10 @@ void StyleEditorWindow::drawAddColorRulePopup()
 			SameLine();
 			if (Button("Delete"))
 			{
-				m_selectedGroup->removeColor(m_colorIdBeingAdded);
+				m_selectedGroup->removeColor(StyleRule::RuleTarget::ImGui, m_colorIdBeingAdded);
 			}
 		}
 	}
-
-
-
 }
 
 
@@ -271,7 +268,8 @@ void StyleEditorWindow::drawColorVariablesEditorPopup()
 			{
 				if (m_colorNameToRemove != "")
 				{
-					m_appState->style.clearColorVariable(m_colorNameToRemove);
+					throw "TODO"; // cannot clear yet
+					//m_appState->style.clearColorVariable(m_colorNameToRemove);
 					m_colorNameToRemove = "";
 				}
 				CloseCurrentPopup();

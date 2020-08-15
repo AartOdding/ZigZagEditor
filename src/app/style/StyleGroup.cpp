@@ -5,6 +5,42 @@
 using namespace ImGui;
 
 
+namespace
+{
+	template<typename Rule>
+	typename std::vector<Rule>::iterator findPos(
+		std::vector<Rule>& vec, 
+		StyleRule::RuleTarget ruleTarget, 
+		int ruleId)
+	{
+		return std::lower_bound(
+			vec.begin(), 
+			vec.end(), 
+			std::make_pair(ruleTarget, ruleId), 
+			[](const Rule& lhs, const auto& id) 
+			{
+				return lhs.target == id.first ? lhs.ruleId < id.second : lhs.target < id.first;
+			});
+	}
+
+	template<typename Rule>
+	typename std::vector<Rule>::const_iterator findPos(
+		const std::vector<Rule>& vec, 
+		StyleRule::RuleTarget ruleTarget, 
+		int ruleId)
+	{
+		return std::lower_bound(
+			vec.begin(),
+			vec.end(), 
+			std::make_pair(ruleTarget, ruleId), 
+			[](const Rule& lhs, const auto& id) 
+			{
+				return lhs.target == id.first ? lhs.ruleId < id.second : lhs.target < id.first;
+			});
+	}
+}
+
+
 StyleGroup::StyleGroup(ApplicationStyle* appStyle, const char* name, StyleGroup* parent)
 	: m_applicationStyle(appStyle),
 	  m_name(name),
@@ -77,101 +113,101 @@ const std::vector<const StyleGroup*>& StyleGroup::getChildren() const
 
 const std::vector<StyleRule::ColorRule>& StyleGroup::getColorRules() const
 {
-	return m_ImGuiColorRules;
+	return m_colorRules;
 }
 
 
 const std::vector<StyleRule::SizeRule>& StyleGroup::getSizeRules() const
 {
-	return m_ImGuiSizeRules;
+	return m_sizeRules;
 }
 
 
-void StyleGroup::setColor(ImGuiCol_ colorId, ImVec4 colorValue)
+void StyleGroup::setColor(StyleRule::RuleTarget target, int colorId, ImVec4 colorValue)
 {
-	auto pos = getColorPos(colorId);
+	auto pos = findPos(m_colorRules, target, colorId);
 
-	if (pos != m_ImGuiColorRules.end() && pos->colorId == colorId)
+	if (pos != m_colorRules.end() && pos->target == target && pos->ruleId == colorId)
 	{
-		*pos = { StyleRule::RuleTarget::ImGui, colorId, colorValue, std::string(), false };
+		*pos = { target, colorId, colorValue, std::string(), false };
 	}
 	else
 	{
-		m_ImGuiColorRules.insert(pos, { StyleRule::RuleTarget::ImGui, colorId, colorValue, std::string(), false });
+		m_colorRules.insert(pos, { target, colorId, colorValue, std::string(), false });
 	}
 }
 
 
-void StyleGroup::setColor(ImGuiCol_ colorId, const std::string& colorVariable)
+void StyleGroup::setColor(StyleRule::RuleTarget target, int colorId, const std::string& colorVariable)
 {
-	auto pos = getColorPos(colorId);
+	auto pos = findPos(m_colorRules, target, colorId);
 
-	if (pos != m_ImGuiColorRules.end() && pos->colorId == colorId)
+	if (pos != m_colorRules.end() && pos->target == target && pos->ruleId == colorId)
 	{
-		*pos = { StyleRule::RuleTarget::ImGui, colorId, {0, 0, 0, 1}, colorVariable, true };
+		*pos = { target, colorId, {0, 0, 0, 1}, colorVariable, true };
 	}
 	else
 	{
-		m_ImGuiColorRules.insert(pos, { StyleRule::RuleTarget::ImGui, colorId, {0, 0, 0, 1}, colorVariable, true });
+		m_colorRules.insert(pos, { target, colorId, {0, 0, 0, 1}, colorVariable, true });
 	}
 }
 
 
-void StyleGroup::removeColor(ImGuiCol_ colorId)
+void StyleGroup::removeColor(StyleRule::RuleTarget target, int colorId)
 {
-	auto pos = getColorPos(colorId);
+	auto pos = findPos(m_colorRules, target, colorId);
 
-	if (pos != m_ImGuiColorRules.end() && pos->colorId == colorId)
+	if (pos != m_colorRules.end() && pos->target == target && pos->ruleId == colorId)
 	{
-		m_ImGuiColorRules.erase(pos);
+		m_colorRules.erase(pos);
 	}
 }
 
 
-void StyleGroup::setSize(ImGuiStyleVar_ sizeId, float value)
+void StyleGroup::setSize(StyleRule::RuleTarget target, int sizeId, float value)
 {
-	auto pos = getSizePos(sizeId);
+	auto pos = findPos(m_sizeRules, target, sizeId);
 
-	if (pos != m_ImGuiSizeRules.end() && pos->sizeId == sizeId)
+	if (pos != m_sizeRules.end() && pos->target == target && pos->ruleId == sizeId)
 	{
-		*pos = { StyleRule::RuleTarget::ImGui, sizeId, ImVec4(value, 0, 0, 0), 1 };
+		*pos = { target, sizeId, ImVec4(value, 0, 0, 0), 1 };
 	}
 	else
 	{
-		m_ImGuiSizeRules.insert(pos, { StyleRule::RuleTarget::ImGui, sizeId, ImVec4(value, 0, 0, 0), 1 });
+		m_sizeRules.insert(pos, { target, sizeId, ImVec4(value, 0, 0, 0), 1 });
 	}
 }
 
 
-void StyleGroup::setSize(ImGuiStyleVar_ sizeId, float x, float y)
+void StyleGroup::setSize(StyleRule::RuleTarget target, int sizeId, float x, float y)
 {
-	auto pos = getSizePos(sizeId);
+	auto pos = findPos(m_sizeRules, target, sizeId);
 
-	if (pos != m_ImGuiSizeRules.end() && pos->sizeId == sizeId)
+	if (pos != m_sizeRules.end() && pos->target == target && pos->ruleId == sizeId)
 	{
-		*pos = { StyleRule::RuleTarget::ImGui, sizeId, ImVec4(x, y, 0, 0), 2 };
+		*pos = { target, sizeId, ImVec4(x, y, 0, 0), 2 };
 	}
 	else
 	{
-		m_ImGuiSizeRules.insert(pos, { StyleRule::RuleTarget::ImGui, sizeId, ImVec4(x, y, 0, 0), 2 });
+		m_sizeRules.insert(pos, { target, sizeId, ImVec4(x, y, 0, 0), 2 });
 	}
 }
 
 
-void StyleGroup::removeSize(ImGuiStyleVar_ sizeId)
+void StyleGroup::removeSize(StyleRule::RuleTarget target, int sizeId)
 {
-	auto pos = getSizePos(sizeId);
+	auto pos = findPos(m_sizeRules, target, sizeId);
 
-	if (pos != m_ImGuiSizeRules.end() && pos->sizeId != sizeId)
+	if (pos != m_sizeRules.end() && pos->target == target && pos->ruleId == sizeId)
 	{
-		m_ImGuiSizeRules.erase(pos);
+		m_sizeRules.erase(pos);
 	}
 }
 
 
-std::pair<ImVec4, StyleGroup::RuleSource> StyleGroup::getColorValue(ImGuiCol_ colorId) const
+std::pair<ImVec4, StyleGroup::RuleSource> StyleGroup::getColorValue(StyleRule::RuleTarget target, int colorId) const
 {
-	auto rule = getColorRule(colorId);
+	auto rule = getColorRule(target, colorId);
 
 	if (rule)
 	{
@@ -188,50 +224,63 @@ std::pair<ImVec4, StyleGroup::RuleSource> StyleGroup::getColorValue(ImGuiCol_ co
 	{
 		if (m_parent)
 		{
-			auto [col, src] = m_parent->getColorValue(colorId);
+			auto [col, src] = m_parent->getColorValue(target, colorId);
 			return {col, src == RuleSource::NoRule ? RuleSource::NoRule : RuleSource::Inherited };
 		}
 		else
 		{
-			return { GetStyleColorVec4(colorId), RuleSource::NoRule };
+			if (target == StyleRule::RuleTarget::ImGui)
+			{
+				return { GetStyleColorVec4(colorId), RuleSource::NoRule };
+			}
+			else if (target == StyleRule::RuleTarget::NodeEditor)
+			{
+				throw "TODO";
+				//node editor way of getting a color
+			}
+			else if (target == StyleRule::RuleTarget::ZigZag)
+			{
+				throw "TODO";
+				//ZigZag way of getting a color
+			}
 		}
 	}
 }
 
 
-bool StyleGroup::hasColorRule(ImGuiCol_ colorId) const
+bool StyleGroup::hasColorRule(StyleRule::RuleTarget target, int colorId) const
 {
-	return getColorRule(colorId);
+	return getColorRule(target, colorId);
 }
 
 
-const StyleRule::ColorRule* StyleGroup::getColorRule(ImGuiCol_ colorId) const
+const StyleRule::ColorRule* StyleGroup::getColorRule(StyleRule::RuleTarget target, int colorId) const
 {
-	auto it = getColorPos(colorId);
+	auto pos = findPos(m_colorRules, target, colorId);
 
-	if (it == m_ImGuiColorRules.end() || (it != m_ImGuiColorRules.end() && it->colorId != colorId))
+	if (pos != m_colorRules.end() && pos->target == target && pos->ruleId == colorId)
 	{
-		return nullptr;
+		return &(*pos);
 	}
-	return &(*it);
+	return nullptr;
 }
 
 
-bool StyleGroup::hasSizeRule(ImGuiStyleVar_ sizeId) const
+bool StyleGroup::hasSizeRule(StyleRule::RuleTarget target, int sizeId) const
 {
-	return getSizeRule(sizeId);
+	return getSizeRule(target, sizeId);
 }
 
 
-const StyleRule::SizeRule* StyleGroup::getSizeRule(ImGuiStyleVar_ sizeId) const
+const StyleRule::SizeRule* StyleGroup::getSizeRule(StyleRule::RuleTarget target, int sizeId) const
 {
-	auto it = getSizePos(sizeId);
+	auto pos = findPos(m_sizeRules, target, sizeId);
 
-	if (it == m_ImGuiSizeRules.end() || (it != m_ImGuiSizeRules.end() && it->sizeId != sizeId))
+	if (pos != m_sizeRules.end() && pos->target == target && pos->ruleId == sizeId)
 	{
-		return nullptr;
+		return &(*pos);
 	}
-	return &(*it);
+	return nullptr;
 }
 
 
@@ -251,33 +300,5 @@ void StyleGroup::insertChild(StyleGroup* child)
 		m_children.insert(pos, child);
 		m_childrenConst.insert(posConst, child);
 	}
-}
-
-
-std::vector<StyleRule::ColorRule>::iterator StyleGroup::getColorPos(ImGuiCol_ colorId)
-{
-	return std::lower_bound(m_ImGuiColorRules.begin(), m_ImGuiColorRules.end(),
-		colorId, [](const StyleRule::ColorRule& lhs, ImGuiCol_ rhs) { return lhs.colorId < rhs; });
-}
-
-
-std::vector<StyleRule::ColorRule>::const_iterator StyleGroup::getColorPos(ImGuiCol_ colorId) const
-{
-	return std::lower_bound(m_ImGuiColorRules.begin(), m_ImGuiColorRules.end(),
-		colorId, [](const StyleRule::ColorRule& lhs, ImGuiCol_ rhs) { return lhs.colorId < rhs; });
-}
-
-
-std::vector<StyleRule::SizeRule>::iterator StyleGroup::getSizePos(ImGuiStyleVar_ sizeId)
-{
-	return std::lower_bound(m_ImGuiSizeRules.begin(), m_ImGuiSizeRules.end(),
-		sizeId, [](const StyleRule::SizeRule& lhs, ImGuiStyleVar_ rhs) { return lhs.sizeId < rhs; });
-}
-
-
-std::vector<StyleRule::SizeRule>::const_iterator StyleGroup::getSizePos(ImGuiStyleVar_ sizeId) const
-{
-	return std::lower_bound(m_ImGuiSizeRules.begin(), m_ImGuiSizeRules.end(),
-		sizeId, [](const StyleRule::SizeRule& lhs, ImGuiStyleVar_ rhs) { return lhs.sizeId < rhs; });
 }
 

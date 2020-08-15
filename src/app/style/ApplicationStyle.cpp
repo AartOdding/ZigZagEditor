@@ -145,34 +145,34 @@ void ApplicationStyle::setColorVariable(const std::string& name, ImVec4 value)
 }
 
 
-void ApplicationStyle::clearColorVariable(const std::string& name)
-{
-	/*
-	 * When removing the variable we need to find all the places where it is used,
-	 * and swap the use of the variable to usage of the value in the variable. only
-	 * after this we can delete the variable.
-	 */
-	auto it = m_colorVariables.find(name);
-	assert(it != m_colorVariables.end());
+// void ApplicationStyle::clearColorVariable(const std::string& name)
+// {
+// 	/*
+// 	 * When removing the variable we need to find all the places where it is used,
+// 	 * and swap the use of the variable to usage of the value in the variable. only
+// 	 * after this we can delete the variable.
+// 	 */
+// 	auto it = m_colorVariables.find(name);
+// 	assert(it != m_colorVariables.end());
 
-	if (it != m_colorVariables.end())
-	{
-		auto colorValue = it->second;
+// 	if (it != m_colorVariables.end())
+// 	{
+// 		auto colorValue = it->second;
 
-		for (auto& group : m_styleGroups)
-		{
-			// Convert all places where the variable is used to the color value:
-			for (auto& colorRule : group->getColorRules())
-			{
-				if (colorRule.useVariable && colorRule.colorVariable == name)
-				{
-					group->setColor(static_cast<ImGuiCol_>(colorRule.colorId), colorValue);
-				}
-			}
-		}
-		m_colorVariables.erase(name);
-	}
-}
+// 		for (auto& group : m_styleGroups)
+// 		{
+// 			// Convert all places where the variable is used to the color value:
+// 			for (auto& colorRule : group->getColorRules())
+// 			{
+// 				if (colorRule.useVariable && colorRule.colorVariable == name)
+// 				{
+// 					group->setColor(static_cast<ImGuiCol_>(colorRule.ruleId), colorValue);
+// 				}
+// 			}
+// 		}
+// 		m_colorVariables.erase(name);
+// 	}
+// }
 
 
 ImVec4 ApplicationStyle::getVariableValue(const std::string& variableName) const
@@ -230,34 +230,59 @@ void ApplicationStyle::pushAndApplyGroup(StyleGroup* group)
 	{
 		for (const auto& colorRule : group->getColorRules())
 		{
-			if (colorRule.useVariable)
+			if (colorRule.target == StyleRule::RuleTarget::ImGui)
 			{
-				auto variableIt = m_colorVariables.find(colorRule.colorVariable);
-
-				if (variableIt == m_colorVariables.end())
+				if (colorRule.useVariable)
 				{
-					assert(false); // Stop in debug.
-					ImGui::PushStyleColor(colorRule.colorId, 0); // in release just push 0
+					auto variableIt = m_colorVariables.find(colorRule.colorVariable);
+
+					if (variableIt == m_colorVariables.end())
+					{
+						assert(false); // Stop in debug.
+						ImGui::PushStyleColor(colorRule.ruleId, ColorConvertFloat4ToU32({0, 0, 0, 1})); // in release just push black
+					}
+					else
+					{
+						ImGui::PushStyleColor(colorRule.ruleId, variableIt->second);
+					}
 				}
 				else
 				{
-					ImGui::PushStyleColor(colorRule.colorId, variableIt->second);
+					ImGui::PushStyleColor(colorRule.ruleId, colorRule.colorValue);
 				}
 			}
-			else
+			else if (colorRule.target == StyleRule::RuleTarget::NodeEditor)
 			{
-				ImGui::PushStyleColor(colorRule.colorId, colorRule.colorValue);
+				// apply node editor rule
+				throw "TODO";
+			}
+			else if (colorRule.target == StyleRule::RuleTarget::ZigZag)
+			{
+				// apply zigzag rule
+				throw "TODO";
 			}
 		}
 		for (const auto& sizeRule : group->getSizeRules())
 		{
-			if (sizeRule.numDimensions == 1)
+			if (sizeRule.target == StyleRule::RuleTarget::ImGui)
 			{
-				ImGui::PushStyleVar(sizeRule.sizeId, sizeRule.size.x);
+				if (sizeRule.numDimensions == 1)
+				{
+					ImGui::PushStyleVar(sizeRule.ruleId, sizeRule.size.x);
+				}
+				else if (sizeRule.numDimensions == 2)
+				{
+					ImGui::PushStyleVar(sizeRule.ruleId, { sizeRule.size.x, sizeRule.size.y });
+				}
 			}
-			else if (sizeRule.numDimensions == 2)
+			else if (sizeRule.target == StyleRule::RuleTarget::NodeEditor)
 			{
-				ImGui::PushStyleVar(sizeRule.sizeId, { sizeRule.size.x, sizeRule.size.y });
+				throw "TODO";
+			}
+			else if (sizeRule.target == StyleRule::RuleTarget::ZigZag)
+			{
+				// apply zigzag rule
+				throw "TODO";
 			}
 		}
 		int numColorRules = group->getColorRules().size();

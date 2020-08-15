@@ -11,7 +11,7 @@ namespace StyleRule
 
         if (rule.target == StyleRule::RuleTarget::ImGui)
         {
-            j["colorId"] = static_cast<ImGuiCol_>(rule.colorId);
+            j["colorId"] = static_cast<ImGuiCol_>(rule.ruleId);
         }
         else if (rule.target == StyleRule::RuleTarget::NodeEditor)
         {
@@ -39,7 +39,7 @@ namespace StyleRule
         
         if (rule.target == StyleRule::RuleTarget::ImGui)
         {
-            rule.colorId = static_cast<int>(j.at("colorId").get<ImGuiCol_>());
+            rule.ruleId = static_cast<int>(j.at("colorId").get<ImGuiCol_>());
         }
         else if (rule.target == StyleRule::RuleTarget::NodeEditor)
         {

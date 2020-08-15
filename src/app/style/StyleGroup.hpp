@@ -37,21 +37,22 @@ public:
 	const std::vector<StyleRule::ColorRule>& getColorRules() const;
 	const std::vector<StyleRule::SizeRule>& getSizeRules() const;
 
-	void setColor(ImGuiCol_ colorId, ImVec4 colorValue);
-	void setColor(ImGuiCol_ colorId, const std::string& colorVariable);
-	void removeColor(ImGuiCol_ colorId);
+	void setColor(StyleRule::RuleTarget target, int colorId, ImVec4 colorValue);
+	void setColor(StyleRule::RuleTarget target, int colorId, const std::string& colorVariable);
+	void removeColor(StyleRule::RuleTarget target, int colorId);
 
-	void setSize(ImGuiStyleVar_ sizeId, float value);
-	void setSize(ImGuiStyleVar_ sizeId, float x, float y);
-	void removeSize(ImGuiStyleVar_ sizeId);
+	void setSize(StyleRule::RuleTarget target, int sizeId, float value);
+	void setSize(StyleRule::RuleTarget target, int sizeId, float x, float y);
+	void removeSize(StyleRule::RuleTarget target, int sizeId);
 
-	std::pair<ImVec4, RuleSource> getColorValue(ImGuiCol_ colorId) const;
+	// TODO: change
+	std::pair<ImVec4, RuleSource> getColorValue(StyleRule::RuleTarget target, int colorId) const;
 
-	bool hasColorRule(ImGuiCol_ colorId) const;
-	const StyleRule::ColorRule* getColorRule(ImGuiCol_ colorId) const;
+	bool hasColorRule(StyleRule::RuleTarget target, int colorId) const;
+	const StyleRule::ColorRule* getColorRule(StyleRule::RuleTarget target, int colorId) const;
 
-	bool hasSizeRule(ImGuiStyleVar_ sizeId) const;
-	const StyleRule::SizeRule* getSizeRule(ImGuiStyleVar_ sizeId) const;
+	bool hasSizeRule(StyleRule::RuleTarget target, int sizeId) const;
+	const StyleRule::SizeRule* getSizeRule(StyleRule::RuleTarget target, int sizeId) const;
 
 private:
 
@@ -61,11 +62,6 @@ private:
 
 	void insertChild(StyleGroup* child);
 
-	std::vector<StyleRule::ColorRule>::iterator getColorPos(ImGuiCol_ colorId);
-	std::vector<StyleRule::ColorRule>::const_iterator getColorPos(ImGuiCol_ colorId) const;
-	std::vector<StyleRule::SizeRule>::iterator getSizePos(ImGuiStyleVar_ sizeId);
-	std::vector<StyleRule::SizeRule>::const_iterator getSizePos(ImGuiStyleVar_ sizeId) const;
-
 	ApplicationStyle* const m_applicationStyle;
 	const std::string m_name;
 	StyleGroup* const m_parent;
@@ -73,8 +69,8 @@ private:
 	std::vector<StyleGroup*> m_children;
 	std::vector<const StyleGroup*> m_childrenConst;
 
-	std::vector<StyleRule::ColorRule> m_ImGuiColorRules;
-	std::vector<StyleRule::SizeRule> m_ImGuiSizeRules;
+	std::vector<StyleRule::ColorRule> m_colorRules;
+	std::vector<StyleRule::SizeRule> m_sizeRules;
     
 };
 
