@@ -1,6 +1,8 @@
 #pragma once
 
+#include <memory>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include <imgui.h>
@@ -21,18 +23,18 @@ public:
 		NoRule
 	};
 
-	StyleGroup(ApplicationStyle* applicationStyle, const char* name, StyleGroup* parent);
+	StyleGroup(ApplicationStyle* applicationStyle, const std::string& name);
+	StyleGroup* createChild(const std::string& name);
 
 	const std::string& getName() const;
 
 	StyleGroup* getParent();
 	const StyleGroup* getParent() const;
 
-	StyleGroup* getChild(const char* name);
-	const StyleGroup* getChild(const char* name) const;
+	StyleGroup* getChild(const std::string& name);
+	const StyleGroup* getChild(const std::string& name) const;
 
-	const std::vector<StyleGroup*>& getChildren();
-	const std::vector<const StyleGroup*>& getChildren() const;
+	const std::unordered_map<std::string, std::unique_ptr<StyleGroup>>& getChildren();
 
 	const std::vector<StyleRule::ColorRule>& getColorRules() const;
 	const std::vector<StyleRule::SizeRule>& getSizeRules() const;
@@ -45,7 +47,6 @@ public:
 	void setSize(StyleRule::RuleTarget target, int sizeId, float x, float y);
 	void removeSize(StyleRule::RuleTarget target, int sizeId);
 
-	// TODO: change
 	std::pair<ImVec4, RuleSource> getColorValue(StyleRule::RuleTarget target, int colorId) const;
 
 	bool hasColorRule(StyleRule::RuleTarget target, int colorId) const;
@@ -60,17 +61,15 @@ private:
 	StyleGroup(const StyleGroup&) = delete;
 	StyleGroup(StyleGroup&&) = delete;
 
-	void insertChild(StyleGroup* child);
+	std::string m_name;
 
-	ApplicationStyle* const m_applicationStyle;
-	const std::string m_name;
-	StyleGroup* const m_parent;
-
-	std::vector<StyleGroup*> m_children;
-	std::vector<const StyleGroup*> m_childrenConst;
+	StyleGroup* m_parent;
+	std::unordered_map<std::string, std::unique_ptr<StyleGroup>> m_children;
 
 	std::vector<StyleRule::ColorRule> m_colorRules;
 	std::vector<StyleRule::SizeRule> m_sizeRules;
+
+	ApplicationStyle* const m_applicationStyle;
     
 };
 

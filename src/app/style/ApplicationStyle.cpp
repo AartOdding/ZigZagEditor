@@ -13,7 +13,7 @@ using namespace ImGui;
 
 
 
-void ApplicationStyle::push(const char* groupName)
+void ApplicationStyle::push(const std::string& groupName)
 {
 	if (m_styleGroupStack.empty())
 	{
@@ -22,13 +22,13 @@ void ApplicationStyle::push(const char* groupName)
 			assert(m_rootStyleGroup->getName() == groupName);
 			if (m_rootStyleGroup->getName() == groupName)
 			{
-				pushAndApplyGroup(m_rootStyleGroup);
+				pushAndApplyGroup(m_rootStyleGroup.get());
 			}
 		}
 		else
 		{
-			m_rootStyleGroup = createGroup(groupName);
-			pushAndApplyGroup(m_rootStyleGroup);
+			m_rootStyleGroup = std::make_unique<StyleGroup>(this, groupName);
+			pushAndApplyGroup(m_rootStyleGroup.get());
 		}
 	}
 	else
@@ -41,14 +41,13 @@ void ApplicationStyle::push(const char* groupName)
 		}
 		else
 		{
-			auto newGroup = createGroup(groupName);
-			pushAndApplyGroup(newGroup);
+			pushAndApplyGroup(m_styleGroupStack.back().group->createChild(groupName));
 		}
 	}
 }
 
 
-void ApplicationStyle::pop(const char* groupName)
+void ApplicationStyle::pop(const std::string& groupName)
 {
 	assert(!m_styleGroupStack.empty());
 	assert(m_styleGroupStack.back().group->getName() == groupName);
@@ -198,28 +197,13 @@ const std::unordered_map<std::string, ImVec4>& ApplicationStyle::getColorVariabl
 
 StyleGroup* ApplicationStyle::getRootStyleGroup()
 {
-	return m_rootStyleGroup;
+	return m_rootStyleGroup.get();
 }
 
 
 const StyleGroup* ApplicationStyle::getRootStyleGroup() const
 {
-	return m_rootStyleGroup;
-}
-
-
-StyleGroup* ApplicationStyle::createGroup(const char* groupName)
-{
-	if (m_styleGroupStack.empty())
-	{
-		assert(!m_rootStyleGroup);
-		m_styleGroups.push_back(std::make_unique<StyleGroup>(this, groupName, nullptr));
-	}
-	else
-	{
-		m_styleGroups.push_back(std::make_unique<StyleGroup>(this, groupName, m_styleGroupStack.back().group));
-	}
-	return m_styleGroups.back().get();
+	return m_rootStyleGroup.get();
 }
 
 

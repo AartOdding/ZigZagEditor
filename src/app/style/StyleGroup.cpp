@@ -41,15 +41,25 @@ namespace
 }
 
 
-StyleGroup::StyleGroup(ApplicationStyle* appStyle, const char* name, StyleGroup* parent)
+StyleGroup::StyleGroup(ApplicationStyle* appStyle, const std::string& name)
 	: m_applicationStyle(appStyle),
 	  m_name(name),
-	  m_parent(parent)
+	  m_parent(nullptr)
+{ }
+
+
+StyleGroup* StyleGroup::createChild(const std::string& name)
 {
-	if (m_parent)
+	assert(m_children.find(name) == m_children.end());
+	if (m_children.find(name) == m_children.end())
 	{
-		m_parent->insertChild(this);
+		auto child = std::make_unique<StyleGroup>(m_applicationStyle, name);
+		auto childPtr = child.get();
+		child->m_parent = this;
+		m_children[name] = std::move(child);
+		return childPtr;
 	}
+	return nullptr;
 }
 
 
@@ -71,43 +81,23 @@ const StyleGroup* StyleGroup::getParent() const
 }
 
 
-StyleGroup* StyleGroup::getChild(const char* name)
+StyleGroup* StyleGroup::getChild(const std::string& name)
 {
-	auto it = std::lower_bound(m_children.begin(), m_children.end(), name,
-		[](const auto& group, const char* name)
-			{ return std::strcmp(group->getName().c_str(), name) < 0; });
-
-	if (it != m_children.end() && (*it)->getName() == name)
-	{
-		return (*it);
-	}
-	return nullptr;
+	auto it = m_children.find(name);
+	return it == m_children.end() ? nullptr : it->second.get();
 }
 
 
-const StyleGroup* StyleGroup::getChild(const char* name) const
+const StyleGroup* StyleGroup::getChild(const std::string& name) const
 {
-	auto it = std::lower_bound(m_childrenConst.begin(), m_childrenConst.end(), name,
-		[](const auto& group, const char* name)
-			{ return std::strcmp(group->getName().c_str(), name) < 0; });
-
-	if (it != m_childrenConst.end() && (*it)->getName() == name)
-	{
-		return (*it);
-	}
-	return nullptr;
+	auto it = m_children.find(name);
+	return it == m_children.end() ? nullptr : it->second.get();
 }
 
 
-const std::vector<StyleGroup*>& StyleGroup::getChildren()
+const std::unordered_map<std::string, std::unique_ptr<StyleGroup>>& StyleGroup::getChildren()
 {
 	return m_children;
-}
-
-
-const std::vector<const StyleGroup*>& StyleGroup::getChildren() const
-{
-	return m_childrenConst;
 }
 
 
@@ -281,24 +271,5 @@ const StyleRule::SizeRule* StyleGroup::getSizeRule(StyleRule::RuleTarget target,
 		return &(*pos);
 	}
 	return nullptr;
-}
-
-
-void StyleGroup::insertChild(StyleGroup* child)
-{
-	assert(child);
-	if (child)
-	{
-		assert(getChild(child->getName().c_str()) == nullptr);
-
-		auto pos = std::lower_bound(m_children.begin(), m_children.end(), child->getName().c_str(),
-			[](const auto& lhs, auto rhs) { return strcmp(lhs->getName().c_str(), rhs) < 0; });
-
-		auto posConst = std::lower_bound(m_childrenConst.begin(), m_childrenConst.end(), child->getName().c_str(),
-			[](const auto& lhs, auto rhs) { return strcmp(lhs->getName().c_str(), rhs) < 0; });
-
-		m_children.insert(pos, child);
-		m_childrenConst.insert(posConst, child);
-	}
 }
 

@@ -20,8 +20,8 @@ class ApplicationStyle
 {
 public:
 
-	void push(const char* groupName);
-	void pop(const char* groupName);
+	void push(const std::string& groupName);
+	void pop(const std::string& groupName);
 
 	bool load(const std::string& fileName);
 	void store(const std::string& fileName) const;
@@ -37,17 +37,14 @@ public:
 
 private:
 
-	StyleGroup* createGroup(const char* groupName);
 	void pushAndApplyGroup(StyleGroup* group);
-	//void storeGroup(StyleGroup* group, json::json& json) const;
 	
 	void storeColorVariables(json& json) const;
 
 
-	std::vector<std::unique_ptr<StyleGroup>> m_styleGroups; // only needed for ownership
 	std::unordered_map<std::string, ImVec4> m_colorVariables;
 
-	StyleGroup* m_rootStyleGroup = nullptr;
+	std::unique_ptr<StyleGroup> m_rootStyleGroup;
 
 	// we need to store how many variables need to be popped, because we could add/ remove
 	// variables from the style that are still on the imgui style stack.

@@ -318,9 +318,9 @@ void StyleEditorWindow::drawGroupListItem(StyleGroup* group)
 
 	if (open)
 	{
-		for (auto child : group->getChildren())
+		for (const auto& child : group->getChildren())
 		{
-			drawGroupListItem(child);
+			drawGroupListItem(child.second.get());
 		}
 		TreePop();
 	}
