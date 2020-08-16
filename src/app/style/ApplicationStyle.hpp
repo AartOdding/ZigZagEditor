@@ -28,6 +28,7 @@ public:
 
 	void setColorVariable(const std::string& name, ImVec4 value);
 	//void clearColorVariable(const std::string& name);
+	bool hasColorVariable(const std::string& name) const;
 
 	StyleGroup* getRootStyleGroup();
 	const StyleGroup* getRootStyleGroup() const;

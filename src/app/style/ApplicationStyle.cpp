@@ -2,7 +2,6 @@
 #include "app/style/StyleGroup.hpp"
 
 #include <array>
-#include <bit>
 #include <cassert>
 #include <cstring>
 #include <iostream>
@@ -172,6 +171,12 @@ void ApplicationStyle::setColorVariable(const std::string& name, ImVec4 value)
 // 		m_colorVariables.erase(name);
 // 	}
 // }
+
+
+bool ApplicationStyle::hasColorVariable(const std::string& name) const
+{
+	return m_colorVariables.find(name) != m_colorVariables.end();
+}
 
 
 ImVec4 ApplicationStyle::getVariableValue(const std::string& variableName) const

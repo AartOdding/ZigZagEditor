@@ -19,10 +19,12 @@ public:
 
 private:
 
-	void drawColorAdjustWidget();
+	void drawSelectedColorWidget();
 	void drawColorListWidget();
-	void drawColorVariablesEditorPopup();
+	void drawColorVariableList();
 	void drawStyleGroupTree(StyleGroup* group);
+	float drawAddColorVariableButton();
+	float drawRemoveColorVariableButton();
 
 
 	std::string m_windowName;
@@ -39,13 +41,9 @@ private:
 	std::string m_colorNameToRemove = "";
 
 	// Variables for the "Add color rule" popup
-	ImGuiCol_ m_colorIdBeingAdded = ImGuiCol_Text;
-	bool m_colorBeingAddedIsVariable = false;
+	int m_colorIdBeingAdded = -1;
 	std::string m_colorBeingAddedSelectedVariable = "";
 	ImVec4 m_colorBeingAddedValue{ 0, 0, 0, 1 };
-
-	// Misc
-	static ImVec2 m_colorPreviewSize;
 
 	std::string m_currentTarget;
 
