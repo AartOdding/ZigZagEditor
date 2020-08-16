@@ -40,7 +40,6 @@ namespace
 
 
 
-
 StyleEditorWindow::StyleEditorWindow(std::string_view windowName, ApplicationState* appState)
 	: m_windowName(windowName),
 	  m_appState(appState)
@@ -155,7 +154,7 @@ void StyleEditorWindow::drawColorListWidget(StyleRule::RuleTarget target, int co
 					if (ruleActive)
 					{
 						m_selectedGroup->setColor(target, i, ruleColor);
-						m_colorIdBeingAdded = i;
+						m_selectedRuleId = i;
 						m_colorBeingAddedValue = ruleColor;
 					}
 					else
@@ -168,7 +167,7 @@ void StyleEditorWindow::drawColorListWidget(StyleRule::RuleTarget target, int co
 				ImGui::ColorEdit4("##color", &ruleColor.x, colorEditFlagsViewOnly);
 				if (ImGui::IsItemClicked())
 				{
-					m_colorIdBeingAdded = i;
+					m_selectedRuleId = i;
 					m_colorBeingAddedValue = ruleColor;
 				}
 				ImGui::SameLine();
@@ -179,9 +178,9 @@ void StyleEditorWindow::drawColorListWidget(StyleRule::RuleTarget target, int co
 					auto disabledCol = ImGui::GetStyleColorVec4(ImGuiCol_TextDisabled);
 					ImGui::PushStyleColor(ImGuiCol_Text, disabledCol);
 				}
-				if (ImGui::Selectable(getColorName(target, i), m_colorIdBeingAdded == i))
+				if (ImGui::Selectable(getColorName(target, i), m_selectedRuleId == i))
 				{
-					m_colorIdBeingAdded = i;
+					m_selectedRuleId = i;
 					m_colorBeingAddedValue = ruleColor;
 				}
 				if (!ruleActive)
@@ -199,17 +198,17 @@ void StyleEditorWindow::drawColorListWidget(StyleRule::RuleTarget target, int co
 void StyleEditorWindow::drawSelectedColorWidget(StyleRule::RuleTarget target, int colorCount)
 {
 	const StyleRule::ColorRule* colorRule = nullptr;
-	bool ruleIdValid = m_colorIdBeingAdded >= 0 && m_colorIdBeingAdded < colorCount;
+	bool ruleIdValid = m_selectedRuleId >= 0 && m_selectedRuleId < colorCount;
 
 	if (m_selectedGroup)
 	{
-		colorRule = m_selectedGroup->getColorRule(target, m_colorIdBeingAdded);
+		colorRule = m_selectedGroup->getColorRule(target, m_selectedRuleId);
 	}
 
 	if (ruleIdValid)
 	{
 		std::string text = "Color: ";
-		text += getColorName(target, m_colorIdBeingAdded);
+		text += getColorName(target, m_selectedRuleId);
 		ImGui::Text(text.c_str());
 	}
 	else
@@ -222,11 +221,11 @@ void StyleEditorWindow::drawSelectedColorWidget(StyleRule::RuleTarget target, in
 	{
 		if (colorExistsAndUsesValue && ruleIdValid && m_selectedGroup) // checked on
 		{
-			m_selectedGroup->setColor(target, m_colorIdBeingAdded, m_colorBeingAddedValue);
+			m_selectedGroup->setColor(target, m_selectedRuleId, m_colorBeingAddedValue);
 		}
 		else if (ruleIdValid && m_selectedGroup) // checked off
 		{
-			m_selectedGroup->removeColor(target, m_colorIdBeingAdded);
+			m_selectedGroup->removeColor(target, m_selectedRuleId);
 		}
 	}
 
@@ -236,7 +235,7 @@ void StyleEditorWindow::drawSelectedColorWidget(StyleRule::RuleTarget target, in
 	{
 		if (ruleIdValid && m_selectedGroup)
 		{
-			m_selectedGroup->setColor(target, m_colorIdBeingAdded, m_colorBeingAddedValue);
+			m_selectedGroup->setColor(target, m_selectedRuleId, m_colorBeingAddedValue);
 		}
 	}
 	ImGui::SameLine();
@@ -245,7 +244,7 @@ void StyleEditorWindow::drawSelectedColorWidget(StyleRule::RuleTarget target, in
 	{
 		if (ruleIdValid && m_selectedGroup)
 		{
-			m_selectedGroup->setColor(target, m_colorIdBeingAdded, m_colorBeingAddedValue);
+			m_selectedGroup->setColor(target, m_selectedRuleId, m_colorBeingAddedValue);
 		}
 	}
 
@@ -255,11 +254,11 @@ void StyleEditorWindow::drawSelectedColorWidget(StyleRule::RuleTarget target, in
 		bool varExists = m_appState->style.hasColorVariable(m_colorBeingAddedSelectedVariable);
 		if (colorExistsAndUsesVariable && ruleIdValid && m_selectedGroup && varExists) // checked on
 		{
-			m_selectedGroup->setColor(target, m_colorIdBeingAdded, m_colorBeingAddedSelectedVariable);
+			m_selectedGroup->setColor(target, m_selectedRuleId, m_colorBeingAddedSelectedVariable);
 		}
 		else if (ruleIdValid && m_selectedGroup) // checked off
 		{
-			m_selectedGroup->removeColor(target, m_colorIdBeingAdded);
+			m_selectedGroup->removeColor(target, m_selectedRuleId);
 		}
 	}
 
@@ -398,6 +397,19 @@ void StyleEditorWindow::drawStyleGroupTree(StyleGroup* group)
 	flags |= group->getChildren().empty() ? ImGuiTreeNodeFlags_Leaf : 0;
 	flags |= group->getChildren().empty() ? ImGuiTreeNodeFlags_Bullet : 0;
 
+	bool hasRule = false;
+	if      (m_currentTarget == possibleTargets[0]) hasRule = group->hasColorRule(StyleRule::RuleTarget::ImGui, m_selectedRuleId);
+	else if (m_currentTarget == possibleTargets[1]) hasRule = group->hasSizeRule(StyleRule::RuleTarget::ImGui, m_selectedRuleId);
+	else if (m_currentTarget == possibleTargets[2]) hasRule = group->hasColorRule(StyleRule::RuleTarget::NodeEditor, m_selectedRuleId);
+	else if (m_currentTarget == possibleTargets[3]) hasRule = group->hasSizeRule(StyleRule::RuleTarget::NodeEditor, m_selectedRuleId);
+	else if (m_currentTarget == possibleTargets[4]) hasRule = group->hasColorRule(StyleRule::RuleTarget::ZigZag, m_selectedRuleId);
+	else if (m_currentTarget == possibleTargets[5]) hasRule = group->hasSizeRule(StyleRule::RuleTarget::ZigZag, m_selectedRuleId);
+
+	if (!hasRule)
+	{
+		auto disabledCol = ImGui::GetStyleColorVec4(ImGuiCol_TextDisabled);
+		ImGui::PushStyleColor(ImGuiCol_Text, disabledCol);
+	}
 	ImGui::AlignTextToFramePadding();
 	auto text = group->getName() + " (" + std::to_string(ruleCount) + ")";
 	bool open = ImGui::TreeNodeEx(text.c_str(), flags);
@@ -405,6 +417,10 @@ void StyleEditorWindow::drawStyleGroupTree(StyleGroup* group)
 	if (ImGui::IsItemClicked())
 	{
 		m_selectedGroup = group;
+	}
+	if (!hasRule)
+	{
+		ImGui::PopStyleColor(1);
 	}
 
 	if (open)

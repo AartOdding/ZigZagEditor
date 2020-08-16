@@ -32,6 +32,7 @@ private:
 	ApplicationState* m_appState;
 
 	StyleGroup* m_selectedGroup = nullptr;
+	int m_selectedRuleId = -1;
 
 	// Variables for the "Add color variable" popup
 	ImVec4 m_newColorVariableValue{ 0, 0, 0, 1 };
@@ -41,7 +42,6 @@ private:
 	std::string m_colorNameToRemove = "";
 
 	// Variables for the "Add color rule" popup
-	int m_colorIdBeingAdded = -1;
 	std::string m_colorBeingAddedSelectedVariable = "";
 	ImVec4 m_colorBeingAddedValue{ 0, 0, 0, 1 };
 
