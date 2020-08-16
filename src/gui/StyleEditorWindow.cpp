@@ -13,12 +13,23 @@ static auto colorEditFlagsViewOnly = colorEditFlagsColorOnly | ImGuiColorEditFla
 
 ImVec2 StyleEditorWindow::m_colorPreviewSize{ 10, 10 };
 
+const std::array<const char*, 6> possibleTargets
+{
+	"ImGui colors",
+	"NodeEditor colors",
+	"ZigZag colors",
+	"ImGui sizes", 
+	"NodeEditor sizes",
+	"ZigZag sizes"
+};
+
 
 StyleEditorWindow::StyleEditorWindow(std::string_view windowName, ApplicationState* appState)
 	: m_windowName(windowName),
 	  m_appState(appState)
 {
 	assert(m_appState);
+	m_currentTarget = possibleTargets[0];
 }
 
 
@@ -27,48 +38,64 @@ void StyleEditorWindow::draw(bool* p_open)
 	Begin(m_windowName.c_str(), p_open);
 	m_appState->style.push("StyleEditorWindow");
 
-	if (Button("Edit color variables"))
-	{
-		OpenPopup("ColorVariablesEditor");
-	}
-	drawColorVariablesEditorPopup();
+	Columns(2);
 
 	if (Button("Store to disk"))
 	{
 		m_appState->style.store("test_Style.xml");
 	}
-
+	SameLine();
+	if (Button("Load from disk"))
+	{
+		std::cout << "loaf style from disk" << std::endl;
+	}
 
 	m_appState->style.push("StyleGroupSelector");
-	drawGroupListItem(m_appState->style.getRootStyleGroup());
+	drawStyleGroupTree(m_appState->style.getRootStyleGroup());
 	m_appState->style.pop("StyleGroupSelector");
 
+	// set cursor to middle 
+	// draw variable editor
 
-	Text("Color rules");
+	NextColumn();
 
-	auto [w, h] = GetContentRegionAvail();
+	//Text("Color rules");
 
-	BeginChildFrame(100, { w, 0.5f * h - 10 });
+	//auto [w, h] = GetContentRegionAvail();
 
-	drawAddColorRulePopup();
+	//BeginChildFrame(100, { w, 0.5f * h - 10 });
 
-	EndChildFrame();
+	if (BeginCombo("##target", m_currentTarget.c_str()))
+	{
+		for (auto& t : possibleTargets)
+		{
+			if (Selectable(t, m_currentTarget == t))
+			{
+				m_currentTarget = t;
+			}
+		}
+		EndCombo();
+	}
+
+	drawColorAdjustWidget();
+	drawColorListWidget();
+
+	//EndChildFrame();
 
 
-	Text("Size rules");
+	// Text("Size rules");
 
-	BeginChildFrame(101, GetContentRegionAvail());
+	// BeginChildFrame(101, GetContentRegionAvail());
 
-	EndChildFrame();
+	// EndChildFrame();
 
 	m_appState->style.pop("StyleEditorWindow");
 	End();
 }
 
 
-void StyleEditorWindow::drawAddColorRulePopup()
+void StyleEditorWindow::drawColorListWidget()
 {
-	Columns(2);
 
 	if (ListBoxHeader("##ids", GetContentRegionAvail()))
 	{
@@ -80,13 +107,10 @@ void StyleEditorWindow::drawAddColorRulePopup()
 
 				auto [col, src] = m_selectedGroup->getColorValue(StyleRule::RuleTarget::ImGui, i);
 				ColorEdit4("##color", &col.x, colorEditFlagsViewOnly);
-				SameLine();
-				auto dummySize = GetItemRectSize();
-				auto cursorPos = GetCursorPos();
-				AlignTextToFramePadding();
-				if (src == StyleGroup::RuleSource::Inherited) Text(">>");
-				SetCursorPos(cursorPos);
-				Dummy(dummySize);
+				if (IsItemClicked())
+				{
+					m_colorIdBeingAdded = static_cast<ImGuiCol_>(i);
+				}
 				SameLine();
 				AlignTextToFramePadding();
 
@@ -109,8 +133,11 @@ void StyleEditorWindow::drawAddColorRulePopup()
 		ListBoxFooter();
 	}
 
-	NextColumn();
+}
 
+
+void StyleEditorWindow::drawColorAdjustWidget()
+{
 	// The name of the active Id.
 	Text(ImGui::GetStyleColorName(m_colorIdBeingAdded));
 
@@ -187,9 +214,8 @@ void StyleEditorWindow::drawAddColorRulePopup()
 	if (m_selectedGroup)
 	{
 		auto rule = m_selectedGroup->getColorRule(StyleRule::RuleTarget::ImGui, m_colorIdBeingAdded);
-		const char* text = rule ? "Update" : "Create";
 
-		if (Button(rule ? "Update" : "Create") && m_selectedGroup)
+		if (Button(rule ? "Update" : "Set") && m_selectedGroup)
 		{
 			if (m_colorBeingAddedIsVariable)
 			{
@@ -203,7 +229,7 @@ void StyleEditorWindow::drawAddColorRulePopup()
 		if (rule)
 		{
 			SameLine();
-			if (Button("Delete"))
+			if (Button("Clear"))
 			{
 				m_selectedGroup->removeColor(StyleRule::RuleTarget::ImGui, m_colorIdBeingAdded);
 			}
@@ -295,7 +321,7 @@ void StyleEditorWindow::drawColorVariablesEditorPopup()
 
 
 
-void StyleEditorWindow::drawGroupListItem(StyleGroup* group)
+void StyleEditorWindow::drawStyleGroupTree(StyleGroup* group)
 {
 	PushID(group);
 
@@ -320,7 +346,7 @@ void StyleEditorWindow::drawGroupListItem(StyleGroup* group)
 	{
 		for (const auto& child : group->getChildren())
 		{
-			drawGroupListItem(child.second.get());
+			drawStyleGroupTree(child.second.get());
 		}
 		TreePop();
 	}

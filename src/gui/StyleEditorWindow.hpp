@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -18,9 +19,10 @@ public:
 
 private:
 
-	void drawAddColorRulePopup();
+	void drawColorAdjustWidget();
+	void drawColorListWidget();
 	void drawColorVariablesEditorPopup();
-	void drawGroupListItem(StyleGroup* group);
+	void drawStyleGroupTree(StyleGroup* group);
 
 
 	std::string m_windowName;
@@ -44,5 +46,7 @@ private:
 
 	// Misc
 	static ImVec2 m_colorPreviewSize;
+
+	std::string m_currentTarget;
 
 };
