@@ -51,8 +51,13 @@ private:
 	// variables from the style that are still on the imgui style stack.
 	struct StyleStackFrame
 	{
-		StyleGroup* group;
-		int colorPopCount, sizePopCount;
+		StyleGroup* group = nullptr;
+		int ImGuiColorPopCount = 0;
+		int NodeEditorColorPopCount = 0;
+		int ZigZagColorPopCount = 0;
+		int ImGuiSizePopCount = 0;
+		int NodeEditorSizePopCount = 0;
+		int ZigZagSizePopCount = 0;
 	};
 
 	std::vector<StyleStackFrame> m_styleGroupStack;

@@ -2,24 +2,43 @@
 #include "app/style/ApplicationStyle.hpp"
 #include "app/style/StyleGroup.hpp"
 #include <iostream>
+#include <imgui_node_editor.h>
+
+using namespace ax;
 
 
-using namespace ImGui;
-
-static auto colorEditFlags =  ImGuiColorEditFlags_DisplayRGB | ImGuiColorEditFlags_AlphaPreviewHalf;
-static auto colorEditFlagsColorOnly = colorEditFlags | ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_AlphaBar;
-static auto colorEditFlagsInputsOnly = colorEditFlags | ImGuiColorEditFlags_Uint8 | ImGuiColorEditFlags_InputRGB | ImGuiColorEditFlags_NoSmallPreview;
-static auto colorEditFlagsViewOnly = colorEditFlagsColorOnly | ImGuiColorEditFlags_NoPicker;
-
-const std::array<const char*, 6> possibleTargets
+namespace
 {
-	"ImGui colors",
-	"ImGui sizes", 
-	"NodeEditor colors",
-	"NodeEditor sizes",
-	"ZigZag colors",
-	"ZigZag sizes"
-};
+	auto colorEditFlags = ImGuiColorEditFlags_DisplayRGB | ImGuiColorEditFlags_AlphaPreviewHalf;
+	auto colorEditFlagsColorOnly = colorEditFlags | ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_AlphaBar;
+	auto colorEditFlagsInputsOnly = colorEditFlags | ImGuiColorEditFlags_Uint8 | ImGuiColorEditFlags_InputRGB | ImGuiColorEditFlags_NoSmallPreview;
+	auto colorEditFlagsViewOnly = colorEditFlagsColorOnly | ImGuiColorEditFlags_NoPicker;
+
+	const std::array<const char*, 6> possibleTargets
+	{
+		"ImGui colors",
+		"ImGui sizes",
+		"NodeEditor colors",
+		"NodeEditor sizes",
+		"ZigZag colors",
+		"ZigZag sizes"
+	};
+
+	const char* getColorName(StyleRule::RuleTarget target, int colorId)
+	{
+		if (target == StyleRule::RuleTarget::ImGui)
+		{
+			return ImGui::GetStyleColorName(colorId);
+		}
+		else if (target == StyleRule::RuleTarget::NodeEditor)
+		{
+			return NodeEditor::GetStyleColorName(static_cast<NodeEditor::StyleColor>(colorId));
+		}
+		return "Error";
+	}
+}
+
+
 
 
 StyleEditorWindow::StyleEditorWindow(std::string_view windowName, ApplicationState* appState)
@@ -34,269 +53,262 @@ StyleEditorWindow::StyleEditorWindow(std::string_view windowName, ApplicationSta
 void StyleEditorWindow::draw(bool* p_open)
 {
 	m_appState->style.push("StyleEditorWindow");
-	Begin(m_windowName.c_str(), p_open);
+	ImGui::Begin(m_windowName.c_str(), p_open);
 
-	Columns(2);
+	ImGui::Columns(2);
 
-	const ImVec2 windowPadding = GetCursorPos();
-	const ImVec2 contentSpace = GetContentRegionAvail(); // content space takes padding into account
-	const ImVec2 itemSpacing = GetStyle().ItemSpacing;
+	const ImVec2 windowPadding = ImGui::GetCursorPos();
+	const ImVec2 contentSpace = ImGui::GetContentRegionAvail(); // content space takes padding into account
+	const ImVec2 itemSpacing = ImGui::GetStyle().ItemSpacing;
 	const float childHeight = 0.5f * (contentSpace.y - itemSpacing.y);
 
 	// The tree widget showing the available style groups, and save / load buttons
 	{
-		if (Button("Save style"))
+		if (ImGui::Button("Save style"))
 		{
 			m_appState->style.store("style.json");
 		}
-		SameLine();
-		if (Button("Load style"))
+		ImGui::SameLine();
+		if (ImGui::Button("Load style"))
 		{
 			std::cout << "load style from disk" << std::endl;
 		}
-		float buttonHeight = GetItemRectSize().y;
+		float buttonHeight = ImGui::GetItemRectSize().y;
 
 		auto leftoverHeight = childHeight - buttonHeight - itemSpacing.y;
-		BeginChildFrame(213, { contentSpace.x, leftoverHeight });
+		ImGui::BeginChildFrame(213, { contentSpace.x, leftoverHeight });
 
 		m_appState->style.push("StyleGroupSelector");
 		drawStyleGroupTree(m_appState->style.getRootStyleGroup());
 		m_appState->style.pop("StyleGroupSelector");
 
-		EndChildFrame();
+		ImGui::EndChildFrame();
 	}
 
 	// The color variable editor
 	{
 		m_appState->style.push("ColorVariablesEditor");
 
-		auto bottomHalfStartPos = GetCursorPos();
+		auto bottomHalfStartPos = ImGui::GetCursorPos();
 
 		float buttonHeight = drawAddColorVariableButton();
-		SameLine();
+		ImGui::SameLine();
 		buttonHeight = std::max(buttonHeight, drawRemoveColorVariableButton());
 
 		float leftoverHeight = childHeight - buttonHeight - itemSpacing.y;
-		BeginChildFrame(214, { contentSpace.x, leftoverHeight });
+		ImGui::BeginChildFrame(214, { contentSpace.x, leftoverHeight });
 
 
 		drawColorVariableList();
 
-		EndChildFrame();
+		ImGui::EndChildFrame();
 		m_appState->style.pop("ColorVariablesEditor");
 	}
 
-	NextColumn();
+	ImGui::NextColumn();
 
-	//Text("Color rules");
-
-	//auto [w, h] = GetContentRegionAvail();
-
-	//BeginChildFrame(100, { w, 0.5f * h - 10 });
-
-	if (BeginCombo("##target", m_currentTarget.c_str()))
+	if (ImGui::BeginCombo("##target", m_currentTarget.c_str()))
 	{
 		for (auto& t : possibleTargets)
 		{
-			if (Selectable(t, m_currentTarget == t))
+			if (ImGui::Selectable(t, m_currentTarget == t))
 			{
 				m_currentTarget = t;
 			}
 		}
-		EndCombo();
+		ImGui::EndCombo();
 	}
 
-	drawSelectedColorWidget();
-	drawColorListWidget();
+	if (m_currentTarget == possibleTargets[0])
+	{
+		drawSelectedColorWidget(StyleRule::RuleTarget::ImGui, ImGuiCol_COUNT);
+		drawColorListWidget(StyleRule::RuleTarget::ImGui, ImGuiCol_COUNT);
+	}
+	else if (m_currentTarget == possibleTargets[2])
+	{
+		drawSelectedColorWidget(StyleRule::RuleTarget::NodeEditor, NodeEditor::StyleColor_Count);
+		drawColorListWidget(StyleRule::RuleTarget::NodeEditor, NodeEditor::StyleColor_Count);
+	}
 
-	//EndChildFrame();
-
-
-	// Text("Size rules");
-
-	// BeginChildFrame(101, GetContentRegionAvail());
-
-	// EndChildFrame();
-
-	End();
+	ImGui::End();
 	m_appState->style.pop("StyleEditorWindow");
 }
 
 
-void StyleEditorWindow::drawColorListWidget()
+void StyleEditorWindow::drawColorListWidget(StyleRule::RuleTarget target, int colorCount)
 {
-	Text("Colors:");
-	if (ListBoxHeader("##ids", GetContentRegionAvail()))
+	ImGui::Text("Colors:");
+	if (ImGui::ListBoxHeader("##ids", ImGui::GetContentRegionAvail()))
 	{
 		if (m_selectedGroup)
 		{
-			for (int i = 0; i < ImGuiCol_COUNT; ++i)
+			for (int i = 0; i < colorCount; ++i)
 			{
-				PushID(i);
+				ImGui::PushID(i);
 
-				auto rule = m_selectedGroup->getColorRule(StyleRule::RuleTarget::ImGui, i);
+				auto rule = m_selectedGroup->getColorRule(target, i);
 				bool ruleActive = rule;
-				auto [ruleColor, colorSource] = m_selectedGroup->getColorValue(StyleRule::RuleTarget::ImGui, i);
+				auto [ruleColor, colorSource] = m_selectedGroup->getColorValue(target, i);
 
-				if (Checkbox("##checkbox", &ruleActive))
+				if (ImGui::Checkbox("##checkbox", &ruleActive))
 				{
 					if (ruleActive)
 					{
-						m_selectedGroup->setColor(StyleRule::RuleTarget::ImGui, i, ruleColor);
-						m_colorIdBeingAdded = static_cast<ImGuiCol_>(i);
+						m_selectedGroup->setColor(target, i, ruleColor);
+						m_colorIdBeingAdded = i;
 						m_colorBeingAddedValue = ruleColor;
 					}
 					else
 					{
-						m_selectedGroup->removeColor(StyleRule::RuleTarget::ImGui, i);
+						m_selectedGroup->removeColor(target, i);
 					}
 				}
-				SameLine();
+				ImGui::SameLine();
 
-				ColorEdit4("##color", &ruleColor.x, colorEditFlagsViewOnly);
-				if (IsItemClicked())
+				ImGui::ColorEdit4("##color", &ruleColor.x, colorEditFlagsViewOnly);
+				if (ImGui::IsItemClicked())
 				{
-					m_colorIdBeingAdded = static_cast<ImGuiCol_>(i);
+					m_colorIdBeingAdded = i;
 					m_colorBeingAddedValue = ruleColor;
 				}
-				SameLine();
-				AlignTextToFramePadding();
+				ImGui::SameLine();
+				ImGui::AlignTextToFramePadding();
 
 				if (!ruleActive)
 				{
-					auto disabledCol = GetStyleColorVec4(ImGuiCol_TextDisabled);
-					PushStyleColor(ImGuiCol_Text, disabledCol);
+					auto disabledCol = ImGui::GetStyleColorVec4(ImGuiCol_TextDisabled);
+					ImGui::PushStyleColor(ImGuiCol_Text, disabledCol);
 				}
-				if (Selectable(ImGui::GetStyleColorName(i), m_colorIdBeingAdded == i))
+				if (ImGui::Selectable(getColorName(target, i), m_colorIdBeingAdded == i))
 				{
-					m_colorIdBeingAdded = static_cast<ImGuiCol_>(i);
+					m_colorIdBeingAdded = i;
 					m_colorBeingAddedValue = ruleColor;
 				}
 				if (!ruleActive)
 				{
-					PopStyleColor(1);
+					ImGui::PopStyleColor(1);
 				}
-				PopID();
+				ImGui::PopID();
 			}
 		}
-		ListBoxFooter();
+		ImGui::ListBoxFooter();
 	}
 }
 
 
-void StyleEditorWindow::drawSelectedColorWidget()
+void StyleEditorWindow::drawSelectedColorWidget(StyleRule::RuleTarget target, int colorCount)
 {
 	const StyleRule::ColorRule* colorRule = nullptr;
-	bool ruleIdValid = m_colorIdBeingAdded >= 0 && m_colorIdBeingAdded < ImGuiCol_COUNT;
+	bool ruleIdValid = m_colorIdBeingAdded >= 0 && m_colorIdBeingAdded < colorCount;
 
 	if (m_selectedGroup)
 	{
-		colorRule = m_selectedGroup->getColorRule(StyleRule::RuleTarget::ImGui, m_colorIdBeingAdded);
+		colorRule = m_selectedGroup->getColorRule(target, m_colorIdBeingAdded);
 	}
 
 	if (ruleIdValid)
 	{
 		std::string text = "Color: ";
-		text += ImGui::GetStyleColorName(m_colorIdBeingAdded);
-		Text(text.c_str());
+		text += getColorName(target, m_colorIdBeingAdded);
+		ImGui::Text(text.c_str());
 	}
 	else
 	{
-		Text("Color: None");
+		ImGui::Text("Color: None");
 	}
 
 	bool colorExistsAndUsesValue = colorRule && !colorRule->useVariable;
-	if (Checkbox("##checkBox1", &colorExistsAndUsesValue))
+	if (ImGui::Checkbox("##checkBox1", &colorExistsAndUsesValue))
 	{
 		if (colorExistsAndUsesValue && ruleIdValid && m_selectedGroup) // checked on
 		{
-			m_selectedGroup->setColor(StyleRule::RuleTarget::ImGui, m_colorIdBeingAdded, m_colorBeingAddedValue);
+			m_selectedGroup->setColor(target, m_colorIdBeingAdded, m_colorBeingAddedValue);
 		}
 		else if (ruleIdValid && m_selectedGroup) // checked off
 		{
-			m_selectedGroup->removeColor(StyleRule::RuleTarget::ImGui, m_colorIdBeingAdded);
+			m_selectedGroup->removeColor(target, m_colorIdBeingAdded);
 		}
 	}
 
-	SameLine();
+	ImGui::SameLine();
 
-	if (ColorEdit4("##colorValue", &m_colorBeingAddedValue.x, colorEditFlagsColorOnly))
+	if (ImGui::ColorEdit4("##colorValue", &m_colorBeingAddedValue.x, colorEditFlagsColorOnly))
 	{
 		if (ruleIdValid && m_selectedGroup)
 		{
-			m_selectedGroup->setColor(StyleRule::RuleTarget::ImGui, m_colorIdBeingAdded, m_colorBeingAddedValue);
+			m_selectedGroup->setColor(target, m_colorIdBeingAdded, m_colorBeingAddedValue);
 		}
 	}
-	SameLine();
-	SetNextItemWidth(GetContentRegionAvailWidth());
-	if (ColorEdit4("##colorValue2", &m_colorBeingAddedValue.x, colorEditFlagsInputsOnly))
+	ImGui::SameLine();
+	ImGui::SetNextItemWidth(ImGui::GetContentRegionAvailWidth());
+	if (ImGui::ColorEdit4("##colorValue2", &m_colorBeingAddedValue.x, colorEditFlagsInputsOnly))
 	{
 		if (ruleIdValid && m_selectedGroup)
 		{
-			m_selectedGroup->setColor(StyleRule::RuleTarget::ImGui, m_colorIdBeingAdded, m_colorBeingAddedValue);
+			m_selectedGroup->setColor(target, m_colorIdBeingAdded, m_colorBeingAddedValue);
 		}
 	}
 
 	bool colorExistsAndUsesVariable = colorRule && colorRule->useVariable;
-	if (Checkbox("##checkbox2", &colorExistsAndUsesVariable))
+	if (ImGui::Checkbox("##checkbox2", &colorExistsAndUsesVariable))
 	{
 		bool varExists = m_appState->style.hasColorVariable(m_colorBeingAddedSelectedVariable);
 		if (colorExistsAndUsesVariable && ruleIdValid && m_selectedGroup && varExists) // checked on
 		{
-			m_selectedGroup->setColor(StyleRule::RuleTarget::ImGui, m_colorIdBeingAdded, m_colorBeingAddedSelectedVariable);
+			m_selectedGroup->setColor(target, m_colorIdBeingAdded, m_colorBeingAddedSelectedVariable);
 		}
 		else if (ruleIdValid && m_selectedGroup) // checked off
 		{
-			m_selectedGroup->removeColor(StyleRule::RuleTarget::ImGui, m_colorIdBeingAdded);
+			m_selectedGroup->removeColor(target, m_colorIdBeingAdded);
 		}
 	}
 
-	SameLine();
+	ImGui::SameLine();
 
 	auto varColor = m_appState->style.getVariableValue(m_colorBeingAddedSelectedVariable);
-	ColorEdit4("##variablePreview", &varColor.x, colorEditFlagsViewOnly);
+	ImGui::ColorEdit4("##variablePreview", &varColor.x, colorEditFlagsViewOnly);
 
-	SameLine();
+	ImGui::SameLine();
 
-	SetNextItemWidth(GetContentRegionAvailWidth());
+	ImGui::SetNextItemWidth(ImGui::GetContentRegionAvailWidth());
 
-	if (BeginCombo("##variables", m_colorBeingAddedSelectedVariable.c_str()))
+	if (ImGui::BeginCombo("##variables", m_colorBeingAddedSelectedVariable.c_str()))
 	{
 		for (auto& [name, color] : m_appState->style.getColorVariables())
 		{
 			auto colorVec4 = color;
-			PushID(&name);
-			ColorEdit4("##", &colorVec4.x, colorEditFlagsViewOnly);
+			ImGui::PushID(&name);
+			ImGui::ColorEdit4("##", &colorVec4.x, colorEditFlagsViewOnly);
 				
-			SameLine();
+			ImGui::SameLine();
 
-			if (Selectable(name.c_str(), name == m_colorBeingAddedSelectedVariable))
+			if (ImGui::Selectable(name.c_str(), name == m_colorBeingAddedSelectedVariable))
 			{
 				m_colorBeingAddedSelectedVariable = name;
 			}
-			PopID();
+			ImGui::PopID();
 		}
-		EndCombo();
+		ImGui::EndCombo();
 	}
 }
 
 
 float StyleEditorWindow::drawAddColorVariableButton()
 {
-	if (Button("Add color"))
+	if (ImGui::Button("Add color"))
 	{
-		OpenPopup("add color");
+		ImGui::OpenPopup("add color");
 	}
-	float height = GetItemRectSize().y;
-	if (BeginPopup("add color"))
+	float height = ImGui::GetItemRectSize().y;
+	if (ImGui::BeginPopup("add color"))
 	{
-		InputText("##name", m_newColorVariableName, 64);
+		ImGui::InputText("##name", m_newColorVariableName, 64);
 
-		SameLine();
-		ColorEdit4("##color", &m_newColorVariableValue.x, colorEditFlagsColorOnly);
+		ImGui::SameLine();
+		ImGui::ColorEdit4("##color", &m_newColorVariableValue.x, colorEditFlagsColorOnly);
 
-		SameLine();
-		if (Button("Add"))
+		ImGui::SameLine();
+		if (ImGui::Button("Add"))
 		{
 			if (m_newColorVariableName[0] != 0)
 			{
@@ -304,10 +316,10 @@ float StyleEditorWindow::drawAddColorVariableButton()
 				m_newColorVariableName[0] = 0;
 				m_newColorVariableValue = { 0, 0, 0, 1 };
 			}
-			CloseCurrentPopup();
+			ImGui::CloseCurrentPopup();
 		}
 
-		EndPopup();
+		ImGui::EndPopup();
 	}
 	return height;
 }
@@ -315,26 +327,26 @@ float StyleEditorWindow::drawAddColorVariableButton()
 
 float StyleEditorWindow::drawRemoveColorVariableButton()
 {
-	if (Button("Remove color"))
+	if (ImGui::Button("Remove color"))
 	{
-		OpenPopup("remove color");
+		ImGui::OpenPopup("remove color");
 	}
-	float height = GetItemRectSize().y;
-	if (BeginPopup("remove color"))
+	float height = ImGui::GetItemRectSize().y;
+	if (ImGui::BeginPopup("remove color"))
 	{
-		if (BeginCombo("##combo", m_colorNameToRemove.c_str()))
+		if (ImGui::BeginCombo("##combo", m_colorNameToRemove.c_str()))
 		{
 			for (auto& [name, color] : m_appState->style.getColorVariables())
 			{
-				if (Selectable(name.c_str(), name == m_colorNameToRemove))
+				if (ImGui::Selectable(name.c_str(), name == m_colorNameToRemove))
 				{
 					m_colorNameToRemove = name;
 				}
 			}
-			EndCombo();
+			ImGui::EndCombo();
 		}
-		SameLine();
-		if (Button("Remove"))
+		ImGui::SameLine();
+		if (ImGui::Button("Remove"))
 		{
 			if (m_colorNameToRemove != "")
 			{
@@ -342,9 +354,9 @@ float StyleEditorWindow::drawRemoveColorVariableButton()
 				//m_appState->style.clearColorVariable(m_colorNameToRemove);
 				m_colorNameToRemove = "";
 			}
-			CloseCurrentPopup();
+			ImGui::CloseCurrentPopup();
 		}
-		EndPopup();
+		ImGui::EndPopup();
 	}
 	return height;
 }
@@ -355,7 +367,7 @@ void StyleEditorWindow::drawColorVariableList()
 	for (auto [name, color] : m_appState->style.getColorVariables())
 	{
 		auto newColor = color;
-		ColorEdit4(name.c_str(), &newColor.x, colorEditFlagsColorOnly);
+		ImGui::ColorEdit4(name.c_str(), &newColor.x, colorEditFlagsColorOnly);
 
 		if (newColor.x != color.x || newColor.y != color.y || newColor.z != color.z || newColor.w != color.w)
 		{
@@ -365,10 +377,17 @@ void StyleEditorWindow::drawColorVariableList()
 }
 
 
-
 void StyleEditorWindow::drawStyleGroupTree(StyleGroup* group)
 {
-	PushID(group);
+	ImGui::PushID(group);
+
+	int ruleCount = 0;
+	if      (m_currentTarget == possibleTargets[0]) ruleCount = group->countColorRules(StyleRule::RuleTarget::ImGui);
+	else if (m_currentTarget == possibleTargets[1]) ruleCount = group->countSizeRules(StyleRule::RuleTarget::ImGui);
+	else if (m_currentTarget == possibleTargets[2]) ruleCount = group->countColorRules(StyleRule::RuleTarget::NodeEditor);
+	else if (m_currentTarget == possibleTargets[3]) ruleCount = group->countSizeRules(StyleRule::RuleTarget::NodeEditor);
+	else if (m_currentTarget == possibleTargets[4]) ruleCount = group->countColorRules(StyleRule::RuleTarget::ZigZag);
+	else if (m_currentTarget == possibleTargets[5]) ruleCount = group->countSizeRules(StyleRule::RuleTarget::ZigZag);
 
 	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_DefaultOpen;
 	flags |= ImGuiTreeNodeFlags_OpenOnDoubleClick;
@@ -379,10 +398,11 @@ void StyleEditorWindow::drawStyleGroupTree(StyleGroup* group)
 	flags |= group->getChildren().empty() ? ImGuiTreeNodeFlags_Leaf : 0;
 	flags |= group->getChildren().empty() ? ImGuiTreeNodeFlags_Bullet : 0;
 
-	AlignTextToFramePadding();
-	bool open = TreeNodeEx(group->getName().c_str(), flags);
+	ImGui::AlignTextToFramePadding();
+	auto text = group->getName() + " (" + std::to_string(ruleCount) + ")";
+	bool open = ImGui::TreeNodeEx(text.c_str(), flags);
 
-	if (IsItemClicked())
+	if (ImGui::IsItemClicked())
 	{
 		m_selectedGroup = group;
 	}
@@ -393,8 +413,8 @@ void StyleEditorWindow::drawStyleGroupTree(StyleGroup* group)
 		{
 			drawStyleGroupTree(child.second.get());
 		}
-		TreePop();
+		ImGui::TreePop();
 	}
 
-	PopID();
+	ImGui::PopID();
 }

@@ -39,6 +39,9 @@ public:
 	const std::vector<StyleRule::ColorRule>& getColorRules() const;
 	const std::vector<StyleRule::SizeRule>& getSizeRules() const;
 
+	int countColorRules(StyleRule::RuleTarget target) const;
+	int countSizeRules(StyleRule::RuleTarget target) const;
+
 	void setColor(StyleRule::RuleTarget target, int colorId, ImVec4 colorValue);
 	void setColor(StyleRule::RuleTarget target, int colorId, const std::string& colorVariable);
 	void removeColor(StyleRule::RuleTarget target, int colorId);

@@ -1,7 +1,8 @@
 #include "ApplicationStyle.hpp"
 #include "StyleGroup.hpp"
+#include "imgui_node_editor.h"
 
-
+using namespace ax;
 using namespace ImGui;
 
 
@@ -110,6 +111,28 @@ const std::vector<StyleRule::ColorRule>& StyleGroup::getColorRules() const
 const std::vector<StyleRule::SizeRule>& StyleGroup::getSizeRules() const
 {
 	return m_sizeRules;
+}
+
+
+int StyleGroup::countColorRules(StyleRule::RuleTarget target) const
+{
+	int count = 0;
+	for (const auto& c : m_colorRules)
+	{
+		count += static_cast<int>(c.target == target);
+	}
+	return count;
+}
+
+
+int StyleGroup::countSizeRules(StyleRule::RuleTarget target) const
+{
+	int count = 0;
+	for (const auto& s : m_sizeRules)
+	{
+		count += static_cast<int>(s.target == target);
+	}
+	return count;
 }
 
 
@@ -225,7 +248,9 @@ std::pair<ImVec4, StyleGroup::RuleSource> StyleGroup::getColorValue(StyleRule::R
 			}
 			else if (target == StyleRule::RuleTarget::NodeEditor)
 			{
-				throw "TODO";
+				auto& style = NodeEditor::GetStyle();
+				return { style.Colors[colorId], RuleSource::NoRule };
+				//throw "TODO";
 				//node editor way of getting a color
 			}
 			else if (target == StyleRule::RuleTarget::ZigZag)

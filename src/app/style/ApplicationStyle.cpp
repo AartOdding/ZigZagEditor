@@ -7,7 +7,9 @@
 #include <iostream>
 #include <iterator>
 
+#include <imgui_node_editor.h>
 
+using namespace ax;
 using namespace ImGui;
 
 
@@ -53,8 +55,12 @@ void ApplicationStyle::pop(const std::string& groupName)
 
 	if (!m_styleGroupStack.empty() && m_styleGroupStack.back().group->getName() == groupName)
 	{
-		ImGui::PopStyleColor(m_styleGroupStack.back().colorPopCount);
-		ImGui::PopStyleVar(m_styleGroupStack.back().sizePopCount);
+		auto& frame = m_styleGroupStack.back();
+		ImGui::PopStyleColor(frame.ImGuiColorPopCount);
+		ImGui::PopStyleVar(frame.ImGuiSizePopCount);
+		NodeEditor::PopStyleColor(frame.NodeEditorColorPopCount);
+		NodeEditor::PopStyleVar(frame.NodeEditorSizePopCount);
+		assert(frame.ZigZagColorPopCount == 0 && frame.ZigZagSizePopCount == 0);
 		m_styleGroupStack.pop_back();
 	}
 }
@@ -223,17 +229,7 @@ void ApplicationStyle::pushAndApplyGroup(StyleGroup* group)
 			{
 				if (colorRule.useVariable)
 				{
-					auto variableIt = m_colorVariables.find(colorRule.colorVariable);
-
-					if (variableIt == m_colorVariables.end())
-					{
-						assert(false); // Stop in debug.
-						ImGui::PushStyleColor(colorRule.ruleId, ColorConvertFloat4ToU32({0, 0, 0, 1})); // in release just push black
-					}
-					else
-					{
-						ImGui::PushStyleColor(colorRule.ruleId, variableIt->second);
-					}
+					ImGui::PushStyleColor(colorRule.ruleId, getVariableValue(colorRule.colorVariable));
 				}
 				else
 				{
@@ -242,8 +238,15 @@ void ApplicationStyle::pushAndApplyGroup(StyleGroup* group)
 			}
 			else if (colorRule.target == StyleRule::RuleTarget::NodeEditor)
 			{
-				// apply node editor rule
-				throw "TODO";
+				auto ruleId = static_cast<NodeEditor::StyleColor>(colorRule.ruleId);
+				if (colorRule.useVariable)
+				{
+					NodeEditor::PushStyleColor(ruleId, getVariableValue(colorRule.colorVariable));
+				}
+				else
+				{
+					NodeEditor::PushStyleColor(ruleId, colorRule.colorValue);
+				}
 			}
 			else if (colorRule.target == StyleRule::RuleTarget::ZigZag)
 			{
@@ -274,8 +277,13 @@ void ApplicationStyle::pushAndApplyGroup(StyleGroup* group)
 				throw "TODO";
 			}
 		}
-		int numColorRules = group->getColorRules().size();
-		int numSizeRules = group->getSizeRules().size();
-		m_styleGroupStack.push_back({ group, numColorRules, numSizeRules });
+		auto& frame = m_styleGroupStack.emplace_back();
+		frame.group = group;
+		frame.ImGuiColorPopCount = group->countColorRules(StyleRule::RuleTarget::ImGui);
+		frame.NodeEditorColorPopCount = group->countColorRules(StyleRule::RuleTarget::NodeEditor);
+		frame.ZigZagColorPopCount = group->countColorRules(StyleRule::RuleTarget::ZigZag);
+		frame.ImGuiSizePopCount = group->countSizeRules(StyleRule::RuleTarget::ImGui);
+		frame.NodeEditorSizePopCount = group->countSizeRules(StyleRule::RuleTarget::NodeEditor);
+		frame.ZigZagSizePopCount = group->countSizeRules(StyleRule::RuleTarget::ZigZag);
 	}
 }

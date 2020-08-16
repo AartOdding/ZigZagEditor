@@ -1,4 +1,4 @@
-#pragma once
+ #pragma once
 
 #include <array>
 #include <string>
@@ -19,8 +19,8 @@ public:
 
 private:
 
-	void drawSelectedColorWidget();
-	void drawColorListWidget();
+	void drawSelectedColorWidget(StyleRule::RuleTarget target, int colorCount);
+	void drawColorListWidget(StyleRule::RuleTarget target, int colorCount);
 	void drawColorVariableList();
 	void drawStyleGroupTree(StyleGroup* group);
 	float drawAddColorVariableButton();
