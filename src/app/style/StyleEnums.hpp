@@ -3,11 +3,18 @@
 #include <imgui.h>
 #include <imgui_node_editor.h>
 #include <nlohmann/json.hpp>
+
 using json = nlohmann::json;
 
-// If these assertions no longer hold, the enums have to be updated.
+
+// If these assertions no longer hold, the enums have to be updated with the new
+// values and the static_assert has to be made to compile again, to serve as a 
+// warning for the next time, the enums will be changed.
 static_assert(ImGuiCol_COUNT == 50);
 static_assert(ImGuiStyleVar_COUNT == 23);
+static_assert(ax::NodeEditor::StyleColor_Count == 18);
+static_assert(ax::NodeEditor::StyleVar_Count == 23);
+
 
 
 NLOHMANN_JSON_SERIALIZE_ENUM( ImGuiCol_, {
@@ -90,3 +97,58 @@ NLOHMANN_JSON_SERIALIZE_ENUM( ImGuiStyleVar_, {
     { ImGuiStyleVar_SelectableTextAlign, "SelectableTextAlign" }
 })
 
+namespace ax
+{
+    namespace NodeEditor
+    {
+
+        NLOHMANN_JSON_SERIALIZE_ENUM(StyleColor, {
+            { StyleColor_Bg,                "Bg" },
+            { StyleColor_Grid,              "Grid" },
+            { StyleColor_NodeBg,            "NodeBg" },
+            { StyleColor_NodeBorder,        "NodeBorder" },
+            { StyleColor_HovNodeBorder,     "HovNodeBorder" },
+            { StyleColor_SelNodeBorder,     "SelNodeBorder" },
+            { StyleColor_NodeSelRect,       "NodeSelRect" },
+            { StyleColor_NodeSelRectBorder, "NodeSelRectBorder" },
+            { StyleColor_HovLinkBorder,     "HovLinkBorder" },
+            { StyleColor_SelLinkBorder,     "SelLinkBorder" },
+            { StyleColor_LinkSelRect,       "LinkSelRect" },
+            { StyleColor_LinkSelRectBorder, "LinkSelRectBorder" },
+            { StyleColor_PinRect,           "PinRect" },
+            { StyleColor_PinRectBorder,     "PinRectBorder" },
+            { StyleColor_Flow,              "Flow" },
+            { StyleColor_FlowMarker,        "FlowMarker" },
+            { StyleColor_GroupBg,           "GroupBg" },
+            { StyleColor_GroupBorder,       "GroupBorder" }
+        })
+
+
+        NLOHMANN_JSON_SERIALIZE_ENUM(StyleVar, {
+            { StyleVar_NodePadding,             "NodePadding" },
+            { StyleVar_NodeRounding,            "NodeRounding" },
+            { StyleVar_NodeBorderWidth,         "NodeBorderWidth" },
+            { StyleVar_HoveredNodeBorderWidth,  "HoveredNodeBorderWidth" },
+            { StyleVar_SelectedNodeBorderWidth, "SelectedNodeBorderWidth" },
+            { StyleVar_PinRounding,             "PinRounding" },
+            { StyleVar_PinBorderWidth,          "PinBorderWidth" },
+            { StyleVar_LinkStrength,            "LinkStrength" },
+            { StyleVar_SourceDirection,         "SourceDirection" },
+            { StyleVar_TargetDirection,         "TargetDirection" },
+            { StyleVar_ScrollDuration,          "ScrollDuration" },
+            { StyleVar_FlowMarkerDistance,      "FlowMarkerDistance" },
+            { StyleVar_FlowSpeed,               "FlowSpeed" },
+            { StyleVar_FlowDuration,            "FlowDuration" },
+            { StyleVar_PivotAlignment,          "PivotAlignment" },
+            { StyleVar_PivotSize,               "PivotSize" },
+            { StyleVar_PivotScale,              "PivotScale" },
+            { StyleVar_PinCorners,              "PinCorners" },
+            { StyleVar_PinRadius,               "PinRadius" },
+            { StyleVar_PinArrowSize,            "PinArrowSize" },
+            { StyleVar_PinArrowWidth,           "PinArrowWidth" },
+            { StyleVar_GroupRounding,           "GroupRounding" },
+            { StyleVar_GroupBorderWidth,        "GroupBorderWidth" }
+        })
+
+    }
+}

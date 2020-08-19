@@ -1,13 +1,16 @@
 #include "app/style/HexColor.hpp"
 #include "app/style/StyleRule.hpp"
 
+using namespace ax;
+
 
 namespace StyleRule
 {
 
     void to_json(json& j, const ColorRule& rule)
     {
-        j = { { "target", rule.target } };
+        j = json();
+        j["target"] = rule.target;
 
         if (rule.target == StyleRule::RuleTarget::ImGui)
         {
@@ -15,11 +18,12 @@ namespace StyleRule
         }
         else if (rule.target == StyleRule::RuleTarget::NodeEditor)
         {
-            // TODO: implement
+            j["ruleId"] = static_cast<NodeEditor::StyleColor>(rule.ruleId);
         }
         else if (rule.target == StyleRule::RuleTarget::ZigZag)
         {
             // TODO: implement
+            assert(false);
         }
 
         if (rule.useVariable)
@@ -43,11 +47,12 @@ namespace StyleRule
         }
         else if (rule.target == StyleRule::RuleTarget::NodeEditor)
         {
-            // TODO: implement
+            rule.ruleId = static_cast<int>(j.at("ruleId").get<NodeEditor::StyleColor>());
         }
         else if (rule.target == StyleRule::RuleTarget::ZigZag)
         {
             // TODO: implement
+            assert(false);
         }
 
         if (j.contains("variable"))
@@ -60,19 +65,22 @@ namespace StyleRule
         {
             rule.useVariable = false;
             rule.colorValue = HexColor::read(j.at("value").get<std::string>());
+            rule.colorVariable = "";
         }
     }
 
 
     void to_json(json& j, const SizeRule& p)
     {
-
+        // TODO: implement
+        assert(false);
     }
 
 
     void from_json(const json& j, SizeRule& p)
     {
-        
+        // TODO: implement
+        assert(false);
     }
 
 }

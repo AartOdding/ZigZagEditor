@@ -1,6 +1,5 @@
 #pragma once
 
-#include <cstdint>
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -14,8 +13,6 @@
 using json = nlohmann::json;
 
 
-class StyleGroup;
-
 class ApplicationStyle
 {
 public:
@@ -23,7 +20,7 @@ public:
 	void push(const std::string& groupName);
 	void pop(const std::string& groupName);
 
-	bool load(const std::string& fileName);
+	void load(const std::string& fileName);
 	void store(const std::string& fileName) const;
 
 	void setColorVariable(const std::string& name, ImVec4 value);
@@ -39,8 +36,7 @@ public:
 private:
 
 	void pushAndApplyGroup(StyleGroup* group);
-	
-	void storeColorVariables(json& json) const;
+	void loadImplementation();
 
 
 	std::unordered_map<std::string, ImVec4> m_colorVariables;
@@ -61,5 +57,8 @@ private:
 	};
 
 	std::vector<StyleStackFrame> m_styleGroupStack;
+
+	bool m_delayedLoadPending = false;
+	std::string m_delayedLoadFileName;
 
 };

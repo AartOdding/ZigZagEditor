@@ -1,7 +1,9 @@
 #include "gui/StyleEditorWindow.hpp"
 #include "app/style/ApplicationStyle.hpp"
 #include "app/style/StyleGroup.hpp"
+
 #include <iostream>
+
 #include <imgui_node_editor.h>
 
 using namespace ax;
@@ -70,7 +72,7 @@ void StyleEditorWindow::draw(bool* p_open)
 		ImGui::SameLine();
 		if (ImGui::Button("Load style"))
 		{
-			std::cout << "load style from disk" << std::endl;
+			m_appState->style.load("style.json");
 		}
 		float buttonHeight = ImGui::GetItemRectSize().y;
 
@@ -100,8 +102,8 @@ void StyleEditorWindow::draw(bool* p_open)
 
 		drawColorVariableList();
 
-		ImGui::EndChildFrame();
 		m_appState->style.pop("ColorVariablesEditor");
+		ImGui::EndChildFrame();
 	}
 
 	ImGui::NextColumn();
@@ -129,8 +131,8 @@ void StyleEditorWindow::draw(bool* p_open)
 		drawColorListWidget(StyleRule::RuleTarget::NodeEditor, NodeEditor::StyleColor_Count);
 	}
 
-	ImGui::End();
 	m_appState->style.pop("StyleEditorWindow");
+	ImGui::End();
 }
 
 
@@ -156,6 +158,7 @@ void StyleEditorWindow::drawColorListWidget(StyleRule::RuleTarget target, int co
 						m_selectedGroup->setColor(target, i, ruleColor);
 						m_selectedRuleId = i;
 						m_colorBeingAddedValue = ruleColor;
+						m_colorBeingAddedVariable = rule ? rule->colorVariable : "";
 					}
 					else
 					{
@@ -169,6 +172,7 @@ void StyleEditorWindow::drawColorListWidget(StyleRule::RuleTarget target, int co
 				{
 					m_selectedRuleId = i;
 					m_colorBeingAddedValue = ruleColor;
+					m_colorBeingAddedVariable = rule ? rule->colorVariable : "";
 				}
 				ImGui::SameLine();
 				ImGui::AlignTextToFramePadding();
@@ -182,6 +186,7 @@ void StyleEditorWindow::drawColorListWidget(StyleRule::RuleTarget target, int co
 				{
 					m_selectedRuleId = i;
 					m_colorBeingAddedValue = ruleColor;
+					m_colorBeingAddedVariable = rule ? rule->colorVariable : "";
 				}
 				if (!ruleActive)
 				{
@@ -251,10 +256,10 @@ void StyleEditorWindow::drawSelectedColorWidget(StyleRule::RuleTarget target, in
 	bool colorExistsAndUsesVariable = colorRule && colorRule->useVariable;
 	if (ImGui::Checkbox("##checkbox2", &colorExistsAndUsesVariable))
 	{
-		bool varExists = m_appState->style.hasColorVariable(m_colorBeingAddedSelectedVariable);
+		bool varExists = m_appState->style.hasColorVariable(m_colorBeingAddedVariable);
 		if (colorExistsAndUsesVariable && ruleIdValid && m_selectedGroup && varExists) // checked on
 		{
-			m_selectedGroup->setColor(target, m_selectedRuleId, m_colorBeingAddedSelectedVariable);
+			m_selectedGroup->setColor(target, m_selectedRuleId, m_colorBeingAddedVariable);
 		}
 		else if (ruleIdValid && m_selectedGroup) // checked off
 		{
@@ -264,26 +269,32 @@ void StyleEditorWindow::drawSelectedColorWidget(StyleRule::RuleTarget target, in
 
 	ImGui::SameLine();
 
-	auto varColor = m_appState->style.getVariableValue(m_colorBeingAddedSelectedVariable);
+	auto varColor = m_appState->style.getVariableValue(m_colorBeingAddedVariable);
 	ImGui::ColorEdit4("##variablePreview", &varColor.x, colorEditFlagsViewOnly);
 
 	ImGui::SameLine();
 
 	ImGui::SetNextItemWidth(ImGui::GetContentRegionAvailWidth());
 
-	if (ImGui::BeginCombo("##variables", m_colorBeingAddedSelectedVariable.c_str()))
+	if (ImGui::BeginCombo("##variables", m_colorBeingAddedVariable.c_str()))
 	{
 		for (auto& [name, color] : m_appState->style.getColorVariables())
 		{
 			auto colorVec4 = color;
 			ImGui::PushID(&name);
 			ImGui::ColorEdit4("##", &colorVec4.x, colorEditFlagsViewOnly);
-				
+			if (ImGui::IsItemClicked())
+			{
+				ImGui::CloseCurrentPopup();
+				m_colorBeingAddedVariable = name;
+				if (m_selectedGroup) m_selectedGroup->setColor(target, m_selectedRuleId, name);
+			}
 			ImGui::SameLine();
 
-			if (ImGui::Selectable(name.c_str(), name == m_colorBeingAddedSelectedVariable))
+			if (ImGui::Selectable(name.c_str(), name == m_colorBeingAddedVariable))
 			{
-				m_colorBeingAddedSelectedVariable = name;
+				m_colorBeingAddedVariable = name;
+				if (m_selectedGroup) m_selectedGroup->setColor(target, m_selectedRuleId, name);
 			}
 			ImGui::PopID();
 		}
@@ -425,9 +436,9 @@ void StyleEditorWindow::drawStyleGroupTree(StyleGroup* group)
 
 	if (open)
 	{
-		for (const auto& child : group->getChildren())
+		for (auto& child : group->getChildren())
 		{
-			drawStyleGroupTree(child.second.get());
+			drawStyleGroupTree(&child.second);
 		}
 		ImGui::TreePop();
 	}

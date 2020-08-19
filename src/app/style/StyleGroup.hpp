@@ -1,16 +1,19 @@
 #pragma once
 
-#include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
-#include <imgui.h>
+#include <nlohmann/json.hpp>
 
 #include "app/style/StyleRule.hpp"
 
 
+using json = nlohmann::json;
+
 class ApplicationStyle;
+
+
 
 class StyleGroup
 {
@@ -23,6 +26,10 @@ public:
 		NoRule
 	};
 
+	StyleGroup() = default;
+	StyleGroup(const StyleGroup&) = delete;
+	StyleGroup(StyleGroup&&) = default;
+
 	StyleGroup(ApplicationStyle* applicationStyle, const std::string& name);
 	StyleGroup* createChild(const std::string& name);
 
@@ -34,7 +41,8 @@ public:
 	StyleGroup* getChild(const std::string& name);
 	const StyleGroup* getChild(const std::string& name) const;
 
-	const std::unordered_map<std::string, std::unique_ptr<StyleGroup>>& getChildren();
+	std::unordered_map<std::string, StyleGroup>& getChildren();
+	const std::unordered_map<std::string, StyleGroup>& getChildren() const;
 
 	const std::vector<StyleRule::ColorRule>& getColorRules() const;
 	const std::vector<StyleRule::SizeRule>& getSizeRules() const;
@@ -60,19 +68,21 @@ public:
 
 private:
 
-	StyleGroup() = delete;
-	StyleGroup(const StyleGroup&) = delete;
-	StyleGroup(StyleGroup&&) = delete;
+	friend void to_json(json& j, const StyleGroup& sg);
+	friend void from_json(const json& j, StyleGroup& sg);
 
 	std::string m_name;
 
 	StyleGroup* m_parent;
-	std::unordered_map<std::string, std::unique_ptr<StyleGroup>> m_children;
+	std::unordered_map<std::string, StyleGroup> m_children;
 
 	std::vector<StyleRule::ColorRule> m_colorRules;
 	std::vector<StyleRule::SizeRule> m_sizeRules;
 
-	ApplicationStyle* const m_applicationStyle;
+	ApplicationStyle* m_applicationStyle;
     
 };
 
+
+void to_json(json& j, const StyleGroup& sg);
+void from_json(const json& j, StyleGroup& sg);

@@ -42,7 +42,7 @@ private:
 	std::string m_colorNameToRemove = "";
 
 	// Variables for the "Add color rule" popup
-	std::string m_colorBeingAddedSelectedVariable = "";
+	std::string m_colorBeingAddedVariable = "";
 	ImVec4 m_colorBeingAddedValue{ 0, 0, 0, 1 };
 
 	std::string m_currentTarget;

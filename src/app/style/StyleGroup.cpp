@@ -1,6 +1,8 @@
 #include "ApplicationStyle.hpp"
 #include "StyleGroup.hpp"
-#include "imgui_node_editor.h"
+
+#include <imgui.h>
+#include <imgui_node_editor.h>
 
 using namespace ax;
 using namespace ImGui;
@@ -54,11 +56,9 @@ StyleGroup* StyleGroup::createChild(const std::string& name)
 	assert(m_children.find(name) == m_children.end());
 	if (m_children.find(name) == m_children.end())
 	{
-		auto child = std::make_unique<StyleGroup>(m_applicationStyle, name);
-		auto childPtr = child.get();
-		child->m_parent = this;
-		m_children[name] = std::move(child);
-		return childPtr;
+		auto [it, s] = m_children.emplace(name, StyleGroup(m_applicationStyle, name));
+		it->second.m_parent = this;
+		return &it->second;
 	}
 	return nullptr;
 }
@@ -85,18 +85,24 @@ const StyleGroup* StyleGroup::getParent() const
 StyleGroup* StyleGroup::getChild(const std::string& name)
 {
 	auto it = m_children.find(name);
-	return it == m_children.end() ? nullptr : it->second.get();
+	return it == m_children.end() ? nullptr : &it->second;
 }
 
 
 const StyleGroup* StyleGroup::getChild(const std::string& name) const
 {
 	auto it = m_children.find(name);
-	return it == m_children.end() ? nullptr : it->second.get();
+	return it == m_children.end() ? nullptr : &it->second;
 }
 
 
-const std::unordered_map<std::string, std::unique_ptr<StyleGroup>>& StyleGroup::getChildren()
+std::unordered_map<std::string, StyleGroup>& StyleGroup::getChildren()
+{
+	return m_children;
+}
+
+
+const std::unordered_map<std::string, StyleGroup>& StyleGroup::getChildren() const
 {
 	return m_children;
 }
@@ -248,10 +254,7 @@ std::pair<ImVec4, StyleGroup::RuleSource> StyleGroup::getColorValue(StyleRule::R
 			}
 			else if (target == StyleRule::RuleTarget::NodeEditor)
 			{
-				auto& style = NodeEditor::GetStyle();
-				return { style.Colors[colorId], RuleSource::NoRule };
-				//throw "TODO";
-				//node editor way of getting a color
+				return { NodeEditor::GetStyle().Colors[colorId], RuleSource::NoRule };
 			}
 			else if (target == StyleRule::RuleTarget::ZigZag)
 			{
@@ -298,3 +301,32 @@ const StyleRule::SizeRule* StyleGroup::getSizeRule(StyleRule::RuleTarget target,
 	return nullptr;
 }
 
+
+void to_json(json& j, const StyleGroup& sg)
+{
+	j = json();
+	j["name"] = sg.m_name;
+	j["colorRules"] = sg.m_colorRules;
+	j["sizeRules"] = sg.m_sizeRules;
+	auto children = json::array();
+	for (const auto& [k, v] : sg.m_children)
+	{
+		children.push_back(v);
+	}
+	j["children"] = children;
+}
+
+
+void from_json(const json& j, StyleGroup& sg)
+{
+	j.at("name").get_to(sg.m_name);
+	j.at("colorRules").get_to(sg.m_colorRules);
+	j.at("sizeRules").get_to(sg.m_sizeRules);
+	auto children = j.at("children");
+	for (const auto& child : children)
+	{
+		auto c = sg.createChild(child.at("name").get<std::string>());
+		c->m_applicationStyle = sg.m_applicationStyle;
+		from_json(child, *c);
+	}
+}
