@@ -8,8 +8,5 @@ set(app_files
     "${command_files}"
     "${style_files}"
 
-    "${CMAKE_CURRENT_LIST_DIR}/Action.cpp"
-    "${CMAKE_CURRENT_LIST_DIR}/Action.hpp"
     "${CMAKE_CURRENT_LIST_DIR}/ApplicationState.hpp"
-    "${CMAKE_CURRENT_LIST_DIR}/WindowActions.hpp"
 )

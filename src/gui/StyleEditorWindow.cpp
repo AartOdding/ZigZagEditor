@@ -43,7 +43,7 @@ namespace
 
 
 StyleEditorWindow::StyleEditorWindow(std::string_view windowName, ApplicationState* appState)
-	: m_windowName(windowName),
+	: Window(windowName),
 	  m_appState(appState)
 {
 	assert(m_appState);
@@ -51,10 +51,9 @@ StyleEditorWindow::StyleEditorWindow(std::string_view windowName, ApplicationSta
 }
 
 
-void StyleEditorWindow::draw(bool* p_open)
+void StyleEditorWindow::draw()
 {
 	m_appState->style.push("StyleEditorWindow");
-	ImGui::Begin(m_windowName.c_str(), p_open);
 
 	ImGui::Columns(2);
 
@@ -132,7 +131,6 @@ void StyleEditorWindow::draw(bool* p_open)
 	}
 
 	m_appState->style.pop("StyleEditorWindow");
-	ImGui::End();
 }
 
 

@@ -4,9 +4,10 @@
 #include <ZigZag/RenderOrder.hpp>
 
 #include "app/ApplicationState.hpp"
+#include "gui/Window.hpp"
 
 
-class RenderOrderWindow
+class RenderOrderWindow : public Window
 {
 public:
 
@@ -14,12 +15,12 @@ public:
 
 	void setScope(ZigZag::BaseOperator* rootOperator);
 
-	void draw(bool* p_open);
+protected:
+
+	void draw() override;
 
 
 private:
-
-	std::string m_windowName;
 
 	ApplicationState* m_appState;
 

@@ -115,7 +115,7 @@ int main(int, char**)
         ImGui::NewFrame();
 
         // do stuff here
-        application->draw();
+        application->update();
 
         ImGui::Render();
 

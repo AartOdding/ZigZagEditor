@@ -1,11 +1,13 @@
 #include "MainMenu.hpp"
+#include "Application.hpp"
 
 #include <imgui.h>
 
 
 
-MainMenu::MainMenu(ApplicationState* appState)
-    : m_appState(appState)
+MainMenu::MainMenu(Application* application, ApplicationState* appState)
+    : m_application(application)
+    , m_appState(appState)
 {
 
 }
@@ -35,37 +37,42 @@ void MainMenu::draw()
     }
     if (ImGui::BeginMenu("View"))
     {
-        ImGui::MenuItem("Recentre", nullptr, false, m_appState->windowActions.viewportWindowOpen.getState());
+        ImGui::MenuItem("Recentre", nullptr, false, false);
+
         ImGui::Separator();
-        if (ImGui::MenuItem("Editor", nullptr, m_appState->windowActions.viewportWindowOpen.getState()))
+
+        if (ImGui::MenuItem("Node Editor", nullptr, m_application->windowOpenCount(Application::WindowType::NodeEditor)))
         {
-            m_appState->windowActions.viewportWindowOpen.setState(true);
+            m_application->openWindow(Application::WindowType::NodeEditor);
         }
-        if (ImGui::MenuItem("Project Hierarchy", nullptr, m_appState->windowActions.objectInspectorWindowOpen.getState()))
+        if (ImGui::MenuItem("Project Hierarchy", nullptr, m_application->windowOpenCount(Application::WindowType::Hierarchy)))
         {
-            m_appState->windowActions.objectInspectorWindowOpen.setState(true);
+            m_application->openWindow(Application::WindowType::Hierarchy);
         }
-        if (ImGui::MenuItem("History", nullptr, m_appState->windowActions.historyWindowOpen.getState()))
+        if (ImGui::MenuItem("History", nullptr, m_application->windowOpenCount(Application::WindowType::History)))
         {
-            m_appState->windowActions.historyWindowOpen.setState(true);
+            m_application->openWindow(Application::WindowType::History);
         }
-        if (ImGui::MenuItem("Render Order", nullptr, m_appState->windowActions.renderOrderWindowOpen.getState()))
+        if (ImGui::MenuItem("Render Order", nullptr, m_application->windowOpenCount(Application::WindowType::RenderOrder)))
         {
-            m_appState->windowActions.renderOrderWindowOpen.setState(true);
+            m_application->openWindow(Application::WindowType::RenderOrder);
         }
-        if (ImGui::MenuItem("Style Editor", nullptr, m_appState->windowActions.styleEditorWindowOpen.getState()))
+        if (ImGui::MenuItem("Style Editor", nullptr, m_application->windowOpenCount(Application::WindowType::StyleEditor)))
         {
-            m_appState->windowActions.styleEditorWindowOpen.setState(true);
+            m_application->openWindow(Application::WindowType::StyleEditor);
         }
+
         ImGui::Separator();
-        if (ImGui::MenuItem("ImGui Demo", nullptr, m_appState->windowActions.imguiDemoWindowOpen.getState()))
+
+        if (ImGui::MenuItem("ImGui Demo Window", nullptr, m_application->windowOpenCount(Application::WindowType::ImGuiDemo)))
         {
-            m_appState->windowActions.imguiDemoWindowOpen.setState(true);
+            m_application->openWindow(Application::WindowType::ImGuiDemo);
         }
-        if (ImGui::MenuItem("ImGui Style", nullptr, m_appState->windowActions.imguiStyleWindowOpen.getState()))
+        if (ImGui::MenuItem("ImGui Style Editor", nullptr, m_application->windowOpenCount(Application::WindowType::ImGuiStyleEditor)))
         {
-            m_appState->windowActions.imguiStyleWindowOpen.setState(true);
+            m_application->openWindow(Application::WindowType::ImGuiStyleEditor);
         }
+
         ImGui::EndMenu();
     }
 

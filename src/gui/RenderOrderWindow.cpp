@@ -6,8 +6,8 @@
 
 
 RenderOrderWindow::RenderOrderWindow(std::string_view windowName, ApplicationState* appState)
-	: m_windowName(windowName),
-	  m_appState(appState)
+	: Window(windowName)
+	, m_appState(appState)
 {
 	assert(m_appState);
 	if (m_appState)
@@ -21,7 +21,7 @@ void RenderOrderWindow::setScope(ZigZag::BaseOperator* rootObject)
 	m_renderOrder = std::make_unique<ZigZag::RenderOrder>(rootObject);
 }
 
-void RenderOrderWindow::draw(bool* p_open)
+void RenderOrderWindow::draw()
 {
 	m_renderOrder->construct();
 
@@ -35,7 +35,6 @@ void RenderOrderWindow::draw(bool* p_open)
 	}
 
 	m_appState->style.push("RenderOrderWindow");
-	ImGui::Begin(m_windowName.c_str(), p_open, ImGuiWindowFlags_HorizontalScrollbar);
 
 	auto basePos = ImGui::GetCursorPos();
 
@@ -50,5 +49,4 @@ void RenderOrderWindow::draw(bool* p_open)
 	}
 
 	m_appState->style.pop("RenderOrderWindow");
-	ImGui::End();
 }

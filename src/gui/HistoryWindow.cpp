@@ -1,4 +1,4 @@
-#include "HistoryView.hpp"
+#include "HistoryWindow.hpp"
 
 #include <imgui.h>
 
@@ -6,18 +6,16 @@
 using namespace ImGui;
 using namespace ZigZag;
 
-HistoryView::HistoryView(std::string_view windowName, ApplicationState* appState)
-	: m_windowName(windowName),
+HistoryWindow::HistoryWindow(std::string_view windowName, ApplicationState* appState)
+	: Window(windowName),
 	  m_appState(appState)
 {
 
 }
 
 
-void HistoryView::draw(bool* p_open)
+void HistoryWindow::draw()
 {
-	Begin(m_windowName.c_str(), p_open);
-
     if (Button("Undo"))
     {
         m_appState->commandStack.undo();
@@ -57,9 +55,4 @@ void HistoryView::draw(bool* p_open)
         //Selectable("Initial State", m_appState->commandStack.getIndex() == -1);
         ListBoxFooter();
     }
-
-    //ImGui::PopStyleColor(4);
-    //ImGui::PopStyleVar();
-
-	End();
 }

@@ -4,12 +4,14 @@
 
 #include "app/ApplicationState.hpp"
 
+class Application;
+
 
 class MainMenu
 {
 public:
 
-    MainMenu(ApplicationState* appState);
+    MainMenu(Application* application, ApplicationState* appState);
 
     MainMenu(const MainMenu&) = delete;
     MainMenu(MainMenu&&) = default;
@@ -18,6 +20,8 @@ public:
 
 private:
 
+    Application* m_application;
     ApplicationState* m_appState;
+
 
 };

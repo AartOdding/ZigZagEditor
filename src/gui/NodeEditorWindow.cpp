@@ -1,40 +1,38 @@
-#include "gui/Viewport.hpp"
+#include "gui/NodeEditorWindow.hpp"
 #include "app/command/ConnectCommand.hpp"
 #include "app/command/DisconnectCommand.hpp"
 #include "app/command/RemoveObjectCommand.hpp"
 
 #include <iostream>
 
-Viewport::Viewport(std::string_view windowName, ApplicationState* appState)
-    : m_windowName(windowName),
-      m_appState(appState),
-      m_scope(&appState->rootOperator)
+NodeEditorWindow::NodeEditorWindow(std::string_view windowName, ApplicationState* appState)
+    : Window(windowName)
+    ,  m_appState(appState)
+    ,  m_scope(&appState->rootOperator)
 {
-    ImNode::Config cfg;
+    NodeEditor::Config cfg;
     cfg.SettingsFile = nullptr;
-    m_editorContext = ImNode::CreateEditor(&cfg);
+    m_editorContext = NodeEditor::CreateEditor(&cfg);
 }
 
 
-Viewport::~Viewport()
+NodeEditorWindow::~NodeEditorWindow()
 {
-    ImNode::DestroyEditor(m_editorContext);
+    NodeEditor::DestroyEditor(m_editorContext);
 }
 
 
-void Viewport::setScope(ZigZag::BaseOperator* scope)
+void NodeEditorWindow::setScope(ZigZag::BaseOperator* scope)
 {
     m_scope = scope;
 }
 
-void Viewport::draw(bool* open)
+void NodeEditorWindow::draw()
 {
     ImGui::PushID(this);
-    //ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0, 0 });
-    ImGui::Begin(m_windowName.c_str(), open);
 
-    ImNode::SetCurrentEditor(m_editorContext);
-    ImNode::Begin(m_windowName.c_str());
+    NodeEditor::SetCurrentEditor(m_editorContext);
+    NodeEditor::Begin(getTitle().c_str());
 
     //ImNode::PushStyleVar(ImNode::StyleVar_NodePadding, {0, 0, 0, 0});
     //ImNode::PushStyleVar(ImNode::StyleVar_NodeRounding, 3);
@@ -48,7 +46,7 @@ void Viewport::draw(bool* open)
     {
         for (auto op : m_scope->getChildOperators())
         {
-            ImNode::BeginNode(ImNode::NodeId(static_cast<ZigZag::Object*>(op)));
+            NodeEditor::BeginNode(NodeEditor::NodeId(static_cast<ZigZag::Object*>(op)));
             auto localPos = ImGui::GetCursorPos();
             ImGui::Dummy({ 100, 100 });
             ImGui::SetCursorPos({ localPos.x + 10, localPos.y + 10 });
@@ -63,23 +61,23 @@ void Viewport::draw(bool* open)
             {
                 int y = 30 + i * 30;
                 ImGui::SetCursorPos({ localPos.x, localPos.y + y });
-                ImNode::BeginPin(
-                    ImNode::PinId(static_cast<ZigZag::Object*>(inputs[i])),
-                    ImNode::PinKind::Input);
+                NodeEditor::BeginPin(
+                    NodeEditor::PinId(static_cast<ZigZag::Object*>(inputs[i])),
+                    NodeEditor::PinKind::Input);
                 ImGui::Dummy({ 20, 20 });
-                ImNode::EndPin();
+                NodeEditor::EndPin();
             }
             for (int i = 0; i < outputs.size(); ++i)
             {
                 int y = 30 + i * 30;
                 ImGui::SetCursorPos({ localPos.x + 80, localPos.y + y });
-                ImNode::BeginPin(
-                    ImNode::PinId(static_cast<ZigZag::Object*>(outputs[i])), 
-                    ImNode::PinKind::Output);
+                NodeEditor::BeginPin(
+                    NodeEditor::PinId(static_cast<ZigZag::Object*>(outputs[i])),
+                    NodeEditor::PinKind::Output);
                 ImGui::Dummy({ 20, 20 });
-                ImNode::EndPin();
+                NodeEditor::EndPin();
             }
-            ImNode::EndNode();
+            NodeEditor::EndNode();
         }
         for (auto op : m_scope->getChildOperators())
         {
@@ -88,25 +86,25 @@ void Viewport::draw(bool* open)
                 for (auto input : output->getConnectedInputs())
                 {
                     // use input for link id because input can only have one conection.
-                    ImNode::Link(
-                        ImNode::LinkId(static_cast<ZigZag::Object*>(input)), 
-                        ImNode::PinId(static_cast<ZigZag::Object*>(output)), 
-                        ImNode::PinId(static_cast<ZigZag::Object*>(input)));
+                    NodeEditor::Link(
+                        NodeEditor::LinkId(static_cast<ZigZag::Object*>(input)),
+                        NodeEditor::PinId(static_cast<ZigZag::Object*>(output)),
+                        NodeEditor::PinId(static_cast<ZigZag::Object*>(input)));
                 }
             }
         }
     }
 
-    if (ImNode::BeginCreate())
+    if (NodeEditor::BeginCreate())
     {
-        ImNode::PinId startId, finishId;
+        NodeEditor::PinId startId, finishId;
 
         // The order of the output and input in QueryNewLink is undefined. Therefore we need to test
         // if there is a output and an input.
-        if (ImNode::QueryNewLink(&startId, &finishId))
+        if (NodeEditor::QueryNewLink(&startId, &finishId))
         {
             // AcceptNewItem returns true if the mouse is released
-            if (ImNode::AcceptNewItem())
+            if (NodeEditor::AcceptNewItem())
             {
                 auto start = startId.AsPointer<ZigZag::Object>();
                 auto finish = finishId.AsPointer<ZigZag::Object>();
@@ -129,44 +127,43 @@ void Viewport::draw(bool* open)
 
         }
     }
-    ImNode::EndCreate();
+    NodeEditor::EndCreate();
 
-    if (ImNode::BeginDelete())
+    if (NodeEditor::BeginDelete())
     {
-        ImNode::LinkId linkId;
-        ImNode::PinId startId, finishId;
+        NodeEditor::LinkId linkId;
+        NodeEditor::PinId startId, finishId;
 
-        if (ImNode::QueryDeletedLink(&linkId))
+        if (NodeEditor::QueryDeletedLink(&linkId))
         {
-            if (ImNode::AcceptDeletedItem())
+            if (NodeEditor::AcceptDeletedItem())
             {
                 auto input = linkId.AsPointer<ZigZag::BaseDataInput>();
                 m_appState->commandStack.push<DisconnectDataCommand>(input->getConnectedOutput(), input);
             }
         }
     }
-    ImNode::EndDelete();
+    NodeEditor::EndDelete();
 
-    if (ImNode::BeginDelete())
+    if (NodeEditor::BeginDelete())
     {
-        ImNode::NodeId nodeId;
+        NodeEditor::NodeId nodeId;
         
-        if (ImNode::QueryDeletedNode(&nodeId))
+        if (NodeEditor::QueryDeletedNode(&nodeId))
         {
-            if (ImNode::AcceptDeletedItem())
+            if (NodeEditor::AcceptDeletedItem())
             {
                 m_appState->commandStack.push<RemoveObjectCommand>(nodeId.AsPointer<ZigZag::BaseOperator>());
             }
         }
     }
-    ImNode::EndDelete();
+    NodeEditor::EndDelete();
 
 
     //ImNode::PopStyleColor(1);
     //ImNode::PopStyleVar(5);
-    ImNode::End();
+    NodeEditor::End();
 
-    ImGui::End();
     //ImGui::PopStyleVar(1);
     ImGui::PopID();
 }

@@ -9,26 +9,27 @@
 #include <ZigZag/ObjectSelection.hpp>
 
 #include "app/ApplicationState.hpp"
+#include "gui/Window.hpp"
 
 
 
-class ObjectInspector
+class HierarchyWindow : public Window
 {
 public:
 
-    ObjectInspector(std::string_view windowName, ApplicationState* appState);
+    HierarchyWindow(std::string_view windowName, ApplicationState* appState);
 
     void setScope(ZigZag::Object* rootObject);
 
-    void draw(bool* p_open);
+protected:
+
+    void draw() override;
 
 private:
 
     void showObjectTree(ZigZag::Object* object);
 
     void clearUnusedObjectData();
-
-    std::string m_windowName;
 
     ApplicationState* m_appState;
     

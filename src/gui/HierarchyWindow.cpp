@@ -1,4 +1,4 @@
-#include "ObjectInspector.hpp"
+#include "HierarchyWindow.hpp"
 #include "app/command/AddObjectCommand.hpp"
 #include "app/command/RemoveObjectCommand.hpp"
 #include "app/command/RenameObjectCommand.hpp"
@@ -12,14 +12,14 @@ using namespace ImGui;
 using namespace ZigZag;
 
 
-ObjectInspector::ObjectInspector(std::string_view windowName, ApplicationState* appState)
-    : m_windowName(windowName),
-      m_appState(appState)
+HierarchyWindow::HierarchyWindow(std::string_view windowName, ApplicationState* appState)
+    : Window(windowName)
+    , m_appState(appState)
 {
 }
 
 
-void ObjectInspector::setScope(ZigZag::Object* rootObject)
+void HierarchyWindow::setScope(ZigZag::Object* rootObject)
 {
     if (m_rootObject)
     {
@@ -43,7 +43,7 @@ void ObjectInspector::setScope(ZigZag::Object* rootObject)
 }
 
 
-void ObjectInspector::draw(bool* p_open)
+void HierarchyWindow::draw()
 {
     m_objectSelection.clearInvalidObjects();
 
@@ -51,8 +51,6 @@ void ObjectInspector::draw(bool* p_open)
     {
         data.active = false;
     }
-
-    Begin(m_windowName.c_str(), p_open);
 
     if (Button("Add Child"))
     {
@@ -119,13 +117,12 @@ void ObjectInspector::draw(bool* p_open)
     ImGui::EndChildFrame();
     
     //ImGui::PopStyleColor(4);
-    
-    End();
+
     clearUnusedObjectData();
 }
 
 
-void ObjectInspector::showObjectTree(ZigZag::Object* object)
+void HierarchyWindow::showObjectTree(ZigZag::Object* object)
 {
     if (object)
     {
@@ -198,7 +195,7 @@ void ObjectInspector::showObjectTree(ZigZag::Object* object)
 }
 
 
-void ObjectInspector::clearUnusedObjectData()
+void HierarchyWindow::clearUnusedObjectData()
 {
     std::vector<ZigZag::Object*> toRemove;
 

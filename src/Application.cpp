@@ -22,11 +22,11 @@ Application::Application()
 {
     registerTypes();
 
-    m_viewport.setScope(&m_appState.rootOperator);
-    m_objectInspector.setScope(&m_appState.rootOperator);
+    m_nodeEditorWindow.setScope(&m_appState.rootOperator);
+    m_hierarchyWindow.setScope(&m_appState.rootOperator);
 }
 
-void Application::draw()
+void Application::update()
 {
     //auto tabColor = ImVec4(0.3f, 0.3f, 0.3f, 1.0f);
     //auto tabColorActiveNoFocus = ImVec4(0.42f, 0.42f, 0.42f, 1.0f);
@@ -45,52 +45,69 @@ void Application::draw()
     m_mainMenu.draw();
     ImGui::DockSpaceOverViewport(nullptr, ImGuiDockNodeFlags_NoWindowMenuButton | ImGuiDockNodeFlags_NoCloseButton);
     
-    if (m_appState.windowActions.viewportWindowOpen.getState())
+    m_nodeEditorWindow.update();
+    m_hierarchyWindow.update();
+    m_historyWindow.update();
+    m_renderOrderWindow.update();
+    m_styleEditorWindow.update();
+
+    if (m_ImGuiDemoWindowOpen)
     {
-        bool open = true;
-        m_viewport.draw(&open);
-        m_appState.windowActions.viewportWindowOpen.setState(open);
+        ImGui::ShowDemoWindow(&m_ImGuiDemoWindowOpen);
     }
-    if (m_appState.windowActions.objectInspectorWindowOpen.getState())
+    if (m_ImGuiStyleEditorWindowOpen)
     {
-        bool open = true;
-        m_objectInspector.draw(&open);
-        m_appState.windowActions.objectInspectorWindowOpen.setState(open);
-    }
-    if (m_appState.windowActions.historyWindowOpen.getState())
-    {
-        bool open = true;
-        m_historyView.draw(&open);
-        m_appState.windowActions.historyWindowOpen.setState(open);
-    }
-    if (m_appState.windowActions.renderOrderWindowOpen.getState())
-    {
-        bool open = true;
-        m_renderOrderWindow.draw(&open);
-        m_appState.windowActions.renderOrderWindowOpen.setState(open);
-    }
-    if (m_appState.windowActions.styleEditorWindowOpen.getState())
-    {
-        bool open = true;
-        m_styleEditorWindow.draw(&open);
-        m_appState.windowActions.styleEditorWindowOpen.setState(open);
-    }
-    if (m_appState.windowActions.imguiDemoWindowOpen.getState())
-    {
-        bool open = true;
-        ImGui::ShowDemoWindow(&open);
-        m_appState.windowActions.imguiDemoWindowOpen.setState(open);
-    }
-    if (m_appState.windowActions.imguiStyleWindowOpen.getState())
-    {
-        bool open = true;
-        ImGui::Begin("Imgui Style Editor", &open); // Style editor is not inside of a window by defualt.
+        ImGui::Begin("Imgui Style Editor", &m_ImGuiStyleEditorWindowOpen);
         ImGui::ShowStyleEditor();
         ImGui::End();
-        m_appState.windowActions.imguiStyleWindowOpen.setState(open);
     }
+
+    //if (m_appState.windowActions.imguiDemoWindowOpen.getState())
+    //{
+    //    bool open = true;
+    //    ImGui::ShowDemoWindow(&open);
+    //    m_appState.windowActions.imguiDemoWindowOpen.setState(open);
+    //}
+    //if (m_appState.windowActions.imguiStyleWindowOpen.getState())
+    //{
+    //    bool open = true;
+    //    ImGui::Begin("Imgui Style Editor", &open); // Style editor is not inside of a window by defualt.
+    //    ImGui::ShowStyleEditor();
+    //    ImGui::End();
+    //    m_appState.windowActions.imguiStyleWindowOpen.setState(open);
+    //}
 
     m_appState.style.pop("Application");
 
     //ImGui::PopStyleColor(8);
+}
+
+
+void Application::openWindow(WindowType type)
+{
+    switch (type)
+    {
+        case WindowType::NodeEditor: m_nodeEditorWindow.open();
+        case WindowType::Hierarchy: m_hierarchyWindow.open();
+        case WindowType::History: m_historyWindow.open();
+        case WindowType::RenderOrder: m_renderOrderWindow.open();
+        case WindowType::StyleEditor: m_styleEditorWindow.open();
+        case WindowType::ImGuiDemo: m_ImGuiDemoWindowOpen = true;
+        case WindowType::ImGuiStyleEditor: m_ImGuiStyleEditorWindowOpen = true;
+    }
+}
+
+int Application::windowOpenCount(WindowType type)
+{
+    switch (type)
+    {
+    case WindowType::NodeEditor: return m_nodeEditorWindow.isOpen();
+    case WindowType::Hierarchy: return m_hierarchyWindow.isOpen();
+    case WindowType::History: return m_historyWindow.isOpen();
+    case WindowType::RenderOrder: return m_renderOrderWindow.isOpen();
+    case WindowType::StyleEditor: return m_styleEditorWindow.isOpen();
+    case WindowType::ImGuiDemo: return m_ImGuiDemoWindowOpen;
+    case WindowType::ImGuiStyleEditor: return m_ImGuiStyleEditorWindowOpen;
+    }
+    return 0;
 }

@@ -6,16 +6,19 @@
 #include <vector>
 
 #include "app/ApplicationState.hpp"
+#include "gui/Window.hpp"
 
 
 
-class StyleEditorWindow
+class StyleEditorWindow : public Window
 {
 public:
 
 	StyleEditorWindow(std::string_view windowName, ApplicationState* appState);
 
-	void draw(bool* p_open);
+protected:
+
+	void draw() override;
 
 private:
 
@@ -27,7 +30,6 @@ private:
 	float drawRemoveColorVariableButton();
 
 
-	std::string m_windowName;
 
 	ApplicationState* m_appState;
 

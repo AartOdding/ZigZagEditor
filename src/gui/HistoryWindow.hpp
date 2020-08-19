@@ -5,20 +5,21 @@
 
 #include "app/ApplicationState.hpp"
 #include "app/command/CommandStack.hpp"
+#include "gui/Window.hpp"
 
 
 
-class HistoryView
+class HistoryWindow : public Window
 {
 public:
 
-    HistoryView(std::string_view windowName, ApplicationState* appState);
+    HistoryWindow(std::string_view windowName, ApplicationState* appState);
 
-    void draw(bool* p_open);
+protected:
+
+    void draw() override;
 
 private:
-
-    std::string m_windowName;
 
     ApplicationState* m_appState;
 
