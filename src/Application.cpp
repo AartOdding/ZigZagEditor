@@ -87,13 +87,27 @@ void Application::openWindow(WindowType type)
 {
     switch (type)
     {
-        case WindowType::NodeEditor: m_nodeEditorWindow.open();
-        case WindowType::Hierarchy: m_hierarchyWindow.open();
-        case WindowType::History: m_historyWindow.open();
-        case WindowType::RenderOrder: m_renderOrderWindow.open();
-        case WindowType::StyleEditor: m_styleEditorWindow.open();
-        case WindowType::ImGuiDemo: m_ImGuiDemoWindowOpen = true;
-        case WindowType::ImGuiStyleEditor: m_ImGuiStyleEditorWindowOpen = true;
+        case WindowType::NodeEditor: 
+            m_nodeEditorWindow.open();
+            break;
+        case WindowType::Hierarchy: 
+            m_hierarchyWindow.open();
+            break;
+        case WindowType::History: 
+            m_historyWindow.open();
+            break;
+        case WindowType::RenderOrder: 
+            m_renderOrderWindow.open();
+            break;
+        case WindowType::StyleEditor: 
+            m_styleEditorWindow.open();
+            break;
+        case WindowType::ImGuiDemo: 
+            m_ImGuiDemoWindowOpen = true;
+            break;
+        case WindowType::ImGuiStyleEditor: 
+            m_ImGuiStyleEditorWindowOpen = true;
+            break;
     }
 }
 

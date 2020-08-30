@@ -74,7 +74,7 @@ void RemoveObjectCommand::recursivelyDisconnect(ZigZag::Object* object)
 				// Input is always a child of m_object, no need to check.
 				if (!source->isChildOf(m_object, false))
 				{
-					disconnect(source, input);
+					ZigZag::disconnect(source, input);
 					m_dataDisconnections.emplace_back(source, input);
 				}
 			}
@@ -88,7 +88,7 @@ void RemoveObjectCommand::recursivelyDisconnect(ZigZag::Object* object)
 				// Source is always a child of m_object, no need to check.
 				if (!input->isChildOf(m_object, false))
 				{
-					disconnect(source, input);
+					ZigZag::disconnect(source, input);
 					m_dataDisconnections.emplace_back(source, input);
 				}
 			}

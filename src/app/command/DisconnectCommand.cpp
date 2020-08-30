@@ -18,12 +18,12 @@ DisconnectDataCommand::DisconnectDataCommand(ZigZag::BaseDataSource* source, Zig
 
 void DisconnectDataCommand::redo()
 {
-	disconnect(m_source, m_input);
+	ZigZag::disconnect(m_source, m_input);
 }
 
 void DisconnectDataCommand::undo()
 {
-	connect(m_source, m_input);
+	ZigZag::connect(m_source, m_input);
 }
 
 const std::string& DisconnectDataCommand::typeName()
@@ -53,12 +53,12 @@ DisconnectParametersCommand::DisconnectParametersCommand(ZigZag::BaseParameter* 
 
 void DisconnectParametersCommand::redo()
 {
-	disconnect(m_source, m_input);
+	ZigZag::disconnect(m_source, m_input);
 }
 
 void DisconnectParametersCommand::undo()
 {
-	connect(m_source, m_input);
+	ZigZag::connect(m_source, m_input);
 }
 
 const std::string& DisconnectParametersCommand::typeName()
