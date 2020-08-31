@@ -30,6 +30,10 @@ target_include_directories(ZigZag PUBLIC external/glm)
 add_subdirectory(external/imgui)
 target_link_libraries(ZigZag imgui)
 
+# IMGUI-COLOR_TEXT_EDIT
+add_subdirectory(external/ImGuiColorTextEdit)
+target_link_libraries(ZigZag ImGuiColorTextEdit)
+
 # IMGUI-NODE-EDITOR
 add_subdirectory(external/imgui-node-editor)
 target_link_libraries(ZigZag imgui_node_editor)

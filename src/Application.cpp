@@ -50,6 +50,7 @@ void Application::update()
     m_historyWindow.update();
     m_renderOrderWindow.update();
     m_styleEditorWindow.update();
+    m_luaEditorWindow.update();
 
     if (m_ImGuiDemoWindowOpen)
     {

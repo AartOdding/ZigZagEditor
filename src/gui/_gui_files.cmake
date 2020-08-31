@@ -6,6 +6,8 @@ set(gui_files
     "${CMAKE_CURRENT_LIST_DIR}/HierarchyWindow.hpp"
     "${CMAKE_CURRENT_LIST_DIR}/HistoryWindow.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/HistoryWindow.hpp"
+    "${CMAKE_CURRENT_LIST_DIR}/LuaEditorWindow.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/LuaEditorWindow.hpp"
     "${CMAKE_CURRENT_LIST_DIR}/MainMenu.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/MainMenu.hpp"
     "${CMAKE_CURRENT_LIST_DIR}/NodeEditorWindow.cpp"

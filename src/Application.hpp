@@ -4,12 +4,14 @@
 
 #include "app/ApplicationState.hpp"
 
-#include "gui/HistoryWindow.hpp"
 #include "gui/MainMenu.hpp"
+
 #include "gui/HierarchyWindow.hpp"
+#include "gui/HistoryWindow.hpp"
+#include "gui/LuaEditorWindow.hpp"
+#include "gui/NodeEditorWindow.hpp"
 #include "gui/RenderOrderWindow.hpp"
 #include "gui/StyleEditorWindow.hpp"
-#include "gui/NodeEditorWindow.hpp"
 
 
 
@@ -45,11 +47,12 @@ private:
 
     MainMenu m_mainMenu{ this, &m_appState };
 
-    NodeEditorWindow m_nodeEditorWindow{ "Node Editor", &m_appState };
     HierarchyWindow m_hierarchyWindow{ "Project Hierarchy", &m_appState };
     HistoryWindow m_historyWindow{ "History", &m_appState };
+    NodeEditorWindow m_nodeEditorWindow{ "Node Editor", &m_appState };
     RenderOrderWindow m_renderOrderWindow{ "Render Order", &m_appState };
     StyleEditorWindow m_styleEditorWindow{ "Style Editor", &m_appState };
+    LuaEditorWindow m_luaEditorWindow{ "Lua Script" };
 
     bool m_ImGuiDemoWindowOpen = false;
     bool m_ImGuiStyleEditorWindowOpen = false;
