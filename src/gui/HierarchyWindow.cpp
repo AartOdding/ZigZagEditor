@@ -1,10 +1,13 @@
 #include "HierarchyWindow.hpp"
+#include "Application.hpp"
+#include "app/ApplicationState.hpp"
 #include "app/command/AddObjectCommand.hpp"
 #include "app/command/RemoveObjectCommand.hpp"
 #include "app/command/RenameObjectCommand.hpp"
 
 #include <imgui.h>
 
+#include <ZigZag/LuaBehaviour.hpp>
 #include <ZigZag/ObjectFactory.hpp>
 #include <iostream>
 
@@ -12,34 +15,18 @@ using namespace ImGui;
 using namespace ZigZag;
 
 
-HierarchyWindow::HierarchyWindow(std::string_view windowName, ApplicationState* appState)
-    : Window(windowName)
-    , m_appState(appState)
+HierarchyWindow::HierarchyWindow(std::string_view windowName, Application* app, ApplicationState* appState) : 
+    Window(windowName),
+    m_application(app),
+    m_appState(appState)
 {
 }
 
 
 void HierarchyWindow::setScope(ZigZag::Object* rootObject)
 {
-    if (m_rootObject)
-    {
-        m_rootObject->deregisterChildrenCallback(m_callbackId);
-    }
     m_rootObject = rootObject;
     m_objectSelection.setRootObject(rootObject);
-
-    m_callbackId = m_rootObject->registerChildrenCallback(
-        [](ZigZag::Object* child, bool added) 
-        {
-            if (added)
-            {
-                std::cout << "adding " << child->getName() << std::endl;
-            }
-            else
-            {
-                std::cout << "removing " << child->getName() << std::endl;
-            }
-        });
 }
 
 
@@ -152,6 +139,11 @@ void HierarchyWindow::showObjectTree(ZigZag::Object* object)
                 m_objectSelection.setSelected(object, true);
             }
         }
+        if (ImGui::BeginPopupContextItem())
+        {
+            contextMenu(object);
+            ImGui::EndPopup();
+        }
 
         NextColumn();
 
@@ -190,6 +182,27 @@ void HierarchyWindow::showObjectTree(ZigZag::Object* object)
                 showObjectTree(child);
             }
             TreePop();
+        }
+    }
+}
+
+
+void HierarchyWindow::contextMenu(ZigZag::Object* object)
+{
+    if (ImGui::Selectable("Add Child"))
+    {
+        std::cout << "test" << std::endl;
+    }
+    if (ImGui::Selectable("Delete"))
+    {
+        std::cout << "test" << std::endl;
+    }
+    if (auto lua = dynamic_cast<ZigZag::LuaBehaviour*>(object))
+    {
+        ImGui::Separator();
+        if (ImGui::Selectable("Edit"))
+        {
+            m_application->openLuaEditorWindow(lua);
         }
     }
 }

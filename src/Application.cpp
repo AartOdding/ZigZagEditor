@@ -50,7 +50,13 @@ void Application::update()
     m_historyWindow.update();
     m_renderOrderWindow.update();
     m_styleEditorWindow.update();
-    m_luaEditorWindow.update();
+
+    for (auto it = m_luaEditorWindows.begin(); it != m_luaEditorWindows.end();) // Important: no increment
+    {
+        it->second->update();
+        it->second->isOpen() ? ++it : it = m_luaEditorWindows.erase(it);
+    }
+
 
     if (m_ImGuiDemoWindowOpen)
     {
@@ -112,17 +118,36 @@ void Application::openWindow(WindowType type)
     }
 }
 
+void Application::openLuaEditorWindow(ZigZag::LuaBehaviour* luaBehaviour)
+{
+    if (luaBehaviour)
+    {
+        auto it = m_luaEditorWindows.find(luaBehaviour);
+
+        if (it != m_luaEditorWindows.end())
+        {
+            it->second->open();
+            // also set focus
+        }
+        else
+        {
+            m_luaEditorWindows[luaBehaviour] = std::make_unique<LuaEditorWindow>(*luaBehaviour);
+        }
+    }
+}
+
 int Application::windowOpenCount(WindowType type)
 {
     switch (type)
     {
-    case WindowType::NodeEditor: return m_nodeEditorWindow.isOpen();
-    case WindowType::Hierarchy: return m_hierarchyWindow.isOpen();
-    case WindowType::History: return m_historyWindow.isOpen();
-    case WindowType::RenderOrder: return m_renderOrderWindow.isOpen();
-    case WindowType::StyleEditor: return m_styleEditorWindow.isOpen();
-    case WindowType::ImGuiDemo: return m_ImGuiDemoWindowOpen;
-    case WindowType::ImGuiStyleEditor: return m_ImGuiStyleEditorWindowOpen;
+        case WindowType::NodeEditor: return m_nodeEditorWindow.isOpen();
+        case WindowType::Hierarchy: return m_hierarchyWindow.isOpen();
+        case WindowType::History: return m_historyWindow.isOpen();
+        case WindowType::RenderOrder: return m_renderOrderWindow.isOpen();
+        case WindowType::StyleEditor: return m_styleEditorWindow.isOpen();
+        case WindowType::LuaEditor: return m_luaEditorWindows.size();
+        case WindowType::ImGuiDemo: return m_ImGuiDemoWindowOpen;
+        case WindowType::ImGuiStyleEditor: return m_ImGuiStyleEditorWindowOpen;
     }
     return 0;
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <unordered_map>
 
 #include "app/ApplicationState.hpp"
 
@@ -13,7 +14,10 @@
 #include "gui/RenderOrderWindow.hpp"
 #include "gui/StyleEditorWindow.hpp"
 
-
+namespace ZigZag
+{
+    class LuaBehaviour;
+}
 
 class Application
 {
@@ -24,6 +28,7 @@ public:
         NodeEditor,
         Hierarchy,
         History,
+        LuaEditor,
         RenderOrder,
         StyleEditor,
         ImGuiDemo,
@@ -39,6 +44,8 @@ public:
     void update();
 
     void openWindow(WindowType type);
+    void openLuaEditorWindow(ZigZag::LuaBehaviour* luaBehaviour);
+
     int windowOpenCount(WindowType type);
 
 private:
@@ -47,12 +54,13 @@ private:
 
     MainMenu m_mainMenu{ this, &m_appState };
 
-    HierarchyWindow m_hierarchyWindow{ "Project Hierarchy", &m_appState };
+    HierarchyWindow m_hierarchyWindow{ "Project Hierarchy", this, &m_appState };
     HistoryWindow m_historyWindow{ "History", &m_appState };
     NodeEditorWindow m_nodeEditorWindow{ "Node Editor", &m_appState };
     RenderOrderWindow m_renderOrderWindow{ "Render Order", &m_appState };
     StyleEditorWindow m_styleEditorWindow{ "Style Editor", &m_appState };
-    LuaEditorWindow m_luaEditorWindow{ "Lua Script" };
+
+    std::unordered_map<ZigZag::LuaBehaviour*, std::unique_ptr<LuaEditorWindow>> m_luaEditorWindows;
 
     bool m_ImGuiDemoWindowOpen = false;
     bool m_ImGuiStyleEditorWindowOpen = false;

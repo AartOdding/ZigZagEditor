@@ -1,14 +1,17 @@
 #pragma once
 
-#include "gui/Window.hpp"
+#include <ZigZag/LuaBehaviour.hpp>
+
 #include <TextEditor.h>
+
+#include "gui/Window.hpp"
 
 
 class LuaEditorWindow : public Window
 {
 public:
 
-	LuaEditorWindow(std::string_view windowName);
+	LuaEditorWindow(ZigZag::LuaBehaviour& luaBehaviour);
 
 protected:
 
@@ -17,5 +20,6 @@ protected:
 private:
 
 	TextEditor m_textEditor;
+	ZigZag::LuaBehaviour* m_luaBehaviour;
 
 };
