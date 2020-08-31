@@ -16,3 +16,6 @@
 [submodule "external/imgui-node-editor/imgui-node-editor"]
 	path = external/imgui-node-editor/imgui-node-editor
 	url = https://github.com/AartOdding/imgui-node-editor
+[submodule "external/ImGuiColorTextEdit/ImGuiColorTextEdit"]
+	path = external/ImGuiColorTextEdit/ImGuiColorTextEdit
+	url = https://github.com/AartOdding/ImGuiColorTextEdit.git
