@@ -7,6 +7,7 @@
 #include <ZigZag/BaseDataInput.hpp>
 #include <ZigZag/BaseDataSource.hpp>
 #include <ZigZag/BaseOperator.hpp>
+#include <ZigZag/LuaBehaviour.hpp>
 #include <ZigZag/ObjectFactory.hpp>
 #include <ZigZag/TParameter.hpp>
 
@@ -15,6 +16,8 @@
 
 namespace TypeNames
 {
+    constexpr char object         [] = "Object";
+    constexpr char luaBehaviour   [] = "LuaBehaviour";
     constexpr char baseDataInput  [] = "BaseDataInput";
     constexpr char baseDataSource [] = "BaseDataSource";
     constexpr char baseOperator   [] = "BaseOperator";
@@ -47,9 +50,11 @@ static void registerTypes()
 {
     auto factory = ZigZag::ObjectFactory::instance();
 
-    factory->registerType(TypeNames::baseDataInput,  [](){ return new ZigZag::BaseDataInput();  });
-    factory->registerType(TypeNames::baseDataSource, [](){ return new ZigZag::BaseDataSource();  });
-    factory->registerType(TypeNames::baseOperator,   [](){ return new ZigZag::BaseOperator();  });
+    factory->registerType(TypeNames::object,         [](){ return new ZigZag::Object(); });
+    factory->registerType(TypeNames::luaBehaviour,   [](){ return new ZigZag::LuaBehaviour(); });
+    factory->registerType(TypeNames::baseDataInput,  [](){ return new ZigZag::BaseDataInput(); });
+    factory->registerType(TypeNames::baseDataSource, [](){ return new ZigZag::BaseDataSource(); });
+    factory->registerType(TypeNames::baseOperator,   [](){ return new ZigZag::BaseOperator(); });
 
     factory->registerType(TypeNames::intParameter,  [](){ return new IntParameter();  });
     factory->registerType(TypeNames::int2Parameter, [](){ return new Int2Parameter(); });
