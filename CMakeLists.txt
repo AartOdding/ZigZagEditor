@@ -11,6 +11,9 @@ add_executable(ZigZag ${src_files})
 
 target_include_directories(ZigZag PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
+# FREETYPE2
+add_subdirectory(external/freetype2)
+target_link_libraries(ZigZag freetype)
 
 # GLAD
 add_subdirectory(external/glad)

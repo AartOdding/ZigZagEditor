@@ -8,6 +8,7 @@
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
+#include <imgui_freetype.h>
 
 #include "Application.hpp"
 #include "OpenSansRegular.hpp"
@@ -46,10 +47,10 @@ static void loadFont(ImGuiIO& io)
     //io.Fonts->AddFontFromFileTTF("../../misc/fonts/DroidSans.ttf", 16.0f);
     //io.Fonts->AddFontFromFileTTF("../../misc/fonts/ProggyTiny.ttf", 10.0f);
     ImFontConfig fontConfig;
-    fontConfig.OversampleH = 4;
-    fontConfig.OversampleV = 4;
     fontConfig.FontDataOwnedByAtlas = false;
-    io.Fonts->AddFontFromMemoryTTF((void*)OpenSans_Regular_ttf, OpenSans_Regular_ttf_len, 18, &fontConfig);
+    io.Fonts->AddFontFromMemoryTTF((void*)OpenSans_Regular_ttf, OpenSans_Regular_ttf_len, 20, &fontConfig);
+    ImGuiFreeType::BuildFontAtlas(io.Fonts);
+
     //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
     //IM_ASSERT(font != NULL);
 }
@@ -69,6 +70,7 @@ int main(int, char**)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_TRUE);
 
     GLFWwindow* window = glfwCreateWindow(1280, 720, "ZigZag", nullptr, nullptr);
 
@@ -109,6 +111,9 @@ int main(int, char**)
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
+        int w, h;
+        glfwGetFramebufferSize(window, &w, &h);
+        std::cout << io.DisplayFramebufferScale.x << " "<< io.DisplaySize.x << " " << io.DisplaySize.y << " " << w << " " << h << std::endl;
 
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
