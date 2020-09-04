@@ -44,7 +44,7 @@ namespace Directories
 #elif defined(__APPLE__) || defined(__linux__)
 
 			auto p = getpwuid(getuid());
-			homeDir = p ? p->pw_dir : getenv("HOME");
+			home = p ? p->pw_dir : getenv("HOME");
 #endif
 			if (home.empty())
 			{
@@ -67,8 +67,8 @@ namespace Directories
 			settings = homeDir();
 			settings.append("\\AppData\\Local\\ZigZag");
 #elif defined(__APPLE__)
-			settingsDir = home();
-			settingsDir.append("/Library/Preferences/ZigZag");
+			settings = homeDir();
+			settings.append("/Library/Preferences/ZigZag");
 #elif defined (__linux__)
 
 #endif
