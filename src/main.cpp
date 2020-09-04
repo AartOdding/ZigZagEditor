@@ -13,6 +13,7 @@
 #include "Application.hpp"
 #include "OpenSansRegular.hpp"
 
+#include <app/Directories.hpp>
 
 static void framebufferSizeCallback(GLFWwindow* window, int width, int height)
 {
@@ -58,6 +59,17 @@ static void loadFont(ImGuiIO& io)
 
 int main(int, char**)
 {
+    std::cout << Directories::homeDir() << std::endl;
+    std::cout << Directories::homeDir() << std::endl;
+    std::cout << Directories::homeDir() << std::endl;
+    std::cout << Directories::homeDir() << std::endl;
+    std::cout << Directories::settingsDir() << std::endl;
+    std::cout << Directories::settingsDir() << std::endl;
+    std::cout << Directories::settingsDir() << std::endl;
+    Directories::createSettingsDir();
+    Directories::createSettingsDir();
+    Directories::createSettingsDir();
+
     glfwSetErrorCallback(errorCallback);
     
     if (!glfwInit())
@@ -98,6 +110,7 @@ int main(int, char**)
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
     //io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
     //io.IniFilename = nullptr;
+    //io.
 
     ImGui::StyleColorsDark();
 
@@ -105,6 +118,7 @@ int main(int, char**)
     ImGui_ImplOpenGL3_Init("#version 150");
 
     loadFont(io);
+    //ImGui::GetStateStorage
 
     auto application = std::make_unique<Application>();
 
@@ -113,7 +127,7 @@ int main(int, char**)
         glfwPollEvents();
         int w, h;
         glfwGetFramebufferSize(window, &w, &h);
-        std::cout << io.DisplayFramebufferScale.x << " "<< io.DisplaySize.x << " " << io.DisplaySize.y << " " << w << " " << h << std::endl;
+        //std::cout << io.DisplayFramebufferScale.x << " "<< io.DisplaySize.x << " " << io.DisplaySize.y << " " << w << " " << h << std::endl;
 
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();

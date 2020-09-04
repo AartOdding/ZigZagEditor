@@ -9,4 +9,6 @@ set(app_files
     "${style_files}"
 
     "${CMAKE_CURRENT_LIST_DIR}/ApplicationState.hpp"
+    "${CMAKE_CURRENT_LIST_DIR}/Directories.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/Directories.hpp"
 )
