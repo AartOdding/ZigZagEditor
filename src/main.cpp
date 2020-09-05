@@ -11,66 +11,20 @@
 #include <imgui_freetype.h>
 
 #include "Application.hpp"
-#include "OpenSansRegular.hpp"
 
 #include <app/Directories.hpp>
 
-static void framebufferSizeCallback(GLFWwindow* window, int width, int height)
-{
-    glViewport(0, 0, width, height);
-}
 
- 
-static void errorCallback(int error, const char* description)
-{
-    std::cerr << "Error:\n" << description << std::endl;
-}
-
-
-static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
-{
-
-}
-
-
-static void loadFont(ImGuiIO& io)
-{
-    // Load Fonts
-    // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
-    // - AddFontFromFileTTF() will return the ImFont* so you can store it if you need to select the font among multiple.
-    // - If the file cannot be loaded, the function will return NULL. Please handle those errors in your application (e.g. use an assertion, or display an error and quit).
-    // - The fonts will be rasterized at a given size (w/ oversampling) and stored into a texture when calling ImFontAtlas::Build()/GetTexDataAsXXXX(), which ImGui_ImplXXXX_NewFrame below will call.
-    // - Read 'docs/FONTS.txt' for more instructions and details.
-    // - Remember that in C/C++ if you want to include a backslash \ in a string literal you need to write a double backslash \\ !
-    //io.Fonts->AddFontDefault();
-    //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Roboto-Medium.ttf", 16.0f);
-    //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf", 15.0f);
-    //io.Fonts->AddFontFromFileTTF("../../misc/fonts/DroidSans.ttf", 16.0f);
-    //io.Fonts->AddFontFromFileTTF("../../misc/fonts/ProggyTiny.ttf", 10.0f);
-    ImFontConfig fontConfig;
-    fontConfig.FontDataOwnedByAtlas = false;
-    io.Fonts->AddFontFromMemoryTTF((void*)OpenSans_Regular_ttf, OpenSans_Regular_ttf_len, 20, &fontConfig);
-    ImGuiFreeType::BuildFontAtlas(io.Fonts);
-
-    //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
-    //IM_ASSERT(font != NULL);
-}
+Application* appInstance = nullptr;
 
 
 int main(int, char**)
 {
-    std::cout << Directories::homeDir() << std::endl;
-    std::cout << Directories::homeDir() << std::endl;
-    std::cout << Directories::homeDir() << std::endl;
-    std::cout << Directories::homeDir() << std::endl;
-    std::cout << Directories::settingsDir() << std::endl;
-    std::cout << Directories::settingsDir() << std::endl;
-    std::cout << Directories::settingsDir() << std::endl;
-    Directories::createSettingsDir();
-    Directories::createSettingsDir();
     Directories::createSettingsDir();
 
-    glfwSetErrorCallback(errorCallback);
+    glfwSetErrorCallback([](int errorCode, const char* errorDescription) {
+        std::cerr << "GLFW error " << errorCode << ": " << errorDescription << std::endl;
+    });
     
     if (!glfwInit())
     {
@@ -81,8 +35,10 @@ int main(int, char**)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-    glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_TRUE);
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, true);
+    glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, true);
+    glfwWindowHint(GLFW_DECORATED, true);
+    glfwWindowHint(GLFW_SCALE_TO_MONITOR, true);
 
     GLFWwindow* window = glfwCreateWindow(1280, 720, "ZigZag", nullptr, nullptr);
 
@@ -93,9 +49,20 @@ int main(int, char**)
         std::exit(1);
     }
 
-    glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1);
+    
+    glfwSetFramebufferSizeCallback(window, [](GLFWwindow* window, int width, int height) {
+        glViewport(0, 0, width, height);
+    });
+
+    glfwSetWindowContentScaleCallback(window, [](GLFWwindow* window, float scaleX, float scaleY) {
+        if (appInstance)
+        {
+            appInstance->setDpiScaling(scaleX);
+        }
+        std::cout << "window scale changed: " << scaleX << std::endl;
+    });
 
     if (!gladLoadGL())
     {
@@ -103,37 +70,33 @@ int main(int, char**)
         glfwTerminate();
         std::exit(1);
     }
-    
-    auto imguiContext = ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO();
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-    //io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
-    //io.IniFilename = nullptr;
-    //io.
+
+    ImGuiContext* imguiContext = ImGui::CreateContext();
+    ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
     ImGui::StyleColorsDark();
 
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 150");
 
-    loadFont(io);
-    //ImGui::GetStateStorage
-
     auto application = std::make_unique<Application>();
+    appInstance = application.get();
+
+    float sx, sy;
+    glfwGetWindowContentScale(window, &sx, &sy);
+    application->setDpiScaling(sx);
 
     while (!glfwWindowShouldClose(window))
     {
+        application->updateBetweenFrames();
+
         glfwPollEvents();
-        int w, h;
-        glfwGetFramebufferSize(window, &w, &h);
-        //std::cout << io.DisplayFramebufferScale.x << " "<< io.DisplaySize.x << " " << io.DisplaySize.y << " " << w << " " << h << std::endl;
 
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        // do stuff here
         application->update();
 
         ImGui::Render();
@@ -146,6 +109,7 @@ int main(int, char**)
         glfwSwapBuffers(window);
     }
 
+    appInstance = nullptr;
     application.reset(nullptr);
 
     ImGui_ImplOpenGL3_Shutdown();

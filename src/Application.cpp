@@ -1,5 +1,6 @@
 #include "Application.hpp"
 #include "types.hpp"
+#include "OpenSansRegular.hpp"
 
 #include "library/dataInputs/GenericInput.hpp"
 #include "library/dataSources/TextureData.hpp"
@@ -9,7 +10,9 @@
 #include <ZigZag/TParameter.hpp>
 
 #include <imgui.h>
+#include <imgui_freetype.h>
 #include <imgui_internal.h>
+#include <imgui_impl_opengl3.h>
 
 #include <iostream>
 
@@ -28,18 +31,6 @@ Application::Application()
 
 void Application::update()
 {
-    //auto tabColor = ImVec4(0.3f, 0.3f, 0.3f, 1.0f);
-    //auto tabColorActiveNoFocus = ImVec4(0.42f, 0.42f, 0.42f, 1.0f);
-    //auto backgroundColor = ImGui::GetStyleColorVec4(ImGuiCol_MenuBarBg);
-    //ImGui::PushStyleColor(ImGuiCol_Tab, tabColor);
-    //ImGui::PushStyleColor(ImGuiCol_TabUnfocused, tabColor);
-    //ImGui::PushStyleColor(ImGuiCol_TabUnfocusedActive, tabColorActiveNoFocus);
-    //ImGui::PushStyleColor(ImGuiCol_WindowBg, backgroundColor);
-    //ImGui::PushStyleColor(ImGuiCol_TitleBg, backgroundColor);
-    //ImGui::PushStyleColor(ImGuiCol_TitleBgActive, backgroundColor);
-    //ImGui::PushStyleColor(ImGuiCol_TitleBgCollapsed, backgroundColor);
-    //ImGui::PushStyleColor(ImGuiCol_Separator, backgroundColor);
-
     m_appState.style.push("Application");
 
     m_mainMenu.draw();
@@ -57,7 +48,6 @@ void Application::update()
         it->second->isOpen() ? ++it : it = m_luaEditorWindows.erase(it);
     }
 
-
     if (m_ImGuiDemoWindowOpen)
     {
         ImGui::ShowDemoWindow(&m_ImGuiDemoWindowOpen);
@@ -69,24 +59,27 @@ void Application::update()
         ImGui::End();
     }
 
-    //if (m_appState.windowActions.imguiDemoWindowOpen.getState())
-    //{
-    //    bool open = true;
-    //    ImGui::ShowDemoWindow(&open);
-    //    m_appState.windowActions.imguiDemoWindowOpen.setState(open);
-    //}
-    //if (m_appState.windowActions.imguiStyleWindowOpen.getState())
-    //{
-    //    bool open = true;
-    //    ImGui::Begin("Imgui Style Editor", &open); // Style editor is not inside of a window by defualt.
-    //    ImGui::ShowStyleEditor();
-    //    ImGui::End();
-    //    m_appState.windowActions.imguiStyleWindowOpen.setState(open);
-    //}
-
     m_appState.style.pop("Application");
+}
 
-    //ImGui::PopStyleColor(8);
+
+void Application::updateBetweenFrames()
+{
+    if (m_styleOutdated)
+    {
+        ImGui::GetIO().Fonts->Clear();
+        ImGui_ImplOpenGL3_DestroyFontsTexture();
+        ImFontConfig fontConfig;
+        fontConfig.FontDataOwnedByAtlas = false;
+        ImGui::GetIO().Fonts->AddFontFromMemoryTTF((void*)OpenSans_Regular_ttf, OpenSans_Regular_ttf_len, m_fontSize * m_dpiScaling, &fontConfig);
+        ImGui::GetIO().Fonts->AddFontFromMemoryTTF((void*)OpenSans_Regular_ttf, OpenSans_Regular_ttf_len, m_fontSizeCode * m_dpiScaling, &fontConfig);
+        ImGuiFreeType::BuildFontAtlas(ImGui::GetIO().Fonts);
+        ImGui_ImplOpenGL3_CreateFontsTexture();
+        ImGui::GetStyle() = ImGuiStyle();
+        ImGui::StyleColorsDark();
+        ImGui::GetStyle().ScaleAllSizes(m_dpiScaling);
+        m_styleOutdated = false;
+    }
 }
 
 
@@ -150,4 +143,40 @@ int Application::windowOpenCount(WindowType type)
         case WindowType::ImGuiStyleEditor: return m_ImGuiStyleEditorWindowOpen;
     }
     return 0;
+}
+
+int Application::getFontSize() const
+{
+    return m_fontSize;
+}
+
+void Application::setFontSize(int fontSize)
+{
+    int clampedFontSize = std::clamp<int>(fontSize, 6, 52);
+    m_styleOutdated |= m_fontSize != clampedFontSize;
+    m_fontSize = clampedFontSize;
+}
+
+int Application::getCodeSize() const
+{
+    return m_fontSize;
+}
+
+void Application::setCodeSize(int fontSize)
+{
+    int clampedCodeSize = std::clamp<int>(fontSize, 6, 52);
+    m_styleOutdated |= m_fontSizeCode != clampedCodeSize;
+    m_fontSizeCode = clampedCodeSize;
+}
+
+void Application::setDpiScaling(float dpiScaling)
+{
+    float clampedDpiScaling = std::clamp<float>(dpiScaling, 0.25f, 4.0f);
+    m_styleOutdated |= m_dpiScaling != clampedDpiScaling;
+    m_dpiScaling = clampedDpiScaling;
+}
+
+float Application::getDpiScaling() const
+{
+    return m_dpiScaling;
 }

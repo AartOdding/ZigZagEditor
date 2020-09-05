@@ -42,11 +42,22 @@ public:
     Application(Application&&) = delete;
 
     void update();
+    void updateBetweenFrames();
 
     void openWindow(WindowType type);
     void openLuaEditorWindow(ZigZag::LuaBehaviour* luaBehaviour);
 
     int windowOpenCount(WindowType type);
+
+    int getFontSize() const;
+    void setFontSize(int fontSize);
+
+    int Application::getCodeSize() const;
+    void Application::setCodeSize(int fontSize);
+
+    void setDpiScaling(float dpiScaling);
+    float getDpiScaling() const;
+
 
 private:
 
@@ -64,4 +75,10 @@ private:
 
     bool m_ImGuiDemoWindowOpen = false;
     bool m_ImGuiStyleEditorWindowOpen = false;
+    bool m_styleOutdated = false;
+
+    int m_fontSize = 18;
+    int m_fontSizeCode = 18;
+    float m_dpiScaling = 1.0f;
+
 };

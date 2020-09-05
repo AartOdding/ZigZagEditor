@@ -15,7 +15,6 @@ MainMenu::MainMenu(Application* application, ApplicationState* appState)
 
 void MainMenu::draw()
 {
-    //ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
     ImGui::BeginMainMenuBar();
 
     if (ImGui::BeginMenu("File"))
@@ -75,7 +74,31 @@ void MainMenu::draw()
 
         ImGui::EndMenu();
     }
+    if (ImGui::BeginMenu("Settings"))
+    {
+        if (ImGui::BeginMenu("Font Size"))
+        {
+            int fontSize = m_application->getFontSize();
+            ImGui::SetNextItemWidth(100 * m_application->getDpiScaling());
+            if (ImGui::InputInt("##Font Size", &fontSize, 1, 1, ImGuiInputTextFlags_EnterReturnsTrue))
+            {
+                m_application->setFontSize(fontSize);
+            }
+            ImGui::EndMenu();
+        }
+        if (ImGui::BeginMenu("Code Size"))
+        {
+            int codeFontSize = m_application->getCodeSize();
+            ImGui::SetNextItemWidth(100 * m_application->getDpiScaling());
+            if (ImGui::InputInt("##Code Size", &codeFontSize, 1, 1, ImGuiInputTextFlags_EnterReturnsTrue))
+            {
+                m_application->setCodeSize(codeFontSize);
+            }
+            ImGui::EndMenu();
+        }
+
+        ImGui::EndMenu();
+    }
 
     ImGui::EndMainMenuBar();
-    //ImGui::PopStyleVar();
 }
