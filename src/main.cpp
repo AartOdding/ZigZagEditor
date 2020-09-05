@@ -14,6 +14,7 @@
 #include "OpenSansRegular.hpp"
 
 #include <app/Directories.hpp>
+#include <app/Monitors.hpp>
 
 static void framebufferSizeCallback(GLFWwindow* window, int width, int height)
 {
@@ -103,6 +104,8 @@ int main(int, char**)
         glfwTerminate();
         std::exit(1);
     }
+
+    Monitors::initialize();
     
     auto imguiContext = ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();

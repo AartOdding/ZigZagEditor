@@ -11,4 +11,6 @@ set(app_files
     "${CMAKE_CURRENT_LIST_DIR}/ApplicationState.hpp"
     "${CMAKE_CURRENT_LIST_DIR}/Directories.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/Directories.hpp"
+    "${CMAKE_CURRENT_LIST_DIR}/Monitors.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/Monitors.hpp"
 )
