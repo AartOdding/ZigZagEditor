@@ -84,6 +84,9 @@ int main(int, char**)
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_TRUE);
+    glfwWindowHint(GLFW_DECORATED, true);
+    glfwWindowHint(GLFW_SCALE_TO_MONITOR, true);
+    //glfwWindowHint(GLFW_FLOATING, true);
 
     GLFWwindow* window = glfwCreateWindow(1280, 720, "ZigZag", nullptr, nullptr);
 
@@ -94,6 +97,7 @@ int main(int, char**)
         std::exit(1);
     }
 
+    glfwSetWindowPos(window, 100, 100);
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1);
@@ -105,14 +109,14 @@ int main(int, char**)
         std::exit(1);
     }
 
-    Monitors::initialize();
-    Monitors::trackWindow(window);
+    //Monitors::initialize();
+    //Monitors::trackWindow(window);
     
     auto imguiContext = ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-    //io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
     //io.IniFilename = nullptr;
     //io.
 
@@ -146,6 +150,14 @@ int main(int, char**)
         glClear(GL_COLOR_BUFFER_BIT);
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        {
+            GLFWwindow* backup_current_context = glfwGetCurrentContext();
+            ImGui::UpdatePlatformWindows();
+            ImGui::RenderPlatformWindowsDefault();
+            glfwMakeContextCurrent(backup_current_context);
+        }
 
         glfwSwapBuffers(window);
     }
