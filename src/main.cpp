@@ -106,6 +106,7 @@ int main(int, char**)
     }
 
     Monitors::initialize();
+    Monitors::trackWindow(window);
     
     auto imguiContext = ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
