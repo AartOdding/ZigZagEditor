@@ -77,6 +77,40 @@ namespace Directories
 		return settings.c_str();
 	}
 
+
+	const char* resourcesDir()
+	{
+		static bool initialized = false;
+		static std::string resources;
+
+		if (!initialized)
+		{
+			auto path = std::filesystem::current_path();
+			auto resourcesPath = path / "resources";
+
+			while (path != path.parent_path() && !std::filesystem::exists(resourcesPath))
+			{
+				path = path.parent_path();
+				resourcesPath = path / "resources";
+			}
+
+			if (std::filesystem::exists(resourcesPath))
+			{
+				if (std::filesystem::exists(resourcesPath / "ZigZagResourcesTag.txt"))
+				{
+					resources = resourcesPath.string();
+				}
+			}
+			if (resources.empty())
+			{
+				std::cerr << "ZigZag could not start up properly, because the resources directory could not be detected." << std::endl;
+				throw std::runtime_error("Could not detect resources directory.");
+			}
+			initialized = true;
+		}
+		return resources.c_str();
+	}
+
 	void createSettingsDir()
 	{
 		// If the path already exists nothing happens.
