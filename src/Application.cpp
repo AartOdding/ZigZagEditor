@@ -72,8 +72,8 @@ void Application::updateBetweenFrames()
         ImGui_ImplOpenGL3_DestroyFontsTexture();
         ImFontConfig fontConfig;
         fontConfig.FontDataOwnedByAtlas = false;
-        ImGui::GetIO().Fonts->AddFontFromMemoryTTF((void*)OpenSans_Regular_ttf, OpenSans_Regular_ttf_len, m_fontSize * m_frameBufferScaling, &fontConfig);
-        ImGui::GetIO().Fonts->AddFontFromMemoryTTF((void*)OpenSans_Regular_ttf, OpenSans_Regular_ttf_len, m_codeSize * m_frameBufferScaling, &fontConfig);
+        ImGui::GetIO().Fonts->AddFontFromMemoryTTF((void*)OpenSans_Regular_ttf, OpenSans_Regular_ttf_len, m_fontSize * m_frameBufferScaling * m_dpiScaling, &fontConfig);
+        ImGui::GetIO().Fonts->AddFontFromMemoryTTF((void*)OpenSans_Regular_ttf, OpenSans_Regular_ttf_len, m_codeSize * m_frameBufferScaling * m_dpiScaling, &fontConfig);
         ImGui::GetIO().FontGlobalScale = 1.0f / m_frameBufferScaling;
         ImGuiFreeType::BuildFontAtlas(ImGui::GetIO().Fonts);
         ImGui_ImplOpenGL3_CreateFontsTexture();
