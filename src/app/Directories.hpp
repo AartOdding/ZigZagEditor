@@ -1,9 +1,10 @@
+#include <filesystem>
 
 
 namespace Directories
 {
-	const char* homeDir();
-	const char* settingsDir();
-	const char* resourcesDir();
+	std::filesystem::path homeDir();
+	std::filesystem::path settingsDir();
+	std::filesystem::path resourcesDir();
 	void createSettingsDir();
 }

@@ -78,21 +78,21 @@ void MainMenu::draw()
     {
         if (ImGui::BeginMenu("Font Size"))
         {
-            int fontSize = m_application->getFontSize();
-            ImGui::SetNextItemWidth(100 * m_application->getDpiScaling());
+            int fontSize = m_appState->fontLibrary.getFontSize();
+            ImGui::SetNextItemWidth(100 * m_appState->fontLibrary.getScaling());
             if (ImGui::InputInt("##Font Size", &fontSize, 1, 1, ImGuiInputTextFlags_EnterReturnsTrue))
             {
-                m_application->setFontSize(fontSize);
+                m_appState->fontLibrary.setFontSize(fontSize);
             }
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Code Size"))
         {
-            int codeFontSize = m_application->getCodeSize();
-            ImGui::SetNextItemWidth(100 * m_application->getDpiScaling());
+            int codeFontSize = m_appState->fontLibrary.getCodeSize();
+            ImGui::SetNextItemWidth(100 * m_appState->fontLibrary.getScaling());
             if (ImGui::InputInt("##Code Size", &codeFontSize, 1, 1, ImGuiInputTextFlags_EnterReturnsTrue))
             {
-                m_application->setCodeSize(codeFontSize);
+                m_appState->fontLibrary.setCodeSize(codeFontSize);
             }
             ImGui::EndMenu();
         }

@@ -8,14 +8,15 @@
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
-#include <imgui_freetype.h>
 
 #include "Application.hpp"
 
 #include <app/Directories.hpp>
+#include <app/style/FontLibrary.hpp>
 
 
-Application* appInstance = nullptr;
+static Application* appInstance = nullptr;
+static FontLibrary* fontLibrary = nullptr;
 
 
 float getFramebufferScaling(GLFWwindow* window)
@@ -66,9 +67,9 @@ int main(int, char**)
     });
 
     glfwSetWindowContentScaleCallback(window, [](GLFWwindow* window, float scaleX, float scaleY) {
-        if (appInstance)
+        if (fontLibrary)
         {
-            appInstance->setDpiScaling(scaleX, getFramebufferScaling(window));
+            fontLibrary->setScaling(scaleX, getFramebufferScaling(window));
         }
         std::cout << "window scale changed: " << scaleX << std::endl;
     });
@@ -91,14 +92,15 @@ int main(int, char**)
 
     auto application = std::make_unique<Application>();
     appInstance = application.get();
+    fontLibrary = &application->getAppState()->fontLibrary;
 
     float sx, sy;
     glfwGetWindowContentScale(window, &sx, &sy);
-    application->setDpiScaling(sx, getFramebufferScaling(window));
+    fontLibrary->setScaling(sx, getFramebufferScaling(window));
 
     while (!glfwWindowShouldClose(window))
     {
-        application->updateBetweenFrames();
+        fontLibrary->updateFonts();
 
         glfwPollEvents();
 
@@ -118,6 +120,7 @@ int main(int, char**)
         glfwSwapBuffers(window);
     }
 
+    fontLibrary = nullptr;
     appInstance = nullptr;
     application.reset(nullptr);
 

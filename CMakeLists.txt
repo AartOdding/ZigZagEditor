@@ -51,9 +51,3 @@ target_link_libraries(ZigZag nlohmann_json)
 add_subdirectory(external/ZigZagCore)
 target_link_libraries(ZigZag ZigZagCore)
 
-# RESOURCES
-target_include_directories(ZigZag PRIVATE resources)
-# resource files have been generated using xxd. See:
-# https://stackoverflow.com/questions/45802537/how-to-embed-font-and-other-image-files-when-using-graphic-libraries-like-sfml
-
-

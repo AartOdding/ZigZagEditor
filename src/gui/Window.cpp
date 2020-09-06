@@ -15,7 +15,7 @@ void Window::update()
 	{
 		auto colorId = hasFocus() ? ImGuiCol_TabActive : ImGuiCol_TabUnfocusedActive;
 		auto targetId = isDocked() ? ImGuiCol_ChildBg : ImGuiCol_WindowBg;
-		ImGui::PushStyleColor(targetId, ImGui::GetStyleColorVec4(colorId));
+		//ImGui::PushStyleColor(targetId, ImGui::GetStyleColorVec4(colorId));
 
 		if (ImGui::Begin(m_title.c_str(), &m_open))
 		{
@@ -27,7 +27,7 @@ void Window::update()
 
 		ImGui::End();
 
-		ImGui::PopStyleColor(1);
+		//ImGui::PopStyleColor(1);
 	}
 	else
 	{

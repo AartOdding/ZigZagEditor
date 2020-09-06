@@ -12,7 +12,7 @@
 
 
 class Application;
-class ApplicationState;
+struct ApplicationState;
 
 
 class HierarchyWindow : public Window

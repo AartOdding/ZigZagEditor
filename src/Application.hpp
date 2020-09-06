@@ -42,24 +42,13 @@ public:
     Application(Application&&) = delete;
 
     void update();
-    void updateBetweenFrames();
 
     void openWindow(WindowType type);
     void openLuaEditorWindow(ZigZag::LuaBehaviour* luaBehaviour);
 
     int windowOpenCount(WindowType type);
 
-    int getFontSize() const;
-    void setFontSize(int fontSize);
-
-    int getCodeSize() const;
-    void setCodeSize(int codeSize);
-
-    // The framebuffer scale argument should be used when the scale between the window size and
-    // the framebuffer size is not 1. This is for instance the case on mac retina displays.
-    void setDpiScaling(float desiredScale, float frameBufferScale = 1.0f);
-    float getDpiScaling() const;
-
+    ApplicationState* getAppState();
 
 private:
 
@@ -77,12 +66,6 @@ private:
 
     bool m_ImGuiDemoWindowOpen = false;
     bool m_ImGuiStyleEditorWindowOpen = false;
-    bool m_styleOutdated = false;
 
-    int m_fontSize = 18;
-    int m_codeSize = 18;
-    float m_desiredScaling = 1.0f;
-    float m_frameBufferScaling = 1.0f;
-    float m_dpiScaling = 1.0f;
 
 };

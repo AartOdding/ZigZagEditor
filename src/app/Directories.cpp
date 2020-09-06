@@ -18,7 +18,7 @@
 
 namespace Directories
 {
-	const char* homeDir()
+	std::filesystem::path homeDir()
 	{
 		static bool initialized = false;
 		static std::string home;
@@ -56,7 +56,7 @@ namespace Directories
 		return home.c_str();
 	}
 
-	const char* settingsDir()
+	std::filesystem::path settingsDir()
 	{
 		static bool initialized = false;
 		static std::string settings;
@@ -64,7 +64,7 @@ namespace Directories
 		if (!initialized)
 		{
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
-			settings = homeDir();
+			settings = homeDir().string();
 			settings.append("\\AppData\\Local\\ZigZag");
 #elif defined(__APPLE__)
 			settings = homeDir();
@@ -78,7 +78,7 @@ namespace Directories
 	}
 
 
-	const char* resourcesDir()
+	std::filesystem::path resourcesDir()
 	{
 		static bool initialized = false;
 		static std::string resources;
