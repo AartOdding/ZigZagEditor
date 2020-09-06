@@ -18,6 +18,15 @@
 Application* appInstance = nullptr;
 
 
+float getFramebufferScaling(GLFWwindow* window)
+{
+    int sizeX, sizeY, fbSizeX, fbSizeY;
+    glfwGetWindowSize(window, &sizeX, &sizeY);
+    glfwGetFramebufferSize(window, &fbSizeX, &fbSizeY);
+    return static_cast<float>(fbSizeX) / static_cast<float>(sizeX);
+}
+
+
 int main(int, char**)
 {
     Directories::createSettingsDir();
@@ -59,7 +68,7 @@ int main(int, char**)
     glfwSetWindowContentScaleCallback(window, [](GLFWwindow* window, float scaleX, float scaleY) {
         if (appInstance)
         {
-            appInstance->setDpiScaling(scaleX);
+            appInstance->setDpiScaling(scaleX, getFramebufferScaling(window));
         }
         std::cout << "window scale changed: " << scaleX << std::endl;
     });
@@ -85,7 +94,7 @@ int main(int, char**)
 
     float sx, sy;
     glfwGetWindowContentScale(window, &sx, &sy);
-    application->setDpiScaling(sx);
+    application->setDpiScaling(sx, getFramebufferScaling(window));
 
     while (!glfwWindowShouldClose(window))
     {

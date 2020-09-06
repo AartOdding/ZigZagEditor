@@ -67,12 +67,14 @@ void Application::updateBetweenFrames()
 {
     if (m_styleOutdated)
     {
+        m_dpiScaling = m_desiredScaling / m_frameBufferScaling;
         ImGui::GetIO().Fonts->Clear();
         ImGui_ImplOpenGL3_DestroyFontsTexture();
         ImFontConfig fontConfig;
         fontConfig.FontDataOwnedByAtlas = false;
-        ImGui::GetIO().Fonts->AddFontFromMemoryTTF((void*)OpenSans_Regular_ttf, OpenSans_Regular_ttf_len, m_fontSize * m_dpiScaling, &fontConfig);
-        ImGui::GetIO().Fonts->AddFontFromMemoryTTF((void*)OpenSans_Regular_ttf, OpenSans_Regular_ttf_len, m_fontSizeCode * m_dpiScaling, &fontConfig);
+        ImGui::GetIO().Fonts->AddFontFromMemoryTTF((void*)OpenSans_Regular_ttf, OpenSans_Regular_ttf_len, m_fontSize * m_frameBufferScaling, &fontConfig);
+        ImGui::GetIO().Fonts->AddFontFromMemoryTTF((void*)OpenSans_Regular_ttf, OpenSans_Regular_ttf_len, m_codeSize * m_frameBufferScaling, &fontConfig);
+        ImGui::GetIO().FontGlobalScale = 1.0f / m_frameBufferScaling;
         ImGuiFreeType::BuildFontAtlas(ImGui::GetIO().Fonts);
         ImGui_ImplOpenGL3_CreateFontsTexture();
         ImGui::GetStyle() = ImGuiStyle();
@@ -162,18 +164,20 @@ int Application::getCodeSize() const
     return m_fontSize;
 }
 
-void Application::setCodeSize(int fontSize)
+void Application::setCodeSize(int codeSize)
 {
-    int clampedCodeSize = std::clamp<int>(fontSize, 6, 52);
-    m_styleOutdated |= m_fontSizeCode != clampedCodeSize;
-    m_fontSizeCode = clampedCodeSize;
+    int clampedCodeSize = std::clamp<int>(codeSize, 6, 52);
+    m_styleOutdated |= m_codeSize != clampedCodeSize;
+    m_codeSize = clampedCodeSize;
 }
 
-void Application::setDpiScaling(float dpiScaling)
+void Application::setDpiScaling(float desiredScale, float frameBufferScale)
 {
-    float clampedDpiScaling = std::clamp<float>(dpiScaling, 0.25f, 4.0f);
-    m_styleOutdated |= m_dpiScaling != clampedDpiScaling;
-    m_dpiScaling = clampedDpiScaling;
+    float clampedDpiScaling = std::clamp<float>(desiredScale, 0.25f, 4.0f);
+    float clampedFrameBufferScaling = std::clamp<float>(frameBufferScale, 0.25f, 4.0f);
+    m_styleOutdated |= (m_desiredScaling != clampedDpiScaling || m_frameBufferScaling != clampedFrameBufferScaling);
+    m_desiredScaling = clampedDpiScaling;
+    m_frameBufferScaling = clampedFrameBufferScaling;
 }
 
 float Application::getDpiScaling() const

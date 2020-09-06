@@ -52,10 +52,12 @@ public:
     int getFontSize() const;
     void setFontSize(int fontSize);
 
-    int Application::getCodeSize() const;
-    void Application::setCodeSize(int fontSize);
+    int getCodeSize() const;
+    void setCodeSize(int codeSize);
 
-    void setDpiScaling(float dpiScaling);
+    // The framebuffer scale argument should be used when the scale between the window size and
+    // the framebuffer size is not 1. This is for instance the case on mac retina displays.
+    void setDpiScaling(float desiredScale, float frameBufferScale = 1.0f);
     float getDpiScaling() const;
 
 
@@ -78,7 +80,9 @@ private:
     bool m_styleOutdated = false;
 
     int m_fontSize = 18;
-    int m_fontSizeCode = 18;
+    int m_codeSize = 18;
+    float m_desiredScaling = 1.0f;
+    float m_frameBufferScaling = 1.0f;
     float m_dpiScaling = 1.0f;
 
 };
