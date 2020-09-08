@@ -1,11 +1,13 @@
 #include "Application.hpp"
 #include "types.hpp"
 
+#include "app/Directories.hpp"
 #include "library/dataInputs/GenericInput.hpp"
 #include "library/dataSources/TextureData.hpp"
 
 #include <ZigZag/Object.hpp>
 #include <ZigZag/BaseOperator.hpp>
+#include <ZigZag/LuaBehaviour.hpp>
 #include <ZigZag/TParameter.hpp>
 
 #include <imgui.h>
@@ -21,6 +23,7 @@ namespace zz = ZigZag;
 Application::Application()
 {
     registerTypes();
+    ZigZag::LuaBehaviour::loadDefaultScript((Directories::resourcesDir() / "LuaBehaviourDefaultScript.lua").string());
 
     m_nodeEditorWindow.setScope(&m_appState.rootOperator);
     m_hierarchyWindow.setScope(&m_appState.rootOperator);
