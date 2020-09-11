@@ -1,4 +1,5 @@
-#include "IDataSource.hpp"
+#include <ZigZag/IDataSource.hpp>
+#include <ZigZag/Platform.hpp>
 
 
 class ExampleDataSource : public IDataSource
@@ -53,7 +54,7 @@ public:
 
 ExampleDataSourceFactory exampleFactory;
 
-extern "C" void getPluginDataSources(int* count, IDataSourceFactory** dataSourceFactories)
+ZIGZAG_C_API void getPluginDataSources(int* count, IDataSourceFactory** dataSourceFactories)
 {
     *count = 1;
     *dataSourceFactories = &exampleFactory;
