@@ -1,19 +1,15 @@
 #include <app/Directories.hpp>
+#include <ZigZag/Platform.hpp>
 
 #include <filesystem>
 #include <iostream>
 #include <stdexcept>
 #include <string>
 
-#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
-	// No extra includes necessary for windows
-#elif defined(__APPLE__) || defined(__linux__)
+#ifdef ZIGZAG_UNIX_LIKE
 	#include <pwd.h>
 	#include <unistd.h>
-#else
-	#error "Platform not supported."
 #endif
-
 
 
 namespace Directories
@@ -25,7 +21,7 @@ namespace Directories
 
 		if (!initialized)
 		{
-#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+#if defined(ZIGZAG_WINDOWS)
 			const auto userProfile = std::getenv("USERPROFILE");
 			if (userProfile)
 			{
@@ -41,8 +37,7 @@ namespace Directories
 					home.append(homePath);
 				}
 			}
-#elif defined(__APPLE__) || defined(__linux__)
-
+#elif defined(ZIGZAG_UNIX_LIKE)
 			auto p = getpwuid(getuid());
 			home = p ? p->pw_dir : getenv("HOME");
 #endif
@@ -63,14 +58,15 @@ namespace Directories
 
 		if (!initialized)
 		{
-#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+#if defined(ZIGZAG_WINDOWS)
 			settings = homeDir().string();
 			settings.append("\\AppData\\Local\\ZigZag");
-#elif defined(__APPLE__)
+#elif defined(ZIGZAG_MAC_OSX)
 			settings = homeDir();
 			settings.append("/Library/Preferences/ZigZag");
-#elif defined (__linux__)
-
+#elif defined (ZIGZAG_LINUX)
+			static_assert(false);
+			//TODO find proper location for linux
 #endif
 			initialized = true;
 		}
