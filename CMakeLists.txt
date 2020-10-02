@@ -2,10 +2,26 @@ cmake_minimum_required(VERSION 3.12)
 
 project(ZigZagEditorNative VERSION 0.1.0)
 
+# To compile first creare a "build" directory in this folder.
+# "mkdir build"
+
+# Enter the build directory
+# "cd build"
+
+# Run cmake:
+# "cmake .."
+
+# To make a debug build:
+# "cmake --build ."
+
+# To make a release build:
+# "cmake --build . --config Release"
+
+# The generated binaries will be placed in the "build_output" folder
 
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_SOURCE_DIR}/build/Debug" CACHE INTERNAL "" FORCE)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/build/Release" CACHE INTERNAL "" FORCE)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_SOURCE_DIR}/build_output/Debug" CACHE INTERNAL "" FORCE)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/build_output/Release" CACHE INTERNAL "" FORCE)
 
 
 include("${CMAKE_CURRENT_LIST_DIR}/src/_src_files.cmake")
