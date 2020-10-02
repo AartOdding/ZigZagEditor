@@ -14,28 +14,43 @@
 #include <app/Directories.hpp>
 #include <app/style/FontLibrary.hpp>
 
+#include <ZigZag/Platform.hpp>
 
-static Application* appInstance = nullptr;
-static FontLibrary* fontLibrary = nullptr;
+#define ZIGZAG_EXPORT extern "C" __declspec(dllexport)
 
 
-float getFramebufferScaling(GLFWwindow* window)
+namespace // Unnamed namespace keeps everything inside local to this file.
 {
-    int sizeX, sizeY, fbSizeX, fbSizeY;
-    glfwGetWindowSize(window, &sizeX, &sizeY);
-    glfwGetFramebufferSize(window, &fbSizeX, &fbSizeY);
-    return static_cast<float>(fbSizeX) / static_cast<float>(sizeX);
+
+    float getFramebufferScaling(GLFWwindow* window)
+    {
+        int sizeX, sizeY, fbSizeX, fbSizeY;
+        glfwGetWindowSize(window, &sizeX, &sizeY);
+        glfwGetFramebufferSize(window, &fbSizeX, &fbSizeY);
+        return static_cast<float>(fbSizeX) / static_cast<float>(sizeX);
+    }
+
+    GLFWwindow* window = nullptr;
+
+    std::unique_ptr<Application> application;
+    FontLibrary* fontLibrary = nullptr;
+} 
+
+
+ZIGZAG_EXPORT GLFWglproc ZigZagGetProcAddress(const char* procName)
+{
+    return glfwGetProcAddress(procName);
 }
 
 
-int main(int, char**)
+ZIGZAG_EXPORT void initialize()
 {
     Directories::createSettingsDir();
 
     glfwSetErrorCallback([](int errorCode, const char* errorDescription) {
         std::cerr << "GLFW error " << errorCode << ": " << errorDescription << std::endl;
     });
-    
+
     if (!glfwInit())
     {
         std::cerr << "Failed to initialize GLFW." << std::endl;
@@ -50,7 +65,7 @@ int main(int, char**)
     glfwWindowHint(GLFW_DECORATED, true);
     glfwWindowHint(GLFW_SCALE_TO_MONITOR, true);
 
-    GLFWwindow* window = glfwCreateWindow(1280, 720, "ZigZag", nullptr, nullptr);
+    window = glfwCreateWindow(1280, 720, "ZigZag", nullptr, nullptr);
 
     if (!window)
     {
@@ -61,7 +76,7 @@ int main(int, char**)
 
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1);
-    
+
     glfwSetFramebufferSizeCallback(window, [](GLFWwindow* window, int width, int height) {
         glViewport(0, 0, width, height);
     });
@@ -90,38 +105,38 @@ int main(int, char**)
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 150");
 
-    auto application = std::make_unique<Application>();
-    appInstance = application.get();
+    application = std::make_unique<Application>();
     fontLibrary = &application->getAppState()->fontLibrary;
 
     float sx, sy;
     glfwGetWindowContentScale(window, &sx, &sy);
     fontLibrary->setScaling(sx, getFramebufferScaling(window));
+}
 
-    while (!glfwWindowShouldClose(window))
-    {
-        fontLibrary->updateFonts();
+ZIGZAG_EXPORT void render()
+{
+    fontLibrary->updateFonts();
 
-        glfwPollEvents();
+    glfwPollEvents();
 
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
 
-        application->update();
+    application->update();
 
-        ImGui::Render();
+    ImGui::Render();
 
-        glClearColor(0, 0, 0, 1);
-        glClear(GL_COLOR_BUFFER_BIT);
+    glClearColor(0, 0, 0, 1);
+    glClear(GL_COLOR_BUFFER_BIT);
 
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-        glfwSwapBuffers(window);
-    }
+    glfwSwapBuffers(window);
+}
 
-    fontLibrary = nullptr;
-    appInstance = nullptr;
+ZIGZAG_EXPORT void shutdown()
+{
     application.reset(nullptr);
 
     ImGui_ImplOpenGL3_Shutdown();
@@ -130,6 +145,9 @@ int main(int, char**)
 
     glfwDestroyWindow(window);
     glfwTerminate();
+}
 
-    return 0;
+ZIGZAG_EXPORT bool shouldQuit()
+{
+    return glfwWindowShouldClose(window);
 }
