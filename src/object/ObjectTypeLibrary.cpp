@@ -2,7 +2,7 @@
 
 
 
-ObjectTypeLibrary* ObjectTypeLibrary::getGLobalInstance()
+ObjectTypeLibrary* ObjectTypeLibrary::getGlobalInstance()
 {
 	static ObjectTypeLibrary globalInstance;
 	return &globalInstance;
