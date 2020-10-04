@@ -8,12 +8,13 @@ class Identifier
 {
 public:
 
+	Identifier() = delete;
+
 	explicit Identifier(std::uint64_t value);
 	
-	~Identifier() = default;
-	Identifier() = delete;
-	Identifier(Identifier&&) = default;
 	Identifier(const Identifier&) = default;
+	Identifier(Identifier&&) = default;
+	~Identifier() = default;
 
 	static Identifier null();
 

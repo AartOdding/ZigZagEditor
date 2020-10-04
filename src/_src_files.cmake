@@ -16,5 +16,7 @@ set(src_files
     "${CMAKE_CURRENT_LIST_DIR}/Application.hpp"
     "${CMAKE_CURRENT_LIST_DIR}/main.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/Platform.hpp"
+    "${CMAKE_CURRENT_LIST_DIR}/Project.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/Project.hpp"
     "${CMAKE_CURRENT_LIST_DIR}/types.hpp"
 )

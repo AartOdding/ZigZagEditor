@@ -36,7 +36,7 @@ bool removeObject(ZObject* object)
     return false;
 }
 
-ZIGZAG_EXPORT void registerObjectDelegates(AddObjectDelegate add, RemoveObjectDelegate rm)
+ZIGZAG_EXPORT void installObjectDelegates(AddObjectDelegate add, RemoveObjectDelegate rm)
 {
     addObjectDelegate = add;
     removeObjectDelegate = rm;
@@ -45,6 +45,7 @@ ZIGZAG_EXPORT void registerObjectDelegates(AddObjectDelegate add, RemoveObjectDe
 ZIGZAG_EXPORT void onNewObjectTypeAdded(const char* name, std::uint64_t uniqueID, ObjectTypeCategory category)
 {
     GlobalObjectTypeLibrary::getInstance()->addNewObjectType(name, Identifier(uniqueID), category);
+    std::cout << "Object type was added: " << name << ", id: " << uniqueID << ", category: " << static_cast<int>(category) << std::endl;
 }
 
 ZIGZAG_EXPORT void onObjectCreated(std::uint64_t newObject, std::uint64_t parentObject)
