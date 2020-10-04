@@ -3,7 +3,7 @@
 
 GlobalObjectMap* GlobalObjectMap::getInstance()
 {
-    GlobalObjectMap instance;
+    static GlobalObjectMap instance;
     return &instance;
 }
 
