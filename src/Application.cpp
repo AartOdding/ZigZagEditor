@@ -2,8 +2,6 @@
 #include "types.hpp"
 
 #include "app/Directories.hpp"
-#include "library/dataInputs/GenericInput.hpp"
-#include "library/dataSources/TextureData.hpp"
 
 #include <ZigZag/Object.hpp>
 #include <ZigZag/BaseOperator.hpp>

@@ -8,11 +8,14 @@ class Identifier
 {
 public:
 
-	Identifier(std::uint64_t value);
+	explicit Identifier(std::uint64_t value);
 	
 	~Identifier() = default;
+	Identifier() = delete;
 	Identifier(Identifier&&) = default;
 	Identifier(const Identifier&) = default;
+
+	static Identifier null();
 
 	bool operator==(Identifier rhs) const;
 	bool operator!=(Identifier rhs) const;
@@ -22,6 +25,8 @@ public:
 	bool operator>=(Identifier rhs) const;
 
 	explicit operator std::uint64_t() const;
+
+	operator bool() const;
 
 private:
 

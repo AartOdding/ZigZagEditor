@@ -6,6 +6,11 @@ Identifier::Identifier(std::uint64_t value)
 {
 }
 
+Identifier Identifier::null()
+{
+	return Identifier(0);
+}
+
 bool Identifier::operator==(Identifier rhs) const
 {
 	return m_value == rhs.m_value;
@@ -39,4 +44,9 @@ bool Identifier::operator>=(Identifier rhs) const
 Identifier::operator std::uint64_t() const
 {
 	return m_value;
+}
+
+Identifier::operator bool() const
+{
+	return m_value != 0;
 }

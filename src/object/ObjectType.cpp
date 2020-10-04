@@ -2,9 +2,9 @@
 
 
 
-ObjectType::ObjectType(std::string_view name, Identifier uniqueID, ObjectTypeCategory category)
+ObjectType::ObjectType(std::string_view name, Identifier identifier, ObjectTypeCategory category)
 	: m_name(name)
-	, m_uniqueID(uniqueID)
+	, m_identifier(identifier)
 	, m_category(category)
 {
 
@@ -21,7 +21,7 @@ ObjectTypeCategory ObjectType::getCategory() const
 }
 
 
-Identifier ObjectType::getUniqueID() const
+Identifier ObjectType::getIdentifier() const
 {
-	return m_uniqueID;
+	return m_identifier;
 }

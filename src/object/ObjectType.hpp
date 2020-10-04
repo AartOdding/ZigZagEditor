@@ -19,16 +19,16 @@ class ObjectType
 {
 public:
 
-    ObjectType(std::string_view name, Identifier uniqueID, ObjectTypeCategory category);
+    ObjectType(std::string_view name, Identifier identifier, ObjectTypeCategory category);
 
     const std::string& getName() const;
-    Identifier getUniqueID() const;
+    Identifier getIdentifier() const;
     ObjectTypeCategory getCategory() const;
 
 private:
 
     std::string m_name;
-    Identifier m_uniqueID;
+    Identifier m_identifier;
     ObjectTypeCategory m_category;
 
 };
