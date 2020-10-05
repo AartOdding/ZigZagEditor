@@ -27,14 +27,14 @@ public:
     ~ZObject();
     
     static std::unique_ptr<ZObject> create(Identifier identifier);
+
     ZObject* createChild(Identifier identifier);
+    void addChild(std::unique_ptr<ZObject>&& child);
+    std::unique_ptr<ZObject> stealFromParent();
     
     Identifier getIdentifier() const;
     ZObject* getParent();
     const std::vector<std::unique_ptr<ZObject>>& getChildren();
-
-    std::unique_ptr<ZObject> stealFromParent();
-    void addChild(std::unique_ptr<ZObject>&& child);
 
 private:
 
