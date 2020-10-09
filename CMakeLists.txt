@@ -70,6 +70,10 @@ set(JSON_ImplicitConversions OFF CACHE INTERNAL "")
 add_subdirectory(external/json)
 target_link_libraries(ZigZagEditorNative nlohmann_json)
 
+# type_conversion_iterator
+add_subdirectory(external/type_conversion_iterator)
+target_link_libraries(ZigZagEditorNative type_conversion_iterator)
+
 # ZIGZAG CORE
 add_subdirectory(external/ZigZagCore)
 target_link_libraries(ZigZagEditorNative ZigZagCore)
