@@ -4,19 +4,28 @@
 #include <functional>
 
 
+template<typename T>
 class Identifier
 {
 public:
 
-	Identifier() = delete;
+	Identifier()
+		: m_id(0)
+		, m_object(nullptr)
+		, m_external(false)
+	{
+	}
 
-	explicit Identifier(std::uint64_t value);
+	Identifier(std::uint64_t id, T* object, bool external)
+		: m_id(id)
+		, m_object(object)
+		, m_external(external)
+	{	
+	}
 	
-	Identifier(const Identifier&) = default;
-	Identifier(Identifier&&) = default;
 	~Identifier() = default;
-
-	static Identifier null();
+	Identifier(const Identifier&) = default;
+	Identifier& operator=(const Identifier&) = default;
 
 	bool operator==(Identifier rhs) const;
 	bool operator!=(Identifier rhs) const;
@@ -31,7 +40,10 @@ public:
 
 private:
 
-	const std::uint64_t m_value;
+	const std::uint64_t m_id;
+    T* const m_object;
+	const bool m_external;
+
 };
 
 

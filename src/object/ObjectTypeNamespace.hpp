@@ -6,35 +6,58 @@
 #include <vector>
 
 #include <object/ObjectType.hpp>
+#include <tci/views.hpp>
 
 
 class ObjectTypeNamespace
 {
-public:
-
     ObjectTypeNamespace() = delete;
     ObjectTypeNamespace(ObjectTypeNamespace&&) = delete;
     ObjectTypeNamespace(const ObjectTypeNamespace&) = delete;
 
+public:
+    
+    using Pointer = std::unique_ptr<ObjectTypeNamespace>;
+
+    using Children = std::vector<std::unique_ptr<ObjectTypeNamespace>>;
+    using ChildrenView = tci::pointer_view<Children>;
+    using ConstChildrenView = tci::const_pointer_view<Children>;
+
+    using Types = std::vector<std::unique_ptr<ObjectType>>;
+    using TypesView = tci::pointer_view<Types>;
+    using ConstTypesView = tci::pointer_view<Types>;
+
+
+    static Pointer create(std::string_view name);
     ~ObjectTypeNamespace();
 
-    static std::unique_ptr<ObjectTypeNamespace> createNamespace(std::string_view name);
 
-    ObjectTypeNamespace* createChildNamespace(std::string_view name);
-    void addChildNamespace(std::unique_ptr<ObjectTypeNamespace>&& childNamespace);
-    std::unique_ptr<ObjectTypeNamespace> stealFromParent();
+    void addChild(Pointer&& childNamespace);
+    Pointer removeFromParent();
 
-    ObjectTypeNamespace* getParentNamespace();
-    const std::vector<std::unique_ptr<ObjectTypeNamespace>>& getChildNamespaces();
+
+    ObjectTypeNamespace* getParent();
+    const ObjectTypeNamespace* getParent() const;
+
+    ChildrenView getChildren();
+    ConstChildrenView getChildren() const;
+
+
+    TypesView getTypes();
+    ConstTypesView getTypes() const;
+
+
+    const std::string& getName() const;
 
 private:
 
     ObjectTypeNamespace(std::string_view name);
     
-    std::vector<std::unique_ptr<ObjectType>> m_objectTypes;
-    std::vector<std::unique_ptr<ObjectTypeNamespace>> m_childNamespaces;
+    Types m_types;
 
-    ObjectTypeNamespace* m_parentNamespace;
+    Children m_children;
+    ObjectTypeNamespace* m_parent;
+
     std::string m_name;
 
 };
