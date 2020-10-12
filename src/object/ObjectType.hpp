@@ -27,11 +27,10 @@ public:
 
     using Pointer = std::unique_ptr<ObjectType>;
 
-    static Pointer create(Identifier<ObjectType> identifier);
+    static Pointer create(std::string_view name, Identifier<ObjectType> identifier);
     ~ObjectType() = default;
 
     const std::string& getName() const;
-    void setName(std::string_view name);
 
     ObjectTypeCategory getCategory() const;
     void setCategory(ObjectTypeCategory category);
@@ -43,9 +42,9 @@ private:
 
     friend class ObjectTypeNamespace;
 
-    ObjectType(Identifier<ObjectType> identifier);
+    ObjectType(std::string_view name, Identifier<ObjectType> identifier);
 
-    std::string m_name;
+    const std::string m_name;
     ObjectTypeCategory m_category;
     ObjectTypeNamespace* m_namespace;
 

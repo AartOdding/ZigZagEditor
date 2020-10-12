@@ -5,13 +5,12 @@
 #include <type_traits>
 
 
-template<typename T>
+template<typename Type>
 class Identifier
 {
 public:
 
     static_assert(std::is_same_v<Type, std::remove_cv_t<Type>>);
-    static_assert(std::is_base_of_v<Identity<Type>, Type>);
 
 	explicit Identifier(std::uint64_t id) : m_id(id) { }
 	
@@ -39,10 +38,10 @@ private:
 
 namespace std
 {
-	template<typename T> 
-	struct hash<Identifier<T>>
+	template<typename Type> 
+	struct hash<Identifier<Type>>
 	{
-		std::size_t operator()(const Identifier<T>& id) const noexcept
+		std::size_t operator()(const Identifier<Type>& id) const noexcept
 		{
 			return hash<std::uint64_t>()(static_cast<std::uint64_t>(id));
 		}

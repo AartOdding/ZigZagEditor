@@ -13,7 +13,7 @@ template<typename Type>
 class Identity
 {
     static_assert(std::is_same_v<Type, std::remove_cv_t<Type>>);
-    static_assert(std::is_base_of_v<Identity<Type>, Type>);
+    //static_assert(std::is_base_of_v<Identity<Type>, Type>);
 
     Identifier<Type> m_identifier;
 
@@ -75,7 +75,7 @@ template<typename Type>
 Identity<Type>::Identity(Type* identity)
 {
     extern std::atomic_uint64_t nextIdentifiableValue;
-    m_identifier = nextIdentifiableValue.fetch_add(1, std::memory_order_relaxed);
+    m_identifier = Identifier<Type>(nextIdentifiableValue.fetch_add(1, std::memory_order_relaxed));
     IdentityMap<Type>::add(m_identifier, identity);
 }
 

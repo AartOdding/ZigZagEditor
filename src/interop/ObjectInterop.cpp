@@ -1,3 +1,4 @@
+#include <Application.hpp>
 #include <Platform.hpp>
 #include <interop/ObjectInterop.hpp>
 #include <object/ZObject.hpp>
@@ -47,35 +48,40 @@ ZIGZAG_EXPORT void onNewObjectTypeAdded(const char* name, std::uint64_t uniqueID
 {
     auto identifier = Identifier<ObjectType>(uniqueID);
     auto nameParts = StringUtils::split(name, '.');
-
-    if (identifier && !nameparts.empty())
+    
+    if (identifier && !nameParts.empty())
     {
-        auto objectType = ObjectType::create(identifier);
-        objectType->setName(nameParts.back());
+        auto objectType = ObjectType::create(nameParts.back(), identifier);
         objectType->setCategory(category);
+        nameParts.pop_back();
 
-        for (auto it = nameParts.rbegin() + 1; it != nameParts.rend() ++it)
+        //ObjectTypeNamespace* typeNamespace = Application::getGlobalInstance()->getRootTypeNamespace();
+
+        for (auto name : nameParts)
         {
-            ObjectTypeNamespace::crea
+            //typeNamespace = typeNamespace->ObjectTypeNamespace::create(*it);
+        }
+
+        if (nameParts.empty())
+        {
+           // Application::getGloblInstance()->getRootTypeNamespace()->addType(std::move(objectType));
+        }
+        else
+        {
+
+
         }
     }
-    auto objectType = ObjectType::create(Identifier<ObjectType>(uniqueID));
-
-
-    
-    auto IdentityMap<ObjectType>::get(Identifier<ObjectType>(uniqueID));
-    GlobalObjectTypeLibrary::getInstance()->addNewObjectType(name, Identifier(uniqueID), category);
-    std::cout << "Object type was added: " << name << ", id: " << uniqueID << ", category: " << static_cast<int>(category) << std::endl;
 }
 
 ZIGZAG_EXPORT void onObjectCreated(std::uint64_t newObject, std::uint64_t parentObject)
 {
-    auto parent = GlobalObjectMap::getInstance()->get(Identifier(parentObject));
-    parent->createChild(Identifier(newObject));
+    //auto parent = GlobalObjectMap::getInstance()->get(Identifier(parentObject));
+    //parent->createChild(Identifier(newObject));
 }
 
 ZIGZAG_EXPORT void onObjectDestroyed(std::uint64_t objectID)
 {
-    auto object = GlobalObjectMap::getInstance()->get(Identifier(objectID));
-    object->stealFromParent(); // not storing the returned unique_ptr will delete it.
+    //auto object = GlobalObjectMap::getInstance()->get(Identifier(objectID));
+    //object->stealFromParent(); // not storing the returned unique_ptr will delete it.
 }

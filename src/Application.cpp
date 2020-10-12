@@ -29,6 +29,8 @@ Application::Application()
     registerTypes();
     ZigZag::LuaBehaviour::loadDefaultScript((Directories::resourcesDir() / "LuaBehaviourDefaultScript.lua").string());
 
+    m_rootTypeNamespace = ObjectTypeNamespace::create("");
+
     m_nodeEditorWindow.setScope(&m_appState.rootOperator);
     m_hierarchyWindow.setScope(&m_appState.rootOperator);
 }
@@ -131,4 +133,14 @@ int Application::windowOpenCount(WindowType type)
 ApplicationState* Application::getAppState()
 {
     return &m_appState;
+}
+
+void Application::setRootObject(std::unique_ptr<ZObject>&& object)
+{
+    m_rootObject = std::move(object);
+}
+
+void Application::clearRootObject()
+{
+    m_rootObject.reset();
 }

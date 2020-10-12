@@ -5,14 +5,16 @@
 
 #include "app/ApplicationState.hpp"
 
-#include "gui/MainMenu.hpp"
-
 #include "gui/HierarchyWindow.hpp"
 #include "gui/HistoryWindow.hpp"
 #include "gui/LuaEditorWindow.hpp"
+#include "gui/MainMenu.hpp"
 #include "gui/NodeEditorWindow.hpp"
 #include "gui/RenderOrderWindow.hpp"
 #include "gui/StyleEditorWindow.hpp"
+
+#include <object/ObjectTypeNamespace.hpp>
+#include <object/ZObject.hpp>
 
 namespace ZigZag
 {
@@ -35,6 +37,7 @@ public:
         ImGuiStyleEditor
     };
 
+    static Application* getGlobalInstance();
 
     Application(const Application&) = delete;
     Application(Application&&) = delete;
@@ -47,6 +50,11 @@ public:
     int windowOpenCount(WindowType type);
 
     ApplicationState* getAppState();
+    
+    void setRootObject(std::unique_ptr<ZObject>&& object);
+    void clearRootObject();
+
+    ObjectTypeNamespace* getRootTypeNamespace();
 
 private:
 
@@ -67,5 +75,7 @@ private:
     bool m_ImGuiDemoWindowOpen = false;
     bool m_ImGuiStyleEditorWindowOpen = false;
 
+    std::unique_ptr<ZObject> m_rootObject;
+    std::unique_ptr<ObjectTypeNamespace> m_rootTypeNamespace;
 
 };

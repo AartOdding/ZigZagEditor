@@ -18,8 +18,8 @@ public:
     using Pointer = std::unique_ptr<ZObject>;
 
     using Children = std::vector<Pointer>;
-    using ChildrenView = tci::pointer_view<Children>;
-    using ConstChildrenView = tci::const_pointer_view<Children>;
+    using ChildrenView = tci::view<Children>;
+    using ConstChildrenView = tci::const_view<Children>;
 
     static Pointer create(Identifier<ZObject> identifier);
     ~ZObject() = default;

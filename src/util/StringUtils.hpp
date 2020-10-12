@@ -9,20 +9,30 @@
 
 namespace StringUtils
 {
+    size_t countCharacter(const char* string, char character) 
+    {
+        size_t count = 0;
 
-    std::vector<std::string_view> split(std::string_view string, char delimiter)
+        for (const char* it = string; it != '\0'; ++it)
+        {
+            count += (*it == character);
+        }
+        return count;
+    }
+
+    std::vector<std::string_view> split(const char* string, char delimiter)
     {
         std::vector<std::string_view> parts;
 
-        if (!string.empty())
+        if (string)
         {
-            auto numParts = std::count(string.begin(), string.end(), delimiter);
+            auto numParts = countCharacter(string, delimiter);
             parts.reserve(numParts);
             
             bool searchingPartBegin = true;
-            std::string_view::const_iterator partBegin;
+            const char* partBegin;
             
-            for (auto it = string.begin(); it != string.end(); ++it)
+            for (const char* it = string; it != '\0'; ++it)
             {
                 auto character = *it;
 
@@ -35,7 +45,9 @@ namespace StringUtils
                 {
                     if (!searchingPartBegin)
                     {
-                        parts.emplace_back(partBegin, it);
+                        size_t sz = it - partBegin;
+                        std::string_view strv(partBegin, sz);
+                        parts.push_back(strv);
                     }
                     searchingPartBegin = true;
                 }

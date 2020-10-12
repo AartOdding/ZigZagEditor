@@ -1,9 +1,10 @@
+#include <algorithm>
+
 #include <object/ObjectTypeNamespace.hpp>
 
 
 ObjectTypeNamespace::ObjectTypeNamespace(std::string_view name)
-    : Identity<ObjectTypeNamespace>(this)
-    , m_name(name)
+    : m_name(name)
 {
 }
 
@@ -14,21 +15,24 @@ ObjectTypeNamespace::Pointer ObjectTypeNamespace::create(std::string_view name)
 
 void ObjectTypeNamespace::addChild(Pointer&& childNamespace)
 {
-    childNamespace->m_parent = this;
-    m_children.push_back(std::move(childNamespace));
+    if (childNamespace)
+    {
+        childNamespace->m_parent = this;
+        m_children[childNamespace->getName()] = std::move(childNamespace);
+    }
 }
 
-ObjectTypeNamespace::Pointer ObjectTypeNamespace::removeChild(Identifier<ObjectTypeNamespace> childIdentifier)
+ObjectTypeNamespace::Pointer ObjectTypeNamespace::removeChild(std::string_view childIdentifier)
 {
-    for(auto it = m_children.begin(); it != m_children.end(); ++it)
+    auto it = std::lower_bound(m_children.begin(), m_children.end(), childIdentifier, 
+        [](const auto& pair, const std::string_view& name){ return pair.first < name; });
+
+    if (it != m_children.end() && it->first == childIdentifier)
     {
-        if ((*it)->getIdentifier() == childIdentifier)
-        {
-            Pointer child = std::move(*it);
-            child->m_parent = nullptr;
-            m_children.erase(it);
-            return std::move(child);
-        }
+        Pointer child = std::move(it->second);
+        child->m_parent = nullptr;
+        m_children.erase(it);
+        return std::move(child);
     }
     return Pointer();
 }
@@ -55,19 +59,35 @@ ObjectTypeNamespace::ConstChildrenView ObjectTypeNamespace::getChildren() const
 
 void ObjectTypeNamespace::addType(TypePointer&& type)
 {
-    type->m_namespace = this;
-    m_types.push_back(std::move(type));
+    if (type)
+    {
+        type->m_namespace = this;
+        m_typesAlphabetic.emplace(type->getName(), type.get());
+        m_types[type->getIdentifier()] = std::move(type);
+    }
 }
 
 ObjectTypeNamespace::TypePointer ObjectTypeNamespace::removeType(Identifier<ObjectType> typeIdentifier)
 {
-    for(auto it = m_types.begin(); it != m_types.end(); ++it)
+    if (typeIdentifier)
     {
-        if ((*it)->getIdentifier() == typeIdentifier)
+        auto typeIt = m_types.find(typeIdentifier);
+
+        if (typeIt != m_types.end())
         {
-            TypePointer type = std::move(*it);
+            auto [begin, end] = m_typesAlphabetic.equal_range(typeIt->second->getName());
+            
+            for (auto it = begin; it != end; ++it)
+            {
+                if (it->second == typeIt->second.get())
+                {
+                    m_typesAlphabetic.erase(it);
+                    break;
+                }
+            }
+            TypePointer type = std::move(typeIt->second);
             type->m_namespace = nullptr;
-            m_types.erase(it);
+            m_types.erase(typeIt);
             return std::move(type);
         }
     }
@@ -76,12 +96,12 @@ ObjectTypeNamespace::TypePointer ObjectTypeNamespace::removeType(Identifier<Obje
 
 ObjectTypeNamespace::TypesView ObjectTypeNamespace::getTypes()
 {
-    return TypesView(m_types);
+    return TypesView(m_typesAlphabetic);
 }
 
 ObjectTypeNamespace::ConstTypesView ObjectTypeNamespace::getTypes() const
 {
-    return ConstTypesView(m_types);
+    return ConstTypesView(m_typesAlphabetic);
 }
 
 const std::string& ObjectTypeNamespace::getName() const
