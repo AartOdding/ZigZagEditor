@@ -9,7 +9,7 @@
 ZIGZAG_EXPORT void onProjectCreated(const char* name, std::uint64_t projectID)
 {
     std::cout << "project created: " << name << ", id: " << projectID << std::endl;
-    auto rootObject = ZObject::create(Identifier(projectID));
+    auto rootObject = ZObject::create(Identifier<ZObject>(projectID));
     Project::getGlobalInstance()->setRootObject(std::move(rootObject));
 }
 

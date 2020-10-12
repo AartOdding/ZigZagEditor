@@ -1,21 +1,23 @@
 #pragma once
 
 #include <cstdint>
+#include <memory>
 #include <string>
 #include <string_view>
 
-#include <object/Identifier.hpp>
+#include <object/Identity.hpp>
 
+
+class ObjectTypeNamespace;
 
 enum class ObjectTypeCategory
 {
+    Object,
     DataSource,
-    Operator,
-    Object
+    Operator
 };
 
-
-class ObjectType
+class ObjectType : public Identity<ObjectType>
 {
     ObjectType() = delete;
     ObjectType(ObjectType&&) = delete;
@@ -25,21 +27,26 @@ public:
 
     using Pointer = std::unique_ptr<ObjectType>;
 
-    static Pointer create(Identifier identifier);
-    ~ObjectType();
+    static Pointer create(Identifier<ObjectType> identifier);
+    ~ObjectType() = default;
 
-
- 
     const std::string& getName() const;
-    Identifier getIdentifier() const;
+    void setName(std::string_view name);
+
     ObjectTypeCategory getCategory() const;
+    void setCategory(ObjectTypeCategory category);
+
+    ObjectTypeNamespace* getNamespace();
+    const ObjectTypeNamespace* getNamespace() const;
 
 private:
 
-    ObjectType(std::string_view name, Identifier identifier, ObjectTypeCategory category);
+    friend class ObjectTypeNamespace;
+
+    ObjectType(Identifier<ObjectType> identifier);
 
     std::string m_name;
-    Identifier m_identifier;
     ObjectTypeCategory m_category;
+    ObjectTypeNamespace* m_namespace;
 
 };

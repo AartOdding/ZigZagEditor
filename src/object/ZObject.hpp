@@ -3,44 +3,40 @@
 #include <memory>
 #include <vector>
 
-#include <object/Identifier.hpp>
-
-/*
-ISSUES:
-
-    setParent should only be accessible when coming from csharp callback
-
-    nothing stops loops in object hierarchy
-
-*/
+#include <object/Identity.hpp>
+#include <tci/views.hpp>
 
 
-
-class ZObject
+class ZObject : public Identity<ZObject>
 {
-public:
-
     ZObject() = delete;
     ZObject(ZObject&&) = delete;
     ZObject(const ZObject&) = delete;
 
-    ~ZObject();
-    
-    static std::unique_ptr<ZObject> create(Identifier identifier);
+public:
 
-    ZObject* createChild(Identifier identifier);
-    void addChild(std::unique_ptr<ZObject>&& child);
-    std::unique_ptr<ZObject> stealFromParent();
+    using Pointer = std::unique_ptr<ZObject>;
+
+    using Children = std::vector<Pointer>;
+    using ChildrenView = tci::pointer_view<Children>;
+    using ConstChildrenView = tci::const_pointer_view<Children>;
+
+    static Pointer create(Identifier<ZObject> identifier);
+    ~ZObject() = default;
+
+    void addChild(Pointer&& child);
+    Pointer removeChild(Identifier<ZObject> childIdentifier);
     
-    Identifier getIdentifier() const;
     ZObject* getParent();
-    const std::vector<std::unique_ptr<ZObject>>& getChildren();
+    const ZObject* getParent() const;
+
+    ChildrenView getChildren();
+    ConstChildrenView getChildren() const;
 
 private:
 
-    ZObject(Identifier identifier);
+    ZObject(Identifier<ZObject> identifier);
 
-    Identifier m_identifier;
     ZObject* m_parent;
     std::vector<std::unique_ptr<ZObject>> m_children;
 

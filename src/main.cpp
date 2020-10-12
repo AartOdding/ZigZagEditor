@@ -31,9 +31,6 @@ namespace // Unnamed namespace keeps everything inside local to this file.
     }
 
     GLFWwindow* window = nullptr;
-
-    std::unique_ptr<Application> application;
-    FontLibrary* fontLibrary = nullptr;
 } 
 
 
@@ -82,6 +79,7 @@ ZIGZAG_EXPORT void initialize()
     });
 
     glfwSetWindowContentScaleCallback(window, [](GLFWwindow* window, float scaleX, float scaleY) {
+        auto fontLibrary = &(Application::getGlobalInstance()->getAppState()->fontLibrary);
         if (fontLibrary)
         {
             fontLibrary->setScaling(scaleX, getFramebufferScaling(window));
@@ -105,16 +103,16 @@ ZIGZAG_EXPORT void initialize()
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 150");
 
-    application = std::make_unique<Application>();
-    fontLibrary = &application->getAppState()->fontLibrary;
-
     float sx, sy;
     glfwGetWindowContentScale(window, &sx, &sy);
+
+    auto fontLibrary = &(Application::getGlobalInstance()->getAppState()->fontLibrary);
     fontLibrary->setScaling(sx, getFramebufferScaling(window));
 }
 
 ZIGZAG_EXPORT void render()
 {
+    auto fontLibrary = &(Application::getGlobalInstance()->getAppState()->fontLibrary);
     fontLibrary->updateFonts();
 
     glfwPollEvents();
@@ -123,7 +121,7 @@ ZIGZAG_EXPORT void render()
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    application->update();
+    Application::getGlobalInstance()->update();
 
     ImGui::Render();
 
@@ -137,8 +135,6 @@ ZIGZAG_EXPORT void render()
 
 ZIGZAG_EXPORT void shutdown()
 {
-    application.reset(nullptr);
-
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();

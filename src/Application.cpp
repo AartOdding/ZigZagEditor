@@ -18,6 +18,12 @@ namespace zz = ZigZag;
 
 
 
+Application* Application::getGlobalInstance()
+{
+    static Application globalApplication;
+    return &globalApplication;
+}
+
 Application::Application()
 {
     registerTypes();

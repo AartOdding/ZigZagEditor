@@ -36,8 +36,6 @@ public:
     };
 
 
-    explicit Application();
-
     Application(const Application&) = delete;
     Application(Application&&) = delete;
 
@@ -51,6 +49,8 @@ public:
     ApplicationState* getAppState();
 
 private:
+
+    Application();
 
     ApplicationState m_appState;
 

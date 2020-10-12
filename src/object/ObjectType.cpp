@@ -2,12 +2,14 @@
 
 
 
-ObjectType::ObjectType(std::string_view name, Identifier identifier, ObjectTypeCategory category)
-	: m_name(name)
-	, m_identifier(identifier)
-	, m_category(category)
+ObjectType::ObjectType(Identifier<ObjectType> identifier)
+	: Identity<ObjectType>(this, identifier)
 {
+}
 
+ObjectType::Pointer ObjectType::create(Identifier<ObjectType> identifier)
+{
+	return std::unique_ptr<ObjectType>(new ObjectType(identifier));
 }
 
 const std::string& ObjectType::getName() const
@@ -15,13 +17,27 @@ const std::string& ObjectType::getName() const
 	return m_name;
 }
 
+void ObjectType::setName(std::string_view name)
+{
+	m_name = name;
+}
+
 ObjectTypeCategory ObjectType::getCategory() const
 {
 	return m_category;
 }
 
-
-Identifier ObjectType::getIdentifier() const
+void ObjectType::setCategory(ObjectTypeCategory category)
 {
-	return m_identifier;
+	m_category = category;
+}
+
+ObjectTypeNamespace* ObjectType::getNamespace()
+{
+	return m_namespace;
+}
+
+const ObjectTypeNamespace* ObjectType::getNamespace() const
+{
+	return m_namespace;
 }
