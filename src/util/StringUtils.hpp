@@ -13,7 +13,7 @@ namespace StringUtils
     {
         size_t count = 0;
 
-        for (const char* it = string; it != '\0'; ++it)
+        for (const char* it = string; *it != 0; ++it)
         {
             count += (*it == character);
         }
@@ -27,12 +27,13 @@ namespace StringUtils
         if (string)
         {
             auto numParts = countCharacter(string, delimiter);
-            parts.reserve(numParts);
+            parts.reserve(numParts+1);
             
             bool searchingPartBegin = true;
-            const char* partBegin;
-            
-            for (const char* it = string; it != '\0'; ++it)
+            const char* partBegin = nullptr;
+            const char* it = string;
+
+            for (; *it != 0; ++it)
             {
                 auto character = *it;
 
@@ -51,6 +52,12 @@ namespace StringUtils
                     }
                     searchingPartBegin = true;
                 }
+            }
+            if (!searchingPartBegin)
+            {
+                size_t sz = it - partBegin;
+                std::string_view strv(partBegin, sz);
+                parts.push_back(strv);
             }
         }
         return parts;
