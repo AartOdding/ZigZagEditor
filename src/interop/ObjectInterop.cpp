@@ -1,16 +1,12 @@
 #include <Application.hpp>
 #include <interop/ObjectInterop.hpp>
 #include <object/ZObject.hpp>
-#include <object/ObjectType.hpp>
 #include <object/ObjectTypeNamespace.hpp>
-#include <util/Platform.hpp>
 #include <util/StringUtils.hpp>
 
 #include <iostream>
 
 
-typedef bool (*AddObjectDelegate)(std::uint64_t objectType, std::uint64_t parentObject);
-typedef bool (*RemoveObjectDelegate)(std::uint64_t object);
 
 namespace
 {
