@@ -36,7 +36,8 @@ public:
     static Pointer create(std::string_view name);
     ~ObjectTypeNamespace() = default;
 
-    void addChild(Pointer&& childNamespace);
+    ObjectTypeNamespace* addChild(Pointer&& childNamespace);
+    ObjectTypeNamespace* getChild(std::string_view childNamespace);
     Pointer removeChild(std::string_view childNamespace);
 
     ObjectTypeNamespace* getParent();
@@ -45,7 +46,7 @@ public:
     ChildrenView getChildren();
     ConstChildrenView getChildren() const;
 
-    void addType(TypePointer&& type);
+    ObjectType* addType(TypePointer&& type);
     TypePointer removeType(Identifier<ObjectType> type);
 
     TypesView getTypes();
@@ -58,7 +59,7 @@ private:
     ObjectTypeNamespace(std::string_view name);
     
     Children m_children;
-    ObjectTypeNamespace* m_parent;
+    ObjectTypeNamespace* m_parent = nullptr;
 
     Types m_types;
     TypesAlphabetic m_typesAlphabetic;

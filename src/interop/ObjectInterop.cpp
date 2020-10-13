@@ -36,12 +36,14 @@ bool removeObject(ZObject* object)
 
 ZIGZAG_API void installObjectDelegates(AddObjectDelegate add, RemoveObjectDelegate rm)
 {
+    std::cout << "[editor dll] installing object creation / destruction delegates" << std::endl;
     addObjectDelegate = add;
     removeObjectDelegate = rm;
 }
 
 ZIGZAG_API void onNewObjectTypeAdded(const char* name, std::uint64_t uniqueID, ObjectTypeCategory category)
 {
+    std::cout << "[editor dll] object type added: " << name << " " << uniqueID << std::endl;
     auto identifier = Identifier<ObjectType>(uniqueID);
     auto nameParts = StringUtils::split(name, '.');
     
@@ -51,22 +53,23 @@ ZIGZAG_API void onNewObjectTypeAdded(const char* name, std::uint64_t uniqueID, O
         objectType->setCategory(category);
         nameParts.pop_back();
 
-        //ObjectTypeNamespace* typeNamespace = Application::getGlobalInstance()->getRootTypeNamespace();
+        ObjectTypeNamespace* typeNamespace = Application::getGlobalInstance()->getRootTypeNamespace();
 
-        for (auto name : nameParts)
+        for (const auto& namespaceName : nameParts)
         {
-            //typeNamespace = typeNamespace->ObjectTypeNamespace::create(*it);
+            auto childNamespace = typeNamespace->getChild(namespaceName);
+
+            if (childNamespace)
+            {
+                typeNamespace = childNamespace;
+            }
+            else
+            {
+                typeNamespace = typeNamespace->addChild(ObjectTypeNamespace::create(namespaceName));
+            }
         }
 
-        if (nameParts.empty())
-        {
-           // Application::getGloblInstance()->getRootTypeNamespace()->addType(std::move(objectType));
-        }
-        else
-        {
-
-
-        }
+        typeNamespace->addType(std::move(objectType));
     }
 }
 

@@ -24,7 +24,7 @@ public:
     static Pointer create(Identifier<ZObject> identifier);
     ~ZObject() = default;
 
-    void addChild(Pointer&& child);
+    ZObject* addChild(Pointer&& child);
     Pointer removeChild(Identifier<ZObject> childIdentifier);
     
     ZObject* getParent();

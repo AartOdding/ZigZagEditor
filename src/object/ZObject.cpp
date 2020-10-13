@@ -17,13 +17,15 @@ std::unique_ptr<ZObject> ZObject::create(Identifier<ZObject> identifier)
     return std::unique_ptr<ZObject>();
 }
 
-void ZObject::addChild(std::unique_ptr<ZObject>&& child)
+ZObject* ZObject::addChild(std::unique_ptr<ZObject>&& child)
 {
     if (child && !child->m_parent)
     {
         child->m_parent = this;
         m_children.push_back(std::move(child));
+        return m_children.back().get();
     }
+    return nullptr;
 }
 
 ZObject::Pointer ZObject::removeChild(Identifier<ZObject> childIdentifier)

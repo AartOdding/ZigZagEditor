@@ -144,3 +144,8 @@ void Application::clearRootObject()
 {
     m_rootObject.reset();
 }
+
+ObjectTypeNamespace* Application::getRootTypeNamespace()
+{
+    return m_rootTypeNamespace.get();
+}
