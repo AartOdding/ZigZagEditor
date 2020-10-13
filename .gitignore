@@ -4,6 +4,8 @@
 .vs/*
 .vscode/*
 build/*
+build_output/*
+debug_host/build/*
 out/*
 CMakeLists.txt.user
 
