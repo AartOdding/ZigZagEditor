@@ -27,10 +27,11 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/build_output/Rel
 include("${CMAKE_CURRENT_LIST_DIR}/src/_src_files.cmake")
 
 add_library(ZigZagEditorNative SHARED ${src_files})
-
 target_include_directories(ZigZagEditorNative PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_compile_definitions(ZigZagEditorNative PRIVATE ZIGZAG_IS_IMPLEMENTATION)
 
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/src" PREFIX Sources FILES ${src_files})
+
 
 # Also build the native host
 add_subdirectory(debug_host)

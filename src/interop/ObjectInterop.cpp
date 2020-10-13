@@ -1,9 +1,9 @@
 #include <Application.hpp>
-#include <Platform.hpp>
 #include <interop/ObjectInterop.hpp>
 #include <object/ZObject.hpp>
 #include <object/ObjectType.hpp>
 #include <object/ObjectTypeNamespace.hpp>
+#include <util/Platform.hpp>
 #include <util/StringUtils.hpp>
 
 #include <iostream>
@@ -38,13 +38,13 @@ bool removeObject(ZObject* object)
     return false;
 }
 
-ZIGZAG_EXPORT void installObjectDelegates(AddObjectDelegate add, RemoveObjectDelegate rm)
+ZIGZAG_API void installObjectDelegates(AddObjectDelegate add, RemoveObjectDelegate rm)
 {
     addObjectDelegate = add;
     removeObjectDelegate = rm;
 }
 
-ZIGZAG_EXPORT void onNewObjectTypeAdded(const char* name, std::uint64_t uniqueID, ObjectTypeCategory category)
+ZIGZAG_API void onNewObjectTypeAdded(const char* name, std::uint64_t uniqueID, ObjectTypeCategory category)
 {
     auto identifier = Identifier<ObjectType>(uniqueID);
     auto nameParts = StringUtils::split(name, '.');
@@ -74,13 +74,13 @@ ZIGZAG_EXPORT void onNewObjectTypeAdded(const char* name, std::uint64_t uniqueID
     }
 }
 
-ZIGZAG_EXPORT void onObjectCreated(std::uint64_t newObject, std::uint64_t parentObject)
+ZIGZAG_API void onObjectCreated(std::uint64_t newObject, std::uint64_t parentObject)
 {
     //auto parent = GlobalObjectMap::getInstance()->get(Identifier(parentObject));
     //parent->createChild(Identifier(newObject));
 }
 
-ZIGZAG_EXPORT void onObjectDestroyed(std::uint64_t objectID)
+ZIGZAG_API void onObjectDestroyed(std::uint64_t objectID)
 {
     //auto object = GlobalObjectMap::getInstance()->get(Identifier(objectID));
     //object->stealFromParent(); // not storing the returned unique_ptr will delete it.

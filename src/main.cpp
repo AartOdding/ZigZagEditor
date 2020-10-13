@@ -14,9 +14,7 @@
 #include <app/Directories.hpp>
 #include <app/style/FontLibrary.hpp>
 
-#include <ZigZag/Platform.hpp>
-
-#define ZIGZAG_EXPORT extern "C" __declspec(dllexport)
+#include <util/Platform.hpp>
 
 
 namespace // Unnamed namespace keeps everything inside local to this file.
@@ -34,13 +32,13 @@ namespace // Unnamed namespace keeps everything inside local to this file.
 } 
 
 
-ZIGZAG_EXPORT GLFWglproc ZigZagGetProcAddress(const char* procName)
+ZIGZAG_API GLFWglproc ZigZagGetProcAddress(const char* procName)
 {
     return glfwGetProcAddress(procName);
 }
 
 
-ZIGZAG_EXPORT void initialize()
+ZIGZAG_API void initialize()
 {
     Directories::createSettingsDir();
 
@@ -110,7 +108,7 @@ ZIGZAG_EXPORT void initialize()
     fontLibrary->setScaling(sx, getFramebufferScaling(window));
 }
 
-ZIGZAG_EXPORT void render()
+ZIGZAG_API void render()
 {
     auto fontLibrary = &(Application::getGlobalInstance()->getAppState()->fontLibrary);
     fontLibrary->updateFonts();
@@ -133,7 +131,7 @@ ZIGZAG_EXPORT void render()
     glfwSwapBuffers(window);
 }
 
-ZIGZAG_EXPORT void shutdown()
+ZIGZAG_API void shutdown()
 {
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
@@ -143,7 +141,7 @@ ZIGZAG_EXPORT void shutdown()
     glfwTerminate();
 }
 
-ZIGZAG_EXPORT bool shouldQuit()
+ZIGZAG_API bool shouldQuit()
 {
     return glfwWindowShouldClose(window);
 }

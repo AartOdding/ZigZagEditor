@@ -12,9 +12,11 @@
 
 
 #ifdef ZIGZAG_WINDOWS
-    #define ZIGZAG_EXPORT extern "C" __declspec(dllexport)
-    #define ZIGZAG_IMPORT extern "C" __declspec(dllimport)
+    #ifdef ZIGZAG_IS_IMPLEMENTATION
+        #define ZIGZAG_API extern "C" __declspec(dllexport)
+    #else
+        #define ZIGZAG_API extern "C" __declspec(dllimport)
+    #endif
 #else
-    #define ZIGZAG_EXPORT
-    #define ZIGZAG_IMPORT
+    #define ZIGZAG_API
 #endif
