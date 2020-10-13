@@ -30,8 +30,10 @@ add_library(ZigZagEditorNative SHARED ${src_files})
 
 target_include_directories(ZigZagEditorNative PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/src" PREFIX Sources FILES ${src_files})
+
 # Also build the native host
-add_subdirectory(nativeHost)
+add_subdirectory(debug_host)
 
 
 # FREETYPE2

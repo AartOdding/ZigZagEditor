@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.0)
 
 
 set(command_files
+    "${CMAKE_CURRENT_LIST_DIR}/_command_files.cmake"
+
     "${CMAKE_CURRENT_LIST_DIR}/Command.hpp"
     "${CMAKE_CURRENT_LIST_DIR}/CommandStack.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/CommandStack.hpp"

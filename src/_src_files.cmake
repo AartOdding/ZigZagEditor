@@ -13,6 +13,8 @@ set(src_files
     "${interop_files}"
     "${object_files}"
     "${util_files}"
+    
+    "${CMAKE_CURRENT_LIST_DIR}/_src_files.cmake"
 
     "${CMAKE_CURRENT_LIST_DIR}/Application.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/Application.hpp"

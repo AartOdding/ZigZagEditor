@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.0)
 
 
 set(gui_files
+    "${CMAKE_CURRENT_LIST_DIR}/_gui_files.cmake"
+
     "${CMAKE_CURRENT_LIST_DIR}/HierarchyWindow.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/HierarchyWindow.hpp"
     "${CMAKE_CURRENT_LIST_DIR}/HistoryWindow.cpp"

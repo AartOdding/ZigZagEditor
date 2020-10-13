@@ -5,6 +5,8 @@ include("${CMAKE_CURRENT_LIST_DIR}/style/_style_files.cmake")
 
 
 set(app_files
+    "${CMAKE_CURRENT_LIST_DIR}/_app_files.cmake"
+
     "${command_files}"
     "${style_files}"
 
