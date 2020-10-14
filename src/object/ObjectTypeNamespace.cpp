@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cassert>
 
 #include <object/ObjectTypeNamespace.hpp>
 
@@ -15,6 +16,8 @@ ObjectTypeNamespace::Pointer ObjectTypeNamespace::create(std::string_view name)
 
 ObjectTypeNamespace* ObjectTypeNamespace::addChild(Pointer&& childNamespace)
 {
+    assert(m_children.count(childNamespace->getName()) == 0);
+
     if (childNamespace)
     {
         auto returnValue = childNamespace.get();
