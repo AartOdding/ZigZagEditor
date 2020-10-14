@@ -69,6 +69,7 @@ private:
     NodeEditorWindow m_nodeEditorWindow{ "Node Editor", &m_appState };
     RenderOrderWindow m_renderOrderWindow{ "Render Order", &m_appState };
     StyleEditorWindow m_styleEditorWindow{ "Style Editor", &m_appState };
+    Window m_typeHierarchyWindow{ "Type Hierarchy" };
 
     std::unordered_map<ZigZag::LuaBehaviour*, std::unique_ptr<LuaEditorWindow>> m_luaEditorWindows;
 

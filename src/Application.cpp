@@ -11,6 +11,8 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 
+#include <gui/widgets/TypeHierarchyWidget.hpp>
+
 #include <iostream>
 
 
@@ -33,6 +35,10 @@ Application::Application()
 
     m_nodeEditorWindow.setScope(&m_appState.rootOperator);
     m_hierarchyWindow.setScope(&m_appState.rootOperator);
+
+    m_typeHierarchyWindow.setDrawFunction([w = TypeHierarchyWidget()]() mutable {
+        w.draw();
+    });
 }
 
 void Application::update()
@@ -47,6 +53,7 @@ void Application::update()
     m_historyWindow.update();
     m_renderOrderWindow.update();
     m_styleEditorWindow.update();
+    m_typeHierarchyWindow.update();
 
     for (auto it = m_luaEditorWindows.begin(); it != m_luaEditorWindows.end();) // Important: no increment
     {
