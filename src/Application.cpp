@@ -11,7 +11,7 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 
-#include <gui/widgets/TypeHierarchyWidget.hpp>
+#include <gui/popups/OperatorSelectionPopup.hpp>
 
 #include <iostream>
 
@@ -36,8 +36,13 @@ Application::Application()
     m_nodeEditorWindow.setScope(&m_appState.rootOperator);
     m_hierarchyWindow.setScope(&m_appState.rootOperator);
 
-    m_typeHierarchyWindow.setDrawFunction([w = TypeHierarchyWidget()]() mutable {
-        w.draw();
+    m_typeHierarchyWindow.setDrawFunction([p = OperatorSelectionPopup()]() mutable {
+
+        if (ImGui::Button("open dialog"))
+        {
+            p.open();
+        }
+        p.draw();
     });
 }
 

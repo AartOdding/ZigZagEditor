@@ -1,12 +1,14 @@
 cmake_minimum_required(VERSION 3.0)
 
-include("${CMAKE_CURRENT_LIST_DIR}/widgets/_widgets_files.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/popups/_popup_files.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/widgets/_widget_files.cmake")
 
 
 set(gui_files
     "${CMAKE_CURRENT_LIST_DIR}/_gui_files.cmake"
 
-    "${widgets_files}"
+    "${popup_files}"
+    "${widget_files}"
 
     "${CMAKE_CURRENT_LIST_DIR}/HierarchyWindow.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/HierarchyWindow.hpp"
