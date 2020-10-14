@@ -36,6 +36,18 @@ void Window::update()
 	}
 }
 
+void Window::draw()
+{
+	if (m_drawFunction)
+	{
+		m_drawFunction();
+	}
+}
+
+void Window::setDrawFunction(std::function<void()> drawFunction)
+{
+	m_drawFunction = std::move(drawFunction);
+}
 
 void Window::open()
 {

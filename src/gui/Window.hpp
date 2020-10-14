@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <string>
 #include <string_view>
 
@@ -23,9 +24,11 @@ public:
 
 	const std::string& getTitle() const;
 
+	void setDrawFunction(std::function<void()> drawFunction);
+
 protected:
 
-	virtual void draw() = 0;
+	virtual void draw();
 
 private:
 
@@ -34,4 +37,5 @@ private:
 	bool m_focus = false;
 	bool m_docked = false;
 
+	std::function<void()> m_drawFunction;
 };
