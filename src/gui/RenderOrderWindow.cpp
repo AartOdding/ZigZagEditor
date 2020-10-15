@@ -6,7 +6,7 @@
 
 
 RenderOrderWindow::RenderOrderWindow(std::string_view windowName, ApplicationState* appState)
-	: Window(windowName)
+	: Window(windowName, false)
 	, m_appState(appState)
 {
 	assert(m_appState);
