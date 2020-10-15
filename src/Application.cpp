@@ -48,6 +48,9 @@ Application::Application()
 
 void Application::update()
 {
+    ImGui::PushFont(m_appState.fontLibrary.getUiFont());
+    m_widthOfE = ImGui::CalcTextSize("e").x;
+
     m_appState.style.push("Application");
 
     m_mainMenu.draw();
@@ -78,6 +81,7 @@ void Application::update()
     }
 
     m_appState.style.pop("Application");
+    ImGui::PopFont();
 }
 
 void Application::openWindow(WindowType type)
@@ -155,6 +159,11 @@ void Application::setRootObject(std::unique_ptr<ZObject>&& object)
 void Application::clearRootObject()
 {
     m_rootObject.reset();
+}
+
+float Application::e() const
+{
+    return m_widthOfE;
 }
 
 ObjectTypeNamespace* Application::getRootTypeNamespace()

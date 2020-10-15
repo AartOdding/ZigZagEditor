@@ -54,6 +54,8 @@ public:
     void setRootObject(std::unique_ptr<ZObject>&& object);
     void clearRootObject();
 
+    float e() const;
+
     ObjectTypeNamespace* getRootTypeNamespace();
 
 private:
@@ -73,6 +75,7 @@ private:
 
     std::unordered_map<ZigZag::LuaBehaviour*, std::unique_ptr<LuaEditorWindow>> m_luaEditorWindows;
 
+    float m_widthOfE = 7;
     bool m_ImGuiDemoWindowOpen = false;
     bool m_ImGuiStyleEditorWindowOpen = false;
 
