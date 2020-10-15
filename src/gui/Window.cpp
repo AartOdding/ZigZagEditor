@@ -2,12 +2,12 @@
 
 #include <iostream>
 
-Window::Window(std::string_view title)
+Window::Window(std::string_view title, bool open)
 	: m_title(title)
+	, m_open(open)
 {
 
 }
-
 
 void Window::update()
 {
@@ -54,24 +54,25 @@ void Window::open()
 	m_open = true;
 }
 
+void Window::close()
+{
+	m_open = false;
+}
 
 bool Window::isOpen() const
 {
 	return m_open;
 }
 
-
 bool Window::isDocked() const
 {
 	return m_docked;
 }
 
-
 bool Window::hasFocus() const
 {
 	return m_focus;
 }
-
 
 const std::string& Window::getTitle() const
 {

@@ -12,11 +12,12 @@ class Window
 {
 public:
 
-	Window(std::string_view title);
+	Window(std::string_view title, bool open = true);
 
 	void update();
 
 	void open();
+	void close();
 
 	bool isOpen() const;
 	bool isDocked() const;
