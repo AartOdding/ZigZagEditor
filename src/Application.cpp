@@ -43,6 +43,11 @@ Application::Application()
             p.open();
         }
         p.draw();
+
+        if (p.getConfirmedOperator())
+        {
+            std::cout << p.getConfirmedOperator() << std::endl;
+        }
     });
 }
 

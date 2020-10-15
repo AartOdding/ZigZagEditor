@@ -1,6 +1,6 @@
 #pragma once
 
-#include <gui/widgets/TypeHierarchyWidget.hpp>
+#include <gui/widgets/OperatorListWidget.hpp>
 
 
 
@@ -12,10 +12,13 @@ public:
 
 	void draw();
 
+	const ObjectType* getConfirmedOperator() const;
 
 private:
 
-	TypeHierarchyWidget m_operatorList;
+	OperatorListWidget m_operatorList;
+
+	const ObjectType* m_confirmedOperator = nullptr;
 
 	bool m_justOpened = false;
 

@@ -1,5 +1,5 @@
 #include <Application.hpp>
-#include <gui/widgets/TypeHierarchyWidget.hpp>
+#include <gui/widgets/OperatorListWidget.hpp>
 #include <object/ObjectTypeNamespace.hpp>
 
 #include <iostream>
@@ -10,9 +10,10 @@
 using namespace ImGui;
 
 
-void TypeHierarchyWidget::draw()
+void OperatorListWidget::draw()
 {
     auto root = Application::getGlobalInstance()->getRootTypeNamespace();
+    m_doubleClickedType = nullptr;
 
     for (auto node : root->getChildren())
     {
@@ -21,19 +22,19 @@ void TypeHierarchyWidget::draw()
 }
 
 
-const ObjectType* TypeHierarchyWidget::getSelectedType() const
+const ObjectType* OperatorListWidget::getSelectedOperator() const
 {
     return m_selectedType;
 }
 
 
-const ObjectType* TypeHierarchyWidget::getDoubleClickedType() const
+const ObjectType* OperatorListWidget::getConfirmedOperator() const
 {
     return m_doubleClickedType;
 }
 
 
-void TypeHierarchyWidget::drawTreeNode(const ObjectTypeNamespace* node)
+void OperatorListWidget::drawTreeNode(const ObjectTypeNamespace* node)
 {
 	if (node)
 	{
@@ -57,7 +58,7 @@ void TypeHierarchyWidget::drawTreeNode(const ObjectTypeNamespace* node)
 }
 
 
-void TypeHierarchyWidget::drawTreeLeaf(const ObjectType* leaf)
+void OperatorListWidget::drawTreeLeaf(const ObjectType* leaf)
 {
     if (leaf)
     {

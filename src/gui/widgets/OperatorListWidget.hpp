@@ -4,14 +4,14 @@ class ObjectTypeNamespace;
 class ObjectType;
 
 
-class TypeHierarchyWidget
+class OperatorListWidget
 {
 public:
 
 	void draw();
 
-	const ObjectType* getSelectedType() const;
-	const ObjectType* getDoubleClickedType() const;
+	const ObjectType* getSelectedOperator() const;
+	const ObjectType* getConfirmedOperator() const;
 
 private:
 

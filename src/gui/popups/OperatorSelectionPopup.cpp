@@ -1,6 +1,8 @@
 #include <gui/popups/OperatorSelectionPopup.hpp>
 
 #include <imgui.h>
+#include <Application.hpp>
+
 
 using namespace ImGui;
 
@@ -13,9 +15,12 @@ void OperatorSelectionPopup::open()
 
 void OperatorSelectionPopup::draw()
 {
+	const float e = Application::getGlobalInstance()->e();
+	m_confirmedOperator = nullptr;
+
 	if (IsPopupOpen("Operator Selection"))
 	{
-		SetNextWindowSize({ 600, 400 });
+		SetNextWindowSize({ 100 * e, 70 * e });
 	}
 	if (BeginPopup("Operator Selection"))
 	{
@@ -23,14 +28,25 @@ void OperatorSelectionPopup::draw()
 
 		if (m_justOpened)
 		{
-			SetColumnWidth(0, 200);
-			SetColumnWidth(1, 400);
+			// only set once, otherwise the user cannot change the divider position
+			SetColumnWidth(0, 35 * e);
 			m_justOpened = false;
 		}
 
+		BeginChild("OperatorList");
 		m_operatorList.draw();
+		EndChild();
+
+		m_confirmedOperator = m_operatorList.getConfirmedOperator();
+
+		if (m_confirmedOperator)
+		{
+			CloseCurrentPopup();
+		}
+
 		NextColumn();
 
+		auto selectedOperator = m_operatorList.getSelectedOperator();
 		// other things
 
 		Columns(1);
@@ -39,3 +55,8 @@ void OperatorSelectionPopup::draw()
 	}
 }
 
+
+const ObjectType* OperatorSelectionPopup::getConfirmedOperator() const
+{
+	return m_confirmedOperator;
+}
