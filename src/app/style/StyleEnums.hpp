@@ -10,8 +10,8 @@ using json = nlohmann::json;
 // If these assertions no longer hold, the enums have to be updated with the new
 // values and the static_assert has to be made to compile again, to serve as a 
 // warning for the next time, the enums will be changed.
-static_assert(ImGuiCol_COUNT == 50);
-static_assert(ImGuiStyleVar_COUNT == 23);
+static_assert(ImGuiCol_COUNT == 55);
+static_assert(ImGuiStyleVar_COUNT == 24);
 static_assert(ax::NodeEditor::StyleColor_Count == 18);
 static_assert(ax::NodeEditor::StyleVar_Count == 23);
 
@@ -62,6 +62,11 @@ NLOHMANN_JSON_SERIALIZE_ENUM( ImGuiCol_, {
     { ImGuiCol_PlotLinesHovered,      "PlotLinesHovered" },
     { ImGuiCol_PlotHistogram,         "PlotHistogram" },
     { ImGuiCol_PlotHistogramHovered,  "PlotHistogramHovered" },
+    { ImGuiCol_TableHeaderBg,         "TableHeaderBg" },
+    { ImGuiCol_TableBorderStrong,     "TableBorderStrong" },
+    { ImGuiCol_TableBorderLight,      "TableBorderLight" },
+    { ImGuiCol_TableRowBg,            "TableRowBg" },
+    { ImGuiCol_TableRowBgAlt,         "TableRowBgAlt" },
     { ImGuiCol_TextSelectedBg,        "TextSelectedBg" },
     { ImGuiCol_DragDropTarget,        "DragDropTarget" },
     { ImGuiCol_NavHighlight,          "NavHighlight" },
@@ -88,6 +93,7 @@ NLOHMANN_JSON_SERIALIZE_ENUM( ImGuiStyleVar_, {
     { ImGuiStyleVar_ItemSpacing,         "ItemSpacing" },
     { ImGuiStyleVar_ItemInnerSpacing,    "ItemInnerSpacing" },
     { ImGuiStyleVar_IndentSpacing,       "IndentSpacing" },
+    { ImGuiStyleVar_CellPadding,         "CellPadding" },
     { ImGuiStyleVar_ScrollbarSize,       "ScrollbarSize" },
     { ImGuiStyleVar_ScrollbarRounding,   "ScrollbarRounding" },
     { ImGuiStyleVar_GrabMinSize,         "GrabMinSize" },

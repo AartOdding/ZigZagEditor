@@ -22,3 +22,6 @@
 [submodule "external/type_conversion_iterator"]
 	path = external/type_conversion_iterator
 	url = https://github.com/AartOdding/type_conversion_iterator.git
+[submodule "external/imgui/imgui"]
+	path = external/imgui/imgui
+	url = https://github.com/AartOdding/imgui.git
