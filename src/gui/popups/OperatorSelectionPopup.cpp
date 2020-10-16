@@ -16,7 +16,7 @@ void OperatorSelectionPopup::open()
 void OperatorSelectionPopup::draw()
 {
 	const float e = Application::getGlobalInstance()->e();
-	m_confirmedOperator = nullptr;
+	m_confirmedOperator = Identifier<ObjectType>();
 
 	if (IsPopupOpen("Operator Selection"))
 	{
@@ -28,7 +28,7 @@ void OperatorSelectionPopup::draw()
 
 		if (m_justOpened)
 		{
-			// only set once, otherwise the user cannot change the divider position
+			// set only once, otherwise the user cannot change the divider position
 			SetColumnWidth(0, 35 * e);
 			m_justOpened = false;
 		}
@@ -55,8 +55,7 @@ void OperatorSelectionPopup::draw()
 	}
 }
 
-
-const ObjectType* OperatorSelectionPopup::getConfirmedOperator() const
+Identifier<ObjectType> OperatorSelectionPopup::getConfirmedOperator() const
 {
 	return m_confirmedOperator;
 }

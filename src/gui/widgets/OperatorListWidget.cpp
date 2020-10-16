@@ -12,25 +12,14 @@ using namespace ImGui;
 
 void OperatorListWidget::draw()
 {
+    m_confirmedType = Identifier<ObjectType>();
+
     auto root = Application::getGlobalInstance()->getRootTypeNamespace();
-    m_doubleClickedType = nullptr;
 
     for (auto node : root->getChildren())
     {
         drawTreeNode(node);
     }
-}
-
-
-const ObjectType* OperatorListWidget::getSelectedOperator() const
-{
-    return m_selectedType;
-}
-
-
-const ObjectType* OperatorListWidget::getConfirmedOperator() const
-{
-    return m_doubleClickedType;
 }
 
 
@@ -65,19 +54,31 @@ void OperatorListWidget::drawTreeLeaf(const ObjectType* leaf)
         ImGuiTreeNodeFlags flags = 0;
         flags |= ImGuiTreeNodeFlags_SpanFullWidth;
         flags |= ImGuiTreeNodeFlags_Leaf;
-        if (leaf == m_selectedType) flags |= ImGuiTreeNodeFlags_Selected;
+        if (leaf->getIdentifier() == m_selectedType) flags |= ImGuiTreeNodeFlags_Selected;
 
         if (TreeNodeEx(leaf->getName().c_str(), flags))
         {
             if (IsItemClicked())
             {
-                m_selectedType = leaf;
+                m_selectedType = leaf->getIdentifier();
             }
             if (IsItemHovered() && IsMouseDoubleClicked(0))
             {
-                m_doubleClickedType = leaf;
+                m_confirmedType = leaf->getIdentifier();
             }
             TreePop();
         }
     }
+}
+
+
+Identifier<ObjectType> OperatorListWidget::getSelectedOperator() const
+{
+    return m_selectedType;
+}
+
+
+Identifier<ObjectType> OperatorListWidget::getConfirmedOperator() const
+{
+    return m_confirmedType;
 }

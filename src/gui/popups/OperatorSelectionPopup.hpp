@@ -9,16 +9,15 @@ class OperatorSelectionPopup
 public:
 
 	void open();
-
 	void draw();
 
-	const ObjectType* getConfirmedOperator() const;
+	Identifier<ObjectType> getConfirmedOperator() const;
 
 private:
 
 	OperatorListWidget m_operatorList;
 
-	const ObjectType* m_confirmedOperator = nullptr;
+	Identifier<ObjectType> m_confirmedOperator;
 
 	bool m_justOpened = false;
 
