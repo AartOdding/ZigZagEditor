@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <functional>
+#include <iostream>
 #include <type_traits>
 
 
@@ -31,7 +32,7 @@ public:
 
 private:
 
-	const std::uint64_t m_id = 0;
+	std::uint64_t m_id = 0;
 
 };
 
@@ -46,4 +47,10 @@ namespace std
 			return hash<std::uint64_t>()(static_cast<std::uint64_t>(id));
 		}
 	};
+}
+
+template<typename Type>
+std::ostream& operator<<(std::ostream& os, Identifier<Type> const& id)
+{
+	return os << "<" << static_cast<std::uint64_t>(id) << ">";
 }
