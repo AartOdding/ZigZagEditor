@@ -13,9 +13,13 @@ ZIGZAG_API void shutdown();
 ZIGZAG_API bool shouldQuit();
 
 
+std::uint64_t nextID = 5000;
+
+
 bool createObject(std::uint64_t objectType, std::uint64_t parentObject)
 {
 	std::cout << "[host] creating object of type: " << objectType << " with parent: " << parentObject << std::endl;
+	onObjectCreated(++nextID, parentObject);
 	return true;
 }
 
@@ -25,7 +29,6 @@ bool removeObject(std::uint64_t objectIdentifier)
 	return true;
 }
 
-std::uint64_t nextID = 5000;
 
 int main()
 {
