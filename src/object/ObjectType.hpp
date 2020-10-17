@@ -12,9 +12,10 @@ class ObjectTypeNamespace;
 
 enum class ObjectTypeCategory
 {
-    Object,
-    DataSource,
-    Operator
+    Project,
+    Operator,
+    OperatorOutput,
+    OperatorInput
 };
 
 class ObjectType : public Identity<ObjectType>

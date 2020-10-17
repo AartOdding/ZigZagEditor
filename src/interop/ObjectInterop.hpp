@@ -10,8 +10,8 @@ class ZObject;
 class ObjectType;
 
 
-bool addObject(Identifier<ObjectType> type, Identifier<ZObject> object);
-bool removeObject(ZObject* object);
+bool addObject(Identifier<ObjectType> objectType, Identifier<ZObject> parentObject);
+bool removeObject(Identifier<ZObject> object);
 
 
 typedef bool (*AddObjectDelegate)(std::uint64_t objectType, std::uint64_t parentObject);
@@ -23,7 +23,7 @@ ZIGZAG_API void installObjectDelegates(AddObjectDelegate add, RemoveObjectDelega
 ZIGZAG_API void onNewObjectTypeAdded(const char* name, std::uint64_t uniqueID, ObjectTypeCategory category);
 
 
-ZIGZAG_API void onObjectCreated(std::uint64_t newObject, std::uint64_t parentObject);
+ZIGZAG_API void onObjectCreated(std::uint64_t newObject, std::uint64_t parentObject, std::uint64_t objectType);
 
 ZIGZAG_API void onObjectDestroyed(std::uint64_t objectID);
 

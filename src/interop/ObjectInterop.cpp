@@ -25,11 +25,11 @@ bool addObject(Identifier<ObjectType> type, Identifier<ZObject> object)
     return false;
 }
 
-bool removeObject(ZObject* object)
+bool removeObject(Identifier<ZObject> object)
 {
     if (object && removeObjectDelegate)
     {
-        return removeObjectDelegate(static_cast<std::uint64_t>(object->getIdentifier()));
+        return removeObjectDelegate(static_cast<std::uint64_t>(object));
     }
     return false;
 }
@@ -73,7 +73,7 @@ ZIGZAG_API void onNewObjectTypeAdded(const char* name, std::uint64_t uniqueID, O
     }
 }
 
-ZIGZAG_API void onObjectCreated(std::uint64_t newObject, std::uint64_t parentObject)
+ZIGZAG_API void onObjectCreated(std::uint64_t newObject, std::uint64_t parentObject, std::uint64_t objectType)
 {
     Identifier<ZObject> id(newObject);
     std::cout << "[editor dll] object created: " << id << std::endl;
