@@ -9,6 +9,7 @@
 #include <gui/Window.hpp>
 #include <gui/popups/OperatorSelectionPopup.hpp>
 #include <object/ObjectType.hpp>
+#include <object/ZObject.hpp>
 
 using namespace ax;
 
@@ -18,15 +19,13 @@ class NodeEditorWindow : public Window
 {
 public:
 
-    NodeEditorWindow(std::string_view windowName, ApplicationState* appState);
+    NodeEditorWindow(std::string_view windowName, bool open = true);
     NodeEditorWindow(const NodeEditorWindow&) = delete;
     NodeEditorWindow(NodeEditorWindow&&) = delete;
 
     ~NodeEditorWindow();
 
-    void setScope(ZigZag::BaseOperator* scope);
-
-    Identifier<ObjectType> newOperatorRequested() const;
+    void setScope(Identifier<ZObject> scope);
 
 protected:
 
@@ -35,10 +34,7 @@ protected:
 
 private:
 
-    ApplicationState* m_appState;
-
-    ZigZag::BaseOperator* m_scope;
-    Identifier<ObjectType> m_requestedOperator;
+    Identifier<ZObject> m_scope;
 
     OperatorSelectionPopup m_operatorSelectionPopup;
     

@@ -70,7 +70,7 @@ private:
 
     HierarchyWindow m_hierarchyWindow{ "Project Hierarchy", this, &m_appState };
     HistoryWindow m_historyWindow{ "History", &m_appState };
-    NodeEditorWindow m_nodeEditorWindow{ "Node Editor", &m_appState };
+    NodeEditorWindow m_nodeEditorWindow{ "Node Editor" };
     RenderOrderWindow m_renderOrderWindow{ "Render Order", &m_appState };
     StyleEditorWindow m_styleEditorWindow{ "Style Editor", &m_appState };
 

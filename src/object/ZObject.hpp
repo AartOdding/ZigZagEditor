@@ -1,9 +1,12 @@
 #pragma once
 
 #include <memory>
+#include <string>
+#include <string_view>
 #include <vector>
 
 #include <object/Identity.hpp>
+#include <object/ObjectType.hpp>
 #include <tci/views.hpp>
 
 
@@ -33,11 +36,19 @@ public:
     ChildrenView getChildren();
     ConstChildrenView getChildren() const;
 
+    void setNodeCategory(ObjectTypeCategory category);
+    ObjectTypeCategory getNodeCategory() const;
+
+    void setName(std::string_view name);
+    const std::string& getName() const;
+
 private:
 
     ZObject(Identifier<ZObject> identifier);
 
     ZObject* m_parent;
     std::vector<std::unique_ptr<ZObject>> m_children;
+    std::string m_name;
+    ObjectTypeCategory m_category = ObjectTypeCategory::Operator;
 
 };

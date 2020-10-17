@@ -75,14 +75,38 @@ ZIGZAG_API void onNewObjectTypeAdded(const char* name, std::uint64_t uniqueID, O
 
 ZIGZAG_API void onObjectCreated(std::uint64_t newObject, std::uint64_t parentObject, std::uint64_t objectType)
 {
-    Identifier<ZObject> id(newObject);
-    std::cout << "[editor dll] object created: " << id << std::endl;
-    //auto parent = GlobalObjectMap::getInstance()->get(Identifier(parentObject));
-    //parent->createChild(Identifier(newObject));
+    std::cout << "[editor dll] object created: " << newObject << std::endl;
+
+    Identifier<ZObject> objectID(newObject);
+    Identifier<ZObject> parentID(parentObject);
+    Identifier<ObjectType> typeID(objectType);
+
+    auto parent = const_cast<ZObject*>(IdentityMap<ZObject>::get(parentID));
+    auto type = IdentityMap<ObjectType>::get(typeID);
+
+    auto object = ZObject::create(objectID);
+
+    if (type)
+    {
+        object->setName(type->getName());
+        object->setNodeCategory(type->getCategory());
+
+        if (parent)
+        {
+            parent->addChild(std::move(object));
+        }
+    }
 }
 
 ZIGZAG_API void onObjectDestroyed(std::uint64_t objectID)
 {
-    //auto object = GlobalObjectMap::getInstance()->get(Identifier(objectID));
+    auto objectConst = IdentityMap<ZObject>::get(Identifier<ZObject>(objectID));
+    auto object = const_cast<ZObject*>(objectConst);
+
+    if (object && object->getParent())
+    {
+        object->getParent()->removeChild(Identifier<ZObject>(objectID));
+    }
+
     //object->stealFromParent(); // not storing the returned unique_ptr will delete it.
 }

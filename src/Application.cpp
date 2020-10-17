@@ -33,7 +33,6 @@ Application::Application()
 
     m_rootTypeNamespace = ObjectTypeNamespace::create("");
 
-    m_nodeEditorWindow.setScope(&m_appState.rootOperator);
     m_hierarchyWindow.setScope(&m_appState.rootOperator);
 }
 
@@ -154,6 +153,7 @@ const ZObject* Application::getRootObject() const
 void Application::setRootObject(std::unique_ptr<ZObject>&& object)
 {
     m_rootObject = std::move(object);
+    m_nodeEditorWindow.setScope(m_rootObject->getIdentifier());
 }
 
 void Application::clearRootObject()

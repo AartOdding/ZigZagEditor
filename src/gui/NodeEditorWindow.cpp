@@ -7,10 +7,8 @@
 
 #include <iostream>
 
-NodeEditorWindow::NodeEditorWindow(std::string_view windowName, ApplicationState* appState)
-    : Window(windowName)
-    ,  m_appState(appState)
-    ,  m_scope(&appState->rootOperator)
+NodeEditorWindow::NodeEditorWindow(std::string_view windowName, bool open)
+    : Window(windowName, open)
 {
     NodeEditor::Config cfg;
     cfg.SettingsFile = nullptr;
@@ -24,78 +22,55 @@ NodeEditorWindow::~NodeEditorWindow()
 }
 
 
-void NodeEditorWindow::setScope(ZigZag::BaseOperator* scope)
+void NodeEditorWindow::setScope(Identifier<ZObject> scope)
 {
     m_scope = scope;
 }
 
 void NodeEditorWindow::draw()
 {
-    m_requestedOperator = Identifier<ObjectType>();
-
     ImGui::PushID(this);
 
     NodeEditor::SetCurrentEditor(m_editorContext);
     NodeEditor::Begin(getTitle().c_str());
 
-    //ImNode::PushStyleVar(ImNode::StyleVar_NodePadding, {0, 0, 0, 0});
-    //ImNode::PushStyleVar(ImNode::StyleVar_NodeRounding, 3);
-    //ImNode::PushStyleVar(ImNode::StyleVar_NodeBorderWidth, 0);
-    //ImNode::PushStyleVar(ImNode::StyleVar_HoveredNodeBorderWidth, 0);
-    //ImNode::PushStyleVar(ImNode::StyleVar_SelectedNodeBorderWidth, 0);
+    auto currentObject = IdentityMap<ZObject>::get(m_scope);
 
-    //ImNode::PushStyleColor(ImNode::StyleColor_NodeBg, { 1, 1, 1, 0 });
-
-    if (m_scope)
+    if (currentObject)
     {
-        for (auto op : m_scope->getChildOperators())
+        for (auto child : currentObject->getChildren())
         {
-            NodeEditor::BeginNode(NodeEditor::NodeId(static_cast<ZigZag::Object*>(op)));
+            NodeEditor::BeginNode(NodeEditor::NodeId(child));
+
             auto localPos = ImGui::GetCursorPos();
             ImGui::Dummy({ 100, 100 });
             ImGui::SetCursorPos({ localPos.x + 10, localPos.y + 10 });
-            ImGui::Text(op->getName().c_str());
+            ImGui::Text(child->getName().c_str());
 
-            auto& inputs = op->getDataInputs();
-            auto& outputs = op->getDataSources();
+            int inputCount = 0;
+            int outputCount = 0;
 
-            auto max = std::max(inputs.size(), outputs.size());
-
-            for (int i = 0; i < inputs.size(); ++i)
+            // while iterating the children make a list of what needs to be connected
+            for (auto grandChild : child->getChildren())
             {
-                int y = 30 + i * 30;
-                ImGui::SetCursorPos({ localPos.x, localPos.y + y });
-                NodeEditor::BeginPin(
-                    NodeEditor::PinId(static_cast<ZigZag::Object*>(inputs[i])),
-                    NodeEditor::PinKind::Input);
-                ImGui::Dummy({ 20, 20 });
-                NodeEditor::EndPin();
-            }
-            for (int i = 0; i < outputs.size(); ++i)
-            {
-                int y = 30 + i * 30;
-                ImGui::SetCursorPos({ localPos.x + 80, localPos.y + y });
-                NodeEditor::BeginPin(
-                    NodeEditor::PinId(static_cast<ZigZag::Object*>(outputs[i])),
-                    NodeEditor::PinKind::Output);
-                ImGui::Dummy({ 20, 20 });
-                NodeEditor::EndPin();
-            }
-            NodeEditor::EndNode();
-        }
-        for (auto op : m_scope->getChildOperators())
-        {
-            for (auto output : op->getDataSources())
-            {
-                for (auto input : output->getConnectedInputs())
+                if (grandChild->getNodeCategory() == ObjectTypeCategory::OperatorInput)
                 {
-                    // use input for link id because input can only have one conection.
-                    NodeEditor::Link(
-                        NodeEditor::LinkId(static_cast<ZigZag::Object*>(input)),
-                        NodeEditor::PinId(static_cast<ZigZag::Object*>(output)),
-                        NodeEditor::PinId(static_cast<ZigZag::Object*>(input)));
+                    int y = 30 + inputCount++ * 30;
+                    ImGui::SetCursorPos({ localPos.x, localPos.y + y });
+                    NodeEditor::BeginPin(NodeEditor::PinId(grandChild), NodeEditor::PinKind::Input);
+                    ImGui::Dummy({ 20, 20 });
+                    NodeEditor::EndPin();
+                }
+                else if (grandChild->getNodeCategory() == ObjectTypeCategory::OperatorOutput)
+                {
+                    int y = 30 + outputCount++ * 30;
+                    ImGui::SetCursorPos({ localPos.x + 80, localPos.y + y });
+                    NodeEditor::BeginPin(NodeEditor::PinId(grandChild), NodeEditor::PinKind::Output);
+                    ImGui::Dummy({ 20, 20 });
+                    NodeEditor::EndPin();
                 }
             }
+            NodeEditor::EndNode();
         }
     }
 
@@ -117,14 +92,14 @@ void NodeEditorWindow::draw()
                 {
                     if (auto finishInput = dynamic_cast<ZigZag::BaseDataInput*>(finish))
                     {
-                        m_appState->commandStack.push<ConnectDataCommand>(startSource, finishInput);
+                        //m_appState->commandStack.push<ConnectDataCommand>(startSource, finishInput);
                     }
                 }
                 else if (auto startInput = dynamic_cast<ZigZag::BaseDataInput*>(start))
                 {
                     if (auto finishSource = dynamic_cast<ZigZag::BaseDataSource*>(finish))
                     {
-                        m_appState->commandStack.push<ConnectDataCommand>(finishSource, startInput);
+                        //m_appState->commandStack.push<ConnectDataCommand>(finishSource, startInput);
                     }
                 }
             }
@@ -135,6 +110,8 @@ void NodeEditorWindow::draw()
 
     if (NodeEditor::BeginDelete())
     {
+        // clear deleted links
+
         NodeEditor::LinkId linkId;
         NodeEditor::PinId startId, finishId;
 
@@ -143,21 +120,20 @@ void NodeEditorWindow::draw()
             if (NodeEditor::AcceptDeletedItem())
             {
                 auto input = linkId.AsPointer<ZigZag::BaseDataInput>();
-                m_appState->commandStack.push<DisconnectDataCommand>(input->getConnectedOutput(), input);
+                //m_appState->commandStack.push<DisconnectDataCommand>(input->getConnectedOutput(), input);
             }
         }
-    }
-    NodeEditor::EndDelete();
 
-    if (NodeEditor::BeginDelete())
-    {
+        // clear deleted nodes
+
         NodeEditor::NodeId nodeId;
         
         if (NodeEditor::QueryDeletedNode(&nodeId))
         {
             if (NodeEditor::AcceptDeletedItem())
             {
-                m_appState->commandStack.push<RemoveObjectCommand>(nodeId.AsPointer<ZigZag::BaseOperator>());
+                auto ptr = nodeId.AsPointer<const ZObject>();
+                removeObject(ptr->getIdentifier());
             }
         }
     }
@@ -165,12 +141,12 @@ void NodeEditorWindow::draw()
 
     bool openPopup = NodeEditor::IsBackgroundDoubleClicked();
 
-    //ImNode::PopStyleColor(1);
-    //ImNode::PopStyleVar(5);
+
     NodeEditor::End();
 
-    //ImGui::PopStyleVar(1);
     ImGui::PopID();
+
+    // Update the operator selection popup
 
     if (openPopup)
     {
@@ -189,9 +165,4 @@ void NodeEditorWindow::draw()
         }
     }
 
-}
-
-Identifier<ObjectType> NodeEditorWindow::newOperatorRequested() const
-{
-    return m_operatorSelectionPopup.getConfirmedOperator();
 }
