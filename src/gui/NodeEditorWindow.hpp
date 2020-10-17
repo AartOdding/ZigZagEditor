@@ -5,8 +5,10 @@
 
 #include <ZigZag/BaseOperator.hpp>
 
-#include "app/ApplicationState.hpp"
-#include "gui/Window.hpp"
+#include <app/ApplicationState.hpp>
+#include <gui/Window.hpp>
+#include <gui/popups/OperatorSelectionPopup.hpp>
+#include <object/ObjectType.hpp>
 
 using namespace ax;
 
@@ -24,6 +26,8 @@ public:
 
     void setScope(ZigZag::BaseOperator* scope);
 
+    Identifier<ObjectType> newOperatorRequested() const;
+
 protected:
 
     void draw() override;
@@ -34,6 +38,9 @@ private:
     ApplicationState* m_appState;
 
     ZigZag::BaseOperator* m_scope;
+    Identifier<ObjectType> m_requestedOperator;
+
+    OperatorSelectionPopup m_operatorSelectionPopup;
     
     NodeEditor::EditorContext* m_editorContext;
 

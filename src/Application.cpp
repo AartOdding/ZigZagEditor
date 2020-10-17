@@ -35,20 +35,6 @@ Application::Application()
 
     m_nodeEditorWindow.setScope(&m_appState.rootOperator);
     m_hierarchyWindow.setScope(&m_appState.rootOperator);
-
-    m_typeHierarchyWindow.setDrawFunction([p = OperatorSelectionPopup()]() mutable {
-
-        if (ImGui::Button("open dialog"))
-        {
-            p.open();
-        }
-        p.draw();
-
-        if (p.getConfirmedOperator())
-        {
-            std::cout << p.getConfirmedOperator() << std::endl;
-        }
-    });
 }
 
 void Application::update()
@@ -66,7 +52,6 @@ void Application::update()
     m_historyWindow.update();
     m_renderOrderWindow.update();
     m_styleEditorWindow.update();
-    m_typeHierarchyWindow.update();
 
     for (auto it = m_luaEditorWindows.begin(); it != m_luaEditorWindows.end();) // Important: no increment
     {
@@ -154,6 +139,16 @@ int Application::windowOpenCount(WindowType type)
 ApplicationState* Application::getAppState()
 {
     return &m_appState;
+}
+
+ZObject* Application::getRootObject()
+{
+    return m_rootObject.get();
+}
+
+const ZObject* Application::getRootObject() const
+{
+    return m_rootObject.get();
 }
 
 void Application::setRootObject(std::unique_ptr<ZObject>&& object)

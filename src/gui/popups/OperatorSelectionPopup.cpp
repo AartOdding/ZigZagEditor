@@ -7,13 +7,13 @@
 using namespace ImGui;
 
 
-void OperatorSelectionPopup::open()
+void OperatorSelectionPopup::open(const ImVec2& centrePoint)
 {
 	OpenPopup("Operator Selection");
-	m_justOpened = true;
+	m_openAt = centrePoint;
 }
 
-void OperatorSelectionPopup::draw()
+void OperatorSelectionPopup::update()
 {
 	const float e = Application::getGlobalInstance()->e();
 	m_confirmedOperator = Identifier<ObjectType>();
@@ -21,16 +21,17 @@ void OperatorSelectionPopup::draw()
 	if (IsPopupOpen("Operator Selection"))
 	{
 		SetNextWindowSize({ 100 * e, 70 * e });
+		SetNextWindowPos(m_openAt, ImGuiCond_Appearing, { 0.5, 0.5 });
 	}
 	if (BeginPopup("Operator Selection"))
 	{
 		Columns(2);
 
-		if (m_justOpened)
+		if (m_neverOpened)
 		{
 			// set only once, otherwise the user cannot change the divider position
-			SetColumnWidth(0, 35 * e);
-			m_justOpened = false;
+			SetColumnWidth(0, 30 * e);
+			m_neverOpened = false;
 		}
 
 		BeginChild("OperatorList");

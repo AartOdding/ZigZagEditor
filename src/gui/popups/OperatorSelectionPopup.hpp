@@ -2,14 +2,15 @@
 
 #include <gui/widgets/OperatorListWidget.hpp>
 
+#include <imgui.h>
 
 
 class OperatorSelectionPopup
 {
 public:
 
-	void open();
-	void draw();
+	void open(const ImVec2& centrePoint);
+	void update();
 
 	Identifier<ObjectType> getConfirmedOperator() const;
 
@@ -19,6 +20,7 @@ private:
 
 	Identifier<ObjectType> m_confirmedOperator;
 
-	bool m_justOpened = false;
+	bool m_neverOpened = true;
+	ImVec2 m_openAt;
 
 };

@@ -15,12 +15,12 @@ namespace
 }
 
 
-bool addObject(ObjectType* type, ZObject* object)
+bool addObject(Identifier<ObjectType> type, Identifier<ZObject> object)
 {
     if (type && object && addObjectDelegate)
     {
-        return addObjectDelegate(static_cast<std::uint64_t>(type->getIdentifier()),
-                                 static_cast<std::uint64_t>(object->getIdentifier()));
+        return addObjectDelegate(static_cast<std::uint64_t>(type),
+                                 static_cast<std::uint64_t>(object));
     }
     return false;
 }
@@ -75,6 +75,8 @@ ZIGZAG_API void onNewObjectTypeAdded(const char* name, std::uint64_t uniqueID, O
 
 ZIGZAG_API void onObjectCreated(std::uint64_t newObject, std::uint64_t parentObject)
 {
+    Identifier<ZObject> id(newObject);
+    std::cout << "[editor dll] object created: " << id << std::endl;
     //auto parent = GlobalObjectMap::getInstance()->get(Identifier(parentObject));
     //parent->createChild(Identifier(newObject));
 }

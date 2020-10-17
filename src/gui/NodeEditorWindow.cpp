@@ -1,7 +1,9 @@
-#include "gui/NodeEditorWindow.hpp"
-#include "app/command/ConnectCommand.hpp"
-#include "app/command/DisconnectCommand.hpp"
-#include "app/command/RemoveObjectCommand.hpp"
+#include <Application.hpp>
+#include <gui/NodeEditorWindow.hpp>
+#include <app/command/ConnectCommand.hpp>
+#include <app/command/DisconnectCommand.hpp>
+#include <app/command/RemoveObjectCommand.hpp>
+#include <interop/ObjectInterop.hpp>
 
 #include <iostream>
 
@@ -29,6 +31,8 @@ void NodeEditorWindow::setScope(ZigZag::BaseOperator* scope)
 
 void NodeEditorWindow::draw()
 {
+    m_requestedOperator = Identifier<ObjectType>();
+
     ImGui::PushID(this);
 
     NodeEditor::SetCurrentEditor(m_editorContext);
@@ -159,6 +163,7 @@ void NodeEditorWindow::draw()
     }
     NodeEditor::EndDelete();
 
+    bool openPopup = NodeEditor::IsBackgroundDoubleClicked();
 
     //ImNode::PopStyleColor(1);
     //ImNode::PopStyleVar(5);
@@ -166,4 +171,27 @@ void NodeEditorWindow::draw()
 
     //ImGui::PopStyleVar(1);
     ImGui::PopID();
+
+    if (openPopup)
+    {
+        auto sz = ImGui::GetWindowSize();
+        m_operatorSelectionPopup.open({ 0.5f * sz.x, 0.5f * sz.y });
+    }
+
+    m_operatorSelectionPopup.update();
+
+    if (m_operatorSelectionPopup.getConfirmedOperator())
+    {
+        auto root = Application::getGlobalInstance()->getRootObject();
+        if (root)
+        {
+            addObject(m_operatorSelectionPopup.getConfirmedOperator(), root->getIdentifier());
+        }
+    }
+
+}
+
+Identifier<ObjectType> NodeEditorWindow::newOperatorRequested() const
+{
+    return m_operatorSelectionPopup.getConfirmedOperator();
 }
