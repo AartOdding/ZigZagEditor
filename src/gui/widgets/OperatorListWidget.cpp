@@ -5,23 +5,27 @@
 #include <iostream>
 
 #include <imgui.h>
-
+#include <GLFW/glfw3.h>
 
 using namespace ImGui;
 
 
 void OperatorListWidget::draw()
 {
+    m_hoveredType = Identifier<ObjectType>();
     m_confirmedType = Identifier<ObjectType>();
 
     auto root = Application::getGlobalInstance()->getRootTypeNamespace();
 
+    for (auto leaf : root->getTypes())
+    {
+        drawTreeLeaf(leaf);
+    }
     for (auto node : root->getChildren())
     {
         drawTreeNode(node);
     }
 }
-
 
 void OperatorListWidget::drawTreeNode(const ObjectTypeNamespace* node)
 {
@@ -46,10 +50,9 @@ void OperatorListWidget::drawTreeNode(const ObjectTypeNamespace* node)
 	}
 }
 
-
 void OperatorListWidget::drawTreeLeaf(const ObjectType* leaf)
 {
-    if (leaf)
+    if (leaf && leaf->getCategory() == ObjectTypeCategory::Operator)
     {
         ImGuiTreeNodeFlags flags = 0;
         flags |= ImGuiTreeNodeFlags_SpanFullWidth;
@@ -58,6 +61,10 @@ void OperatorListWidget::drawTreeLeaf(const ObjectType* leaf)
 
         if (TreeNodeEx(leaf->getName().c_str(), flags))
         {
+            if (IsItemHovered())
+            {
+                m_hoveredType = leaf->getIdentifier();
+            }
             if (IsItemClicked())
             {
                 m_selectedType = leaf->getIdentifier();
@@ -66,17 +73,24 @@ void OperatorListWidget::drawTreeLeaf(const ObjectType* leaf)
             {
                 m_confirmedType = leaf->getIdentifier();
             }
+            if (IsItemFocused() && IsKeyPressed(GLFW_KEY_ENTER))
+            {
+                m_confirmedType = leaf->getIdentifier();
+            }
             TreePop();
         }
     }
 }
 
+Identifier<ObjectType> OperatorListWidget::getHoveredOperator() const
+{
+    return m_hoveredType;
+}
 
 Identifier<ObjectType> OperatorListWidget::getSelectedOperator() const
 {
     return m_selectedType;
 }
-
 
 Identifier<ObjectType> OperatorListWidget::getConfirmedOperator() const
 {
