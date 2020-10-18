@@ -20,12 +20,15 @@ void HistoryWindow::draw()
     {
         m_appState->commandStack.undo();
     }
-
     SameLine();
-
     if (Button("Redo"))
     {
         m_appState->commandStack.redo();
+    }
+    SameLine();
+    if (Button("Clear"))
+    {
+        m_appState->commandStack.clear();
     }
 
     //ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1);
