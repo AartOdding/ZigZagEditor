@@ -25,7 +25,7 @@ RemoveObjectCommand::~RemoveObjectCommand()
 	}
 }
 
-void RemoveObjectCommand::redo()
+bool RemoveObjectCommand::redo()
 {
 	// Disconnects everything and keeps track of all the things disconnected.
 	recursivelyDisconnect(m_object);
@@ -34,9 +34,10 @@ void RemoveObjectCommand::redo()
 	m_object->setDeleteByParent(false);
 	m_ownsObject = true;
 	m_object->setParent(nullptr);
+	return true;
 }
 
-void RemoveObjectCommand::undo()
+bool RemoveObjectCommand::undo()
 {
 	// First restore all connections.
 	restoreConnections();
@@ -45,9 +46,10 @@ void RemoveObjectCommand::undo()
 	m_object->setParent(m_parentObject);
 	m_object->setDeleteByParent(true);
 	m_ownsObject = false;
+	return true;
 }
 
-const std::string& RemoveObjectCommand::typeName()
+const std::string& RemoveObjectCommand::getCommandName()
 {
 	static const std::string name = "RemoveObjectCommand";
 	return name;

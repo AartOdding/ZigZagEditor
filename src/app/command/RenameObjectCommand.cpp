@@ -19,17 +19,19 @@ RenameObjectCommand::RenameObjectCommand(ZigZag::Object* object, std::string_vie
 	m_description = "Rename " + m_initialName + " to " + m_newName;
 }
 
-void RenameObjectCommand::redo()
+bool RenameObjectCommand::redo()
 {
 	m_object->setName(m_newName);
+	return true;
 }
 
-void RenameObjectCommand::undo()
+bool RenameObjectCommand::undo()
 {
 	m_object->setName(m_initialName);
+	return true;
 }
 
-const std::string& RenameObjectCommand::typeName()
+const std::string& RenameObjectCommand::getCommandName()
 {
 	static const std::string name = "RenameObjectCommand";
 	return name;

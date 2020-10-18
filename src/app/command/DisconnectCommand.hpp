@@ -17,10 +17,10 @@ public:
 
 	DisconnectDataCommand(ZigZag::BaseDataSource* source, ZigZag::BaseDataInput* input);
 
-	void redo() final;
-	void undo() final;
+	bool redo() final;
+	bool undo() final;
 
-	const std::string& typeName() final;
+	const std::string& getCommandName() final;
 	const std::string& description() final;
 
 private:
@@ -40,10 +40,10 @@ public:
 
 	DisconnectParametersCommand(ZigZag::BaseParameter* source, ZigZag::BaseParameter* input);
 
-	void redo() final;
-	void undo() final;
+	bool redo() final;
+	bool undo() final;
 
-	const std::string& typeName() final;
+	const std::string& getCommandName() final;
 	const std::string& description() final;
 
 private:

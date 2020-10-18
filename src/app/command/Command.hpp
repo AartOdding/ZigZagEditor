@@ -11,10 +11,10 @@ public:
 
 	virtual ~Command() = default;
 
-	virtual const std::string& typeName() = 0;
+	virtual const std::string& getCommandName() = 0;
 	virtual const std::string& description() = 0;
 
-	virtual void redo() = 0;
-	virtual void undo() = 0;
+	virtual bool redo() = 0;
+	virtual bool undo() = 0;
 
 };

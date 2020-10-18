@@ -16,17 +16,19 @@ DisconnectDataCommand::DisconnectDataCommand(ZigZag::BaseDataSource* source, Zig
 	m_description = "Disconnect " + source->getName() + " and " + input->getName();
 }
 
-void DisconnectDataCommand::redo()
+bool DisconnectDataCommand::redo()
 {
 	ZigZag::disconnect(m_source, m_input);
+	return true;
 }
 
-void DisconnectDataCommand::undo()
+bool DisconnectDataCommand::undo()
 {
 	ZigZag::connect(m_source, m_input);
+	return true;
 }
 
-const std::string& DisconnectDataCommand::typeName()
+const std::string& DisconnectDataCommand::getCommandName()
 {
 	static const std::string name = "DisconnectDataCommand";
 	return name;
@@ -51,17 +53,19 @@ DisconnectParametersCommand::DisconnectParametersCommand(ZigZag::BaseParameter* 
 	m_description = "Disconnect " + source->getName() + " and " + input->getName();
 }
 
-void DisconnectParametersCommand::redo()
+bool DisconnectParametersCommand::redo()
 {
 	ZigZag::disconnect(m_source, m_input);
+	return true;
 }
 
-void DisconnectParametersCommand::undo()
+bool DisconnectParametersCommand::undo()
 {
 	ZigZag::connect(m_source, m_input);
+	return true;
 }
 
-const std::string& DisconnectParametersCommand::typeName()
+const std::string& DisconnectParametersCommand::getCommandName()
 {
 	static const std::string name = "DisconnectParametersCommand";
 	return name;

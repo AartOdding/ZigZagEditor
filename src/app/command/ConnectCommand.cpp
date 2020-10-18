@@ -17,12 +17,13 @@ ConnectDataCommand::ConnectDataCommand(ZigZag::BaseDataSource* source, ZigZag::B
 	m_description = "Connect " + source->getName() + " and " + input->getName();
 }
 
-void ConnectDataCommand::redo()
+bool ConnectDataCommand::redo()
 {
 	connect(m_source, m_input);
+	return true;
 }
 
-void ConnectDataCommand::undo()
+bool ConnectDataCommand::undo()
 {
 	disconnect(m_source, m_input);
 
@@ -30,9 +31,10 @@ void ConnectDataCommand::undo()
 	{
 		connect(m_initialSource, m_input);
 	}
+	return true;
 }
 
-const std::string& ConnectDataCommand::typeName()
+const std::string& ConnectDataCommand::getCommandName()
 {
 	static const std::string name = "ConnectDataCommand";
 	return name;
@@ -58,12 +60,13 @@ ConnectParametersCommand::ConnectParametersCommand(ZigZag::BaseParameter* source
 	m_description = "Connect " + source->getName() + " and " + input->getName();
 }
 
-void ConnectParametersCommand::redo()
+bool ConnectParametersCommand::redo()
 {
 	connect(m_source, m_input);
+	return true;
 }
 
-void ConnectParametersCommand::undo()
+bool ConnectParametersCommand::undo()
 {
 	disconnect(m_source, m_input);
 
@@ -71,9 +74,10 @@ void ConnectParametersCommand::undo()
 	{
 		connect(m_initialSource, m_input);
 	}
+	return true;
 }
 
-const std::string& ConnectParametersCommand::typeName()
+const std::string& ConnectParametersCommand::getCommandName()
 {
 	static const std::string name = "ConnectParametersCommand";
 	return name;

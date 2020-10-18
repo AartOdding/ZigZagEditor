@@ -21,10 +21,10 @@ public:
 	RemoveObjectCommand(ZigZag::Object* object);
 	~RemoveObjectCommand();
 
-	void redo() final;
-	void undo() final;
+	bool redo() final;
+	bool undo() final;
 
-	const std::string& typeName() final;
+	const std::string& getCommandName() final;
 	const std::string& description() final;
 
 private:
