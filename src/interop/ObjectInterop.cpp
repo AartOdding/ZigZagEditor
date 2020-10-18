@@ -12,17 +12,20 @@ namespace
 {
     AddObjectDelegate addObjectDelegate = nullptr;
     RemoveObjectDelegate removeObjectDelegate = nullptr;
+    SetObjectParentDelegate setObjectParentDelegate = nullptr;
+
+    std::unordered_map<Identifier<ZObject>, ZObject::Pointer> parentlessObjects;
 }
 
 
-bool addObject(Identifier<ObjectType> type, Identifier<ZObject> object)
+Identifier<ZObject> addObject(Identifier<ObjectType> objectType, Identifier<ZObject> parentObject)
 {
-    if (type && object && addObjectDelegate)
+    if (objectType && addObjectDelegate)
     {
-        return addObjectDelegate(static_cast<std::uint64_t>(type),
-                                 static_cast<std::uint64_t>(object));
+        return Identifier<ZObject>(addObjectDelegate(static_cast<std::uint64_t>(objectType),
+                                                     static_cast<std::uint64_t>(parentObject)));
     }
-    return false;
+    return Identifier<ZObject>();
 }
 
 bool removeObject(Identifier<ZObject> object)
@@ -34,11 +37,23 @@ bool removeObject(Identifier<ZObject> object)
     return false;
 }
 
-ZIGZAG_API void installObjectDelegates(AddObjectDelegate add, RemoveObjectDelegate rm)
+bool setObjectParent(Identifier<ZObject> object, Identifier<ZObject> newParent)
 {
-    std::cout << "[editor dll] installing object creation / destruction delegates" << std::endl;
-    addObjectDelegate = add;
-    removeObjectDelegate = rm;
+    if (object && setObjectParentDelegate)
+    {
+        return setObjectParentDelegate(static_cast<std::uint64_t>(object),
+                                       static_cast<std::uint64_t>(newParent));
+    }
+    return false;
+}
+
+ZIGZAG_API void installObjectDelegates(AddObjectDelegate addDelegate, 
+    RemoveObjectDelegate removeDelegate, SetObjectParentDelegate parentDelegate)
+{
+    std::cout << "[editor dll] installing object delegates" << std::endl;
+    addObjectDelegate = addDelegate;
+    removeObjectDelegate = removeDelegate;
+    setObjectParentDelegate = parentDelegate;
 }
 
 ZIGZAG_API void onNewObjectTypeAdded(const char* name, std::uint64_t uniqueID, ObjectTypeCategory category)
@@ -95,11 +110,19 @@ ZIGZAG_API void onObjectCreated(std::uint64_t newObject, std::uint64_t parentObj
         {
             parent->addChild(std::move(object));
         }
+        else
+        {
+            parentlessObjects[object->getIdentifier()] = std::move(std::move(object));
+        }
     }
 }
 
-ZIGZAG_API void onObjectDestroyed(std::uint64_t objectID)
+ZIGZAG_API void onObjectDestroyed(std::uint64_t objectID_)
 {
+    auto objectID = Identifier<ZObject>(objectID_);
+
+    std::cout << "[editor dll] object destroyed: " << objectID << std::endl;
+
     auto objectConst = IdentityMap<ZObject>::get(Identifier<ZObject>(objectID));
     auto object = const_cast<ZObject*>(objectConst);
 
@@ -107,6 +130,47 @@ ZIGZAG_API void onObjectDestroyed(std::uint64_t objectID)
     {
         object->getParent()->removeChild(Identifier<ZObject>(objectID));
     }
+    else if (object && parentlessObjects.count(objectID) == 1)
+    {
+        parentlessObjects.erase(objectID);
+    }
+}
 
-    //object->stealFromParent(); // not storing the returned unique_ptr will delete it.
+ZIGZAG_API void onObjectReparented(std::uint64_t objectID_, std::uint64_t newParentID_)
+{
+    auto objectID = Identifier<ZObject>(objectID_);
+    auto newParentID = Identifier<ZObject>(newParentID_);
+
+    auto objectPtr = const_cast<ZObject*>(IdentityMap<ZObject>::get(objectID));
+    auto newParentPtr = const_cast<ZObject*>(IdentityMap<ZObject>::get(newParentID));
+    auto oldParentPtr = objectPtr->getParent();
+
+    if (objectPtr)
+    {
+        ZObject::Pointer object;
+
+        if (objectPtr->getParent())
+        {
+            object = objectPtr->getParent()->removeChild(objectID);
+        }
+        else
+        {
+            object = std::move(parentlessObjects[objectID]);
+            parentlessObjects.erase(objectID);
+        }
+        if (object)
+        {
+            if (newParentPtr)
+            {
+                newParentPtr->addChild(std::move(object));
+            }
+            else
+            {
+                parentlessObjects[object->getIdentifier()] = std::move(object);
+            }
+        }
+    }
+
+    std::cout << "[editor dll] object reparented: " << objectID << std::endl;
+
 }

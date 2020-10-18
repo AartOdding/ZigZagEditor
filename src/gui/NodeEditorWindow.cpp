@@ -1,5 +1,6 @@
 #include <Application.hpp>
 #include <gui/NodeEditorWindow.hpp>
+#include <app/command/AddObjectCommand.hpp>
 #include <app/command/ConnectCommand.hpp>
 #include <app/command/DisconnectCommand.hpp>
 #include <app/command/RemoveObjectCommand.hpp>
@@ -158,10 +159,13 @@ void NodeEditorWindow::draw()
 
     if (m_operatorSelectionPopup.getConfirmedOperator())
     {
+        auto typeID = m_operatorSelectionPopup.getConfirmedOperator();
         auto root = Application::getGlobalInstance()->getRootObject();
         if (root)
         {
-            addObject(m_operatorSelectionPopup.getConfirmedOperator(), root->getIdentifier());
+            auto appState = Application::getGlobalInstance()->getAppState();
+            appState->commandStack.push<AddObjectCommand>(typeID, root->getIdentifier());
+            //addObject(m_operatorSelectionPopup.getConfirmedOperator(), root->getIdentifier());
         }
     }
 

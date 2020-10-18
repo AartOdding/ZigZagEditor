@@ -1,55 +1,47 @@
 #include "AddObjectCommand.hpp"
 
 #include <stdexcept>
-
-#include <ZigZag/ObjectFactory.hpp>
-
-
-using namespace ZigZag;
+#include <interop/ObjectInterop.hpp>
 
 
-AddObjectCommand::AddObjectCommand(ZigZag::Object* parentObject, const std::string& typeName)
+
+AddObjectCommand::AddObjectCommand(Identifier<ObjectType> objectType, Identifier<ZObject> parentObject)
 	: m_parentObject(parentObject)
 {
-	if (!parentObject)
-	{
-		throw std::runtime_error("Cannot add object to nullptr.");
-	}
-	m_addedObject = ObjectFactory::instance()->create(typeName);
-	m_addedObject->setDeleteByParent(false);
+	m_object = addObject(objectType, Identifier<ZObject>());
 	m_ownsObject = true;
-	m_addedObject->setName(m_addedObject->typeName());
-
-	if (!m_addedObject)
-	{
-		throw std::runtime_error("Object type does not exist.");
-	}
+	m_description = "Added object " + std::to_string(m_object);
 }
 
 AddObjectCommand::~AddObjectCommand()
 {
-	if (m_addedObject && m_ownsObject)
+	if (m_ownsObject)
 	{
-		delete m_addedObject;
+		removeObject(m_object);
 	}
 }
 
-void AddObjectCommand::redo()
+bool AddObjectCommand::redo()
 {
-	m_addedObject->setParent(m_parentObject);
-	m_addedObject->setDeleteByParent(true);
-	m_ownsObject = false;
-	m_description = "Add " + m_addedObject->getName() + " to " + m_parentObject->getName();
+	if (setObjectParent(m_object, m_parentObject))
+	{
+		m_ownsObject = false;
+		return true;
+	}
+	return false;
 }
 
-void AddObjectCommand::undo()
+bool AddObjectCommand::undo()
 {
-	m_addedObject->setDeleteByParent(false);
-	m_ownsObject = true;
-	m_addedObject->setParent(nullptr);
+	if (setObjectParent(m_object, Identifier<ZObject>()))
+	{
+		m_ownsObject = true;
+		return true;
+	}
+	return false;
 }
 
-const std::string& AddObjectCommand::typeName()
+const std::string& AddObjectCommand::getCommandName()
 {
 	static const std::string name = "AddObjectCommand";
 	return name;

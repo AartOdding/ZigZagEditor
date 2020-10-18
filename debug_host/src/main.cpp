@@ -64,14 +64,15 @@ namespace
 	{
 		std::uint64_t typeID;
 		std::uint64_t parentID;
+		std::uint64_t objectID;
 
-		CreateObjectTask(std::uint64_t t, std::uint64_t p) : typeID(t), parentID(p) {}
+		CreateObjectTask(std::uint64_t t, std::uint64_t p) : typeID(t), parentID(p), objectID(++nextID) {}
 
 		virtual void execute() override
 		{
 			ObjInstance object;
 			object.name = "Name";
-			object.id = ++nextID;
+			object.id = objectID;
 			object.type = typeID;
 			object.parent = parentID;
 			objectInstances[object.id] = object;
@@ -103,12 +104,25 @@ namespace
 		}
 	};
 
+	struct ReparentingTask : ObjTask
+	{
+		std::uint64_t objectID;
+		std::uint64_t newParentID;
+
+		ReparentingTask(std::uint64_t object, std::uint64_t newParent) : objectID(object), newParentID(newParent) {}
+
+		virtual void execute() override
+		{
+			objectInstances[objectID].parent = newParentID;
+			onObjectReparented(objectID, newParentID);
+		}
+	};
+
 	std::vector<std::unique_ptr<ObjTask>> taskQueue;
-	std::unordered_set<std::uint64_t> toBeDeletedObjects;
 }
 
 
-bool createObject(std::uint64_t objectType, std::uint64_t parentObject)
+std::uint64_t createObject(std::uint64_t objectType, std::uint64_t parentObject)
 {
 	std::cout << "[host] creating object of type: " << objectType << " with parent: " << parentObject << std::endl;
 
@@ -116,23 +130,41 @@ bool createObject(std::uint64_t objectType, std::uint64_t parentObject)
 	{
 		if (objectInstances.count(parentObject) == 1 || parentObject == 0)
 		{
-			taskQueue.push_back(std::make_unique<CreateObjectTask>(objectType, parentObject));
-			return true;
+			auto task = std::make_unique<CreateObjectTask>(objectType, parentObject);
+			auto id = task->objectID;
+			taskQueue.push_back(std::move(task));
+			return id;
 		}
 	}
-	return false;
+	return 0;
 }
 
 bool removeObject(std::uint64_t objectID)
 {
 	std::cout << "[host] removing object with identifier: " << objectID << std::endl;
 
-	if (objectInstances.count(objectID) == 1 && toBeDeletedObjects.count(objectID) == 0)
+	if (objectInstances.count(objectID) == 1)
 	{
 		taskQueue.push_back(std::make_unique<DeleteObjectTask>(objectID));
-		toBeDeletedObjects.insert(objectID);
 		return true;
 	}
+	return false;
+}
+
+bool setObjectParent(std::uint64_t objectID, std::uint64_t newParentID)
+{
+	std::cout << "[host] reparenting object: " << objectID << " to new parent: " << newParentID << std::endl;
+
+	// IMPORTANT: should also check for loops
+
+	//if (objectInstances.count(objectID) == 1)
+	//{
+		if (newParentID == 0 || objectInstances.count(newParentID) == 1)
+		{
+			taskQueue.push_back(std::make_unique<ReparentingTask>(objectID, newParentID));
+			return true;
+		}
+	//}
 	return false;
 }
 
@@ -147,7 +179,7 @@ int main()
 
 
 	initialize();
-	installObjectDelegates(createObject, removeObject);
+	installObjectDelegates(createObject, removeObject, setObjectParent);
 
 	for (const auto& [id, t] : objectTypes)
 	{
@@ -163,7 +195,6 @@ int main()
 			task->execute();
 		}
 		taskQueue.clear();
-		toBeDeletedObjects.clear();
 
 		// Lastly render the ui
 		render();

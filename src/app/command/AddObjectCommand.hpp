@@ -5,7 +5,8 @@
 #include <string>
 #include <string_view>
 
-#include <ZigZag/Object.hpp>
+#include <object/ObjectType.hpp>
+#include <object/ZObject.hpp>
 
 
 
@@ -14,19 +15,19 @@ class AddObjectCommand : public Command
 
 public:
 
-	AddObjectCommand(ZigZag::Object* parentObject, const std::string& typeName);
+	AddObjectCommand(Identifier<ObjectType> objectType, Identifier<ZObject> parentObject);
 	~AddObjectCommand();
 
-	void redo() final;
-	void undo() final;
+	bool redo() final;
+	bool undo() final;
 
-	const std::string& typeName() final;
+	const std::string& getCommandName() final;
 	const std::string& description() final;
 
 private:
-
-	ZigZag::Object* m_parentObject{ nullptr };
-	ZigZag::Object* m_addedObject{ nullptr };
+	
+	Identifier<ZObject> m_object;
+	Identifier<ZObject> m_parentObject;
 
 	bool m_ownsObject{ false };
 

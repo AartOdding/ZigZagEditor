@@ -60,7 +60,7 @@ void HierarchyWindow::draw()
                 if (IsItemClicked())
                 {
                     //m_appState->commandStack.pushCommand(std::make_unique<AddObjectCommand>(m_editedObject, type));
-                    m_appState->commandStack.push<AddObjectCommand>(m_editedObject, type);
+                    //m_appState->commandStack.push<AddObjectCommand>(m_editedObject, type);
 
                     if (!GetIO().KeyShift)
                     {
