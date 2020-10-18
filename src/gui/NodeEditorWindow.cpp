@@ -134,7 +134,8 @@ void NodeEditorWindow::draw()
             if (NodeEditor::AcceptDeletedItem())
             {
                 auto ptr = nodeId.AsPointer<const ZObject>();
-                removeObject(ptr->getIdentifier());
+                auto appState = Application::getGlobalInstance()->getAppState();
+                appState->commandStack.push<RemoveObjectCommand>(ptr->getIdentifier());
             }
         }
     }
@@ -165,7 +166,6 @@ void NodeEditorWindow::draw()
         {
             auto appState = Application::getGlobalInstance()->getAppState();
             appState->commandStack.push<AddObjectCommand>(typeID, root->getIdentifier());
-            //addObject(m_operatorSelectionPopup.getConfirmedOperator(), root->getIdentifier());
         }
     }
 

@@ -1,10 +1,8 @@
 #pragma once
 
-#include "Command.hpp"
-
 #include <string>
-#include <string_view>
 
+#include <app/command/Command.hpp>
 #include <object/ObjectType.hpp>
 #include <object/ZObject.hpp>
 
@@ -12,10 +10,9 @@
 
 class AddObjectCommand : public Command
 {
-
 public:
 
-	AddObjectCommand(Identifier<ObjectType> objectType, Identifier<ZObject> parentObject);
+	AddObjectCommand(Identifier<ObjectType> typeID, Identifier<ZObject> parentID);
 	~AddObjectCommand();
 
 	bool redo() final;
@@ -26,11 +23,11 @@ public:
 
 private:
 	
-	Identifier<ZObject> m_object;
-	Identifier<ZObject> m_parentObject;
-
-	bool m_ownsObject{ false };
+	Identifier<ZObject> m_objectID;
+	Identifier<ZObject> m_parentID;
 
 	std::string m_description;
+
+	bool m_ownsObject;
 
 };

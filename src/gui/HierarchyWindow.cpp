@@ -82,7 +82,7 @@ void HierarchyWindow::draw()
         for (auto obj : m_objectSelection.getSelection())
         {
             //m_appState->commandStack.pushCommand(std::make_unique<RemoveObjectCommand>(obj));
-            m_appState->commandStack.push<RemoveObjectCommand>(obj);
+            //m_appState->commandStack.push<RemoveObjectCommand>(obj);
         }
     }
 

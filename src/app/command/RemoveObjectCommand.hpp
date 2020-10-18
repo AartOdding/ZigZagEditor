@@ -1,24 +1,17 @@
 #pragma once
 
-#include "Command.hpp"
-
 #include <string>
-#include <utility>
-#include <vector>
 
-#include <ZigZag/Object.hpp>
-#include <ZigZag/BaseDataInput.hpp>
-#include <ZigZag/BaseDataSource.hpp>
-#include <ZigZag/BaseParameter.hpp>
+#include <app/command/Command.hpp>
+#include <object/ZObject.hpp>
 
 
 
 class RemoveObjectCommand : public Command
 {
-
 public:
 
-	RemoveObjectCommand(ZigZag::Object* object);
+	RemoveObjectCommand(Identifier<ZObject> objectID);
 	~RemoveObjectCommand();
 
 	bool redo() final;
@@ -29,17 +22,17 @@ public:
 
 private:
 
-	void recursivelyDisconnect(ZigZag::Object* object);
-	void restoreConnections();
+	//void recursivelyDisconnect(ZigZag::Object* object);
+	//void restoreConnections();
 
-	std::vector<std::pair<ZigZag::BaseDataSource*, ZigZag::BaseDataInput*>> m_dataDisconnections;
-	std::vector<std::pair<ZigZag::BaseParameter*, ZigZag::BaseParameter*>> m_parameterDisconnections;
+	//std::vector<std::pair<ZigZag::BaseDataSource*, ZigZag::BaseDataInput*>> m_dataDisconnections;
+	//std::vector<std::pair<ZigZag::BaseParameter*, ZigZag::BaseParameter*>> m_parameterDisconnections;
 	
+	Identifier<ZObject> m_objectID;
+	Identifier<ZObject> m_parentID;
+
 	std::string m_description;
 
-	ZigZag::Object* m_object{ nullptr };
-	ZigZag::Object* m_parentObject{ nullptr };
-
-	bool m_ownsObject{ false };
+	bool m_ownsObject;
 
 };

@@ -1,52 +1,66 @@
-#include "RemoveObjectCommand.hpp"
-
+#include <cassert>
 #include <stdexcept>
 
+#include <app/command/RemoveObjectCommand.hpp>
+#include <interop/ObjectInterop.hpp>
 
-using namespace ZigZag;
 
 
-RemoveObjectCommand::RemoveObjectCommand(ZigZag::Object* object)
-	: m_object(object)
+RemoveObjectCommand::RemoveObjectCommand(Identifier<ZObject> objectID)
+	: m_objectID(objectID)
+	, m_ownsObject(false)
 {
-	if (!m_object || !m_object->getParent() || !m_object->getDeleteByParent())
+	assert(IdentityMap<ZObject>::get(objectID));
+	assert(IdentityMap<ZObject>::get(objectID)->getParent());
+
+	// TODO LOGGING: log error if object does not exist, or does not have a parent.
+
+	auto objectPtr = IdentityMap<ZObject>::get(objectID);
+	if (objectPtr)
 	{
-		throw std::runtime_error("Cannot remove object.");
+		auto parentPtr = objectPtr->getParent();
+		if (parentPtr)
+		{
+			// If the object has a parent we need to store it for proper undoing
+			m_parentID = parentPtr->getIdentifier();
+		}
+		// else log error
 	}
-	m_parentObject = m_object->getParent();
-	m_description = "Remove " + m_object->getName() + " from " + m_object->getParent()->getName();
+	// else log error
+
+	m_description = "Removed object <" + std::to_string(static_cast<std::uint64_t>(m_objectID)) + ">";
 }
 
 RemoveObjectCommand::~RemoveObjectCommand()
 {
-	if (m_object && m_ownsObject)
+	if (m_ownsObject)
 	{
-		delete m_object;
+		removeObject(m_objectID);
 	}
 }
 
 bool RemoveObjectCommand::redo()
 {
-	// Disconnects everything and keeps track of all the things disconnected.
-	recursivelyDisconnect(m_object);
-
-	// The actual removal of the object from the parent:
-	m_object->setDeleteByParent(false);
-	m_ownsObject = true;
-	m_object->setParent(nullptr);
-	return true;
+	if (m_objectID && m_parentID)
+	{
+		if (setObjectParent(m_objectID, Identifier<ZObject>()))
+		{
+			m_ownsObject = true;
+			return true;
+		}
+	}
+	// TODO LOGGING: log info that a command was unsuccesful
+	return false;
 }
 
 bool RemoveObjectCommand::undo()
 {
-	// First restore all connections.
-	restoreConnections();
-
-	// Actually set the parent back.
-	m_object->setParent(m_parentObject);
-	m_object->setDeleteByParent(true);
-	m_ownsObject = false;
-	return true;
+	if (setObjectParent(m_objectID, m_parentID))
+	{
+		m_ownsObject = false;
+		return true;
+	}
+	return false;
 }
 
 const std::string& RemoveObjectCommand::getCommandName()
@@ -59,7 +73,7 @@ const std::string& RemoveObjectCommand::description()
 {
 	return m_description;
 }
-
+/*
 void RemoveObjectCommand::recursivelyDisconnect(ZigZag::Object* object)
 {
 	// Important about this function is that when a connection between two
@@ -142,3 +156,4 @@ void RemoveObjectCommand::restoreConnections()
 	m_dataDisconnections.clear();
 	m_parameterDisconnections.clear();
 }
+*/
