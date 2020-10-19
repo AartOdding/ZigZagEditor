@@ -187,7 +187,7 @@ int main()
 	}
 
 	onNodeCreated(projectInstance.id, 0, projectType.id);
-	setProjectRootNode(projectInstance.name.c_str(), projectInstance.id);
+	setProjectRootNode(projectInstance.id);
 
 	while (!shouldQuit())
 	{

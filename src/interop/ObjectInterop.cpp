@@ -186,7 +186,7 @@ ZIGZAG_API void onNodeParentChanged(std::uint64_t nodeID_, std::uint64_t newPare
 }
 
 
-ZIGZAG_API void setProjectRootNode(const char* name, std::uint64_t projectNodeID)
+ZIGZAG_API void setProjectRootNode(std::uint64_t projectNodeID)
 {
     auto node = Application::getGlobalInstance()->takeParentlessNode(Identifier<Node>(projectNodeID));
 

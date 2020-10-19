@@ -30,4 +30,4 @@ ZIGZAG_API void onNodeCreated(std::uint64_t nodeID, std::uint64_t parentID, std:
 ZIGZAG_API void onNodeDestroyed(std::uint64_t nodeID);
 ZIGZAG_API void onNodeParentChanged(std::uint64_t nodeID, std::uint64_t newParentID);
 
-ZIGZAG_API void setProjectRootNode(const char* name, std::uint64_t projectID);
+ZIGZAG_API void setProjectRootNode(std::uint64_t projectID);
