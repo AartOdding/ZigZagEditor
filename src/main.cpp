@@ -133,6 +133,8 @@ ZIGZAG_API void render()
 
 ZIGZAG_API void shutdown()
 {
+    Application::getGlobalInstance()->getAppState()->commandStack.clear();
+
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();

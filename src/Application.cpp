@@ -173,7 +173,7 @@ NodeTemplateGroup* Application::getRootTypeNamespace()
 
 void Application::addParentlessNode(Node::Pointer&& node)
 {
-    std::cout << "[dll] adding parentless node" << std::endl;
+    std::cout << "[editor dll] Storing parentless node in Application: " << node->getIdentifier() << std::endl;
     if (node)
     {
         m_parentlessNodes[node->getIdentifier()] = std::move(node);
@@ -182,7 +182,7 @@ void Application::addParentlessNode(Node::Pointer&& node)
 
 Node::Pointer Application::takeParentlessNode(Identifier<Node> nodeID)
 {
-    std::cout << "[dll] removing parentless node" << std::endl;
+    std::cout << "[editor dll] Removing parentless node from Application: " << nodeID << std::endl;
     auto it = m_parentlessNodes.find(nodeID);
     if (it != m_parentlessNodes.end())
     {

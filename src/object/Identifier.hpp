@@ -4,6 +4,7 @@
 #include <functional>
 #include <iostream>
 #include <type_traits>
+#include <string>
 
 
 template<typename Type>
@@ -29,6 +30,8 @@ public:
 	explicit operator std::uint64_t() const { return m_id; }
 
 	operator bool() const { return m_id != 0; }
+
+	std::string toString() const { return "<" + std::to_string(m_id) + ">"; }
 
 private:
 
