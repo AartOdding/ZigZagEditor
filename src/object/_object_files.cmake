@@ -12,6 +12,6 @@ set(object_files
     "${CMAKE_CURRENT_LIST_DIR}/NodeCategory.hpp"
     "${CMAKE_CURRENT_LIST_DIR}/NodeTemplate.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/NodeTemplate.hpp"
-    "${CMAKE_CURRENT_LIST_DIR}/TemplateGroup.cpp"
-    "${CMAKE_CURRENT_LIST_DIR}/TemplateGroup.hpp"
+    "${CMAKE_CURRENT_LIST_DIR}/NodeTemplateGroup.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/NodeTemplateGroup.hpp"
 )

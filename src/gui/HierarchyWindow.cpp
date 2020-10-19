@@ -25,7 +25,7 @@ HierarchyWindow::HierarchyWindow(std::string_view windowName, Application* app, 
 
 void HierarchyWindow::setScope(ZigZag::Object* rootObject)
 {
-    m_rootObject = rootObject;
+    m_rootNode = rootObject;
     m_objectSelection.setRootObject(rootObject);
 }
 
@@ -96,7 +96,7 @@ void HierarchyWindow::draw()
 
     //ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1);
 
-    showObjectTree(m_rootObject);
+    showObjectTree(m_rootNode);
 
     //ImGui::PopStyleVar();
 

@@ -28,12 +28,12 @@ void NodeTemplate::setCategory(NodeCategory category)
 	m_category = category;
 }
 
-TemplateGroup* NodeTemplate::getNamespace()
+NodeTemplateGroup* NodeTemplate::getNamespace()
 {
 	return m_namespace;
 }
 
-const TemplateGroup* NodeTemplate::getNamespace() const
+const NodeTemplateGroup* NodeTemplate::getNamespace() const
 {
 	return m_namespace;
 }

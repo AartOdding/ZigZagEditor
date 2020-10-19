@@ -1,20 +1,20 @@
 #include <algorithm>
 #include <cassert>
 
-#include <object/TemplateGroup.hpp>
+#include <object/NodeTemplateGroup.hpp>
 
 
-TemplateGroup::TemplateGroup(std::string_view name)
+NodeTemplateGroup::NodeTemplateGroup(std::string_view name)
     : m_name(name)
 {
 }
 
-TemplateGroup::Pointer TemplateGroup::create(std::string_view name)
+NodeTemplateGroup::Pointer NodeTemplateGroup::create(std::string_view name)
 {
-    return std::unique_ptr<TemplateGroup>(new TemplateGroup(name));
+    return std::unique_ptr<NodeTemplateGroup>(new NodeTemplateGroup(name));
 }
 
-TemplateGroup* TemplateGroup::addChild(Pointer&& childNamespace)
+NodeTemplateGroup* NodeTemplateGroup::addChild(Pointer&& childNamespace)
 {
     assert(m_children.count(childNamespace->getName()) == 0);
 
@@ -28,7 +28,7 @@ TemplateGroup* TemplateGroup::addChild(Pointer&& childNamespace)
     return nullptr;
 }
 
-TemplateGroup* TemplateGroup::getChild(std::string_view childNamespace)
+NodeTemplateGroup* NodeTemplateGroup::getChild(std::string_view childNamespace)
 {
     auto it = std::lower_bound(m_children.begin(), m_children.end(), childNamespace,
         [](const auto& pair, const std::string_view& name) { return pair.first < name; });
@@ -40,7 +40,7 @@ TemplateGroup* TemplateGroup::getChild(std::string_view childNamespace)
     return nullptr;
 }
 
-TemplateGroup::Pointer TemplateGroup::removeChild(std::string_view childNamespace)
+NodeTemplateGroup::Pointer NodeTemplateGroup::removeChild(std::string_view childNamespace)
 {
     auto it = std::lower_bound(m_children.begin(), m_children.end(), childNamespace,
         [](const auto& pair, const std::string_view& name){ return pair.first < name; });
@@ -55,27 +55,27 @@ TemplateGroup::Pointer TemplateGroup::removeChild(std::string_view childNamespac
     return Pointer();
 }
 
-TemplateGroup* TemplateGroup::getParent()
+NodeTemplateGroup* NodeTemplateGroup::getParent()
 {
     return m_parent;
 }
 
-const TemplateGroup* TemplateGroup::getParent() const
+const NodeTemplateGroup* NodeTemplateGroup::getParent() const
 {
     return m_parent;
 }
 
-TemplateGroup::ChildrenView TemplateGroup::getChildren()
+NodeTemplateGroup::ChildrenView NodeTemplateGroup::getChildren()
 {
     return ChildrenView(m_children);
 }
 
-TemplateGroup::ConstChildrenView TemplateGroup::getChildren() const
+NodeTemplateGroup::ConstChildrenView NodeTemplateGroup::getChildren() const
 {
     return ConstChildrenView(m_children);
 }
 
-NodeTemplate* TemplateGroup::addType(TypePointer&& type)
+NodeTemplate* NodeTemplateGroup::addType(TypePointer&& type)
 {
     if (type)
     {
@@ -88,7 +88,7 @@ NodeTemplate* TemplateGroup::addType(TypePointer&& type)
     return nullptr;
 }
 
-TemplateGroup::TypePointer TemplateGroup::removeType(Identifier<NodeTemplate> typeIdentifier)
+NodeTemplateGroup::TypePointer NodeTemplateGroup::removeType(Identifier<NodeTemplate> typeIdentifier)
 {
     if (typeIdentifier)
     {
@@ -115,17 +115,17 @@ TemplateGroup::TypePointer TemplateGroup::removeType(Identifier<NodeTemplate> ty
     return TypePointer();
 }
 
-TemplateGroup::TypesView TemplateGroup::getTypes()
+NodeTemplateGroup::TypesView NodeTemplateGroup::getTypes()
 {
     return TypesView(m_typesAlphabetic);
 }
 
-TemplateGroup::ConstTypesView TemplateGroup::getTypes() const
+NodeTemplateGroup::ConstTypesView NodeTemplateGroup::getTypes() const
 {
     return ConstTypesView(m_typesAlphabetic);
 }
 
-const std::string& TemplateGroup::getName() const
+const std::string& NodeTemplateGroup::getName() const
 {
     return m_name;
 }

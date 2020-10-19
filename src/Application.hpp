@@ -14,7 +14,7 @@
 #include "gui/StyleEditorWindow.hpp"
 
 #include <object/Node.hpp>
-#include <object/TemplateGroup.hpp>
+#include <object/NodeTemplateGroup.hpp>
 
 namespace ZigZag
 {
@@ -58,7 +58,11 @@ public:
 
     float e() const;
 
-    TemplateGroup* getRootTypeNamespace();
+    NodeTemplateGroup* getRootTypeNamespace();
+
+    void addParentlessNode(Node::Pointer&& node);
+    Node::Pointer takeParentlessNode(Identifier<Node> nodeID);
+    bool existsParentlessNode(Identifier<Node> nodeID);
 
 private:
 
@@ -80,7 +84,9 @@ private:
     bool m_ImGuiDemoWindowOpen = false;
     bool m_ImGuiStyleEditorWindowOpen = false;
 
-    std::unique_ptr<Node> m_rootObject;
-    std::unique_ptr<TemplateGroup> m_rootTypeNamespace;
+    std::unique_ptr<Node> m_rootNode;
+    std::unordered_map<Identifier<Node>, Node::Pointer> m_parentlessNodes;
+
+    std::unique_ptr<NodeTemplateGroup> m_rootNodeTemplateGroup;
 
 };

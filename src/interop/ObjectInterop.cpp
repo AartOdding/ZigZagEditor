@@ -1,7 +1,7 @@
 #include <Application.hpp>
 #include <interop/ObjectInterop.hpp>
 #include <object/Node.hpp>
-#include <object/TemplateGroup.hpp>
+#include <object/NodeTemplateGroup.hpp>
 #include <util/StringUtils.hpp>
 
 #include <iostream>
@@ -14,7 +14,6 @@ namespace
     DestroyNodeDelegate destroyNodeDelegate = nullptr;
     SetNodeParentDelegate setNodeParentDelegate = nullptr;
 
-    std::unordered_map<Identifier<Node>, Node::Pointer> parentlessNodes;
 }
 
 namespace Host
@@ -74,7 +73,7 @@ ZIGZAG_API void onTemplateAdded(const char* name, std::uint64_t templateID_, Nod
         nodeTemplate->setCategory(category);
         nameParts.pop_back();
 
-        TemplateGroup* templateGroup = Application::getGlobalInstance()->getRootTypeNamespace();
+        NodeTemplateGroup* templateGroup = Application::getGlobalInstance()->getRootTypeNamespace();
 
         for (const auto& part : nameParts)
         {
@@ -86,7 +85,7 @@ ZIGZAG_API void onTemplateAdded(const char* name, std::uint64_t templateID_, Nod
             }
             else
             {
-                templateGroup = templateGroup->addChild(TemplateGroup::create(part));
+                templateGroup = templateGroup->addChild(NodeTemplateGroup::create(part));
             }
         }
 
@@ -119,7 +118,7 @@ ZIGZAG_API void onNodeCreated(std::uint64_t nodeID_, std::uint64_t parentID_, st
         }
         else
         {
-            parentlessNodes[object->getIdentifier()] = std::move(std::move(object));
+            Application::getGlobalInstance()->addParentlessNode(std::move(std::move(object)));
         }
     }
 }
@@ -138,9 +137,9 @@ ZIGZAG_API void onNodeDestroyed(std::uint64_t objectID_)
     {
         object->getParent()->removeChild(Identifier<Node>(objectID));
     }
-    else if (object && parentlessNodes.count(objectID) == 1)
+    else if (object)
     {
-        parentlessNodes.erase(objectID);
+        Application::getGlobalInstance()->takeParentlessNode(objectID);
     }
 }
 
@@ -164,8 +163,7 @@ ZIGZAG_API void onNodeParentChanged(std::uint64_t nodeID_, std::uint64_t newPare
         }
         else
         {
-            object = std::move(parentlessNodes[nodeID]);
-            parentlessNodes.erase(nodeID);
+            object = Application::getGlobalInstance()->takeParentlessNode(nodeID);
         }
         if (object)
         {
@@ -175,7 +173,7 @@ ZIGZAG_API void onNodeParentChanged(std::uint64_t nodeID_, std::uint64_t newPare
             }
             else
             {
-                parentlessNodes[object->getIdentifier()] = std::move(object);
+                Application::getGlobalInstance()->addParentlessNode(std::move(object));
             }
         }
     }
@@ -183,15 +181,15 @@ ZIGZAG_API void onNodeParentChanged(std::uint64_t nodeID_, std::uint64_t newPare
 }
 
 
-ZIGZAG_API void setProjectRootNode(const char* name, std::uint64_t projectID)
+ZIGZAG_API void setProjectRootNode(const char* name, std::uint64_t projectNodeID)
 {
-    std::cout << "[editor dll] project created: " << name << " " << projectID << std::endl;
+    std::cout << "[editor dll] project created: " << name << " " << projectNodeID << std::endl;
 
-    if (parentlessNodes.count(Identifier<Node>(projectID)) == 1)
+    auto node = Application::getGlobalInstance()->takeParentlessNode(Identifier<Node>(projectNodeID));
+
+    if (node)
     {
-        Application::getGlobalInstance()->setRootObject(
-            std::move(parentlessNodes[Identifier<Node>(projectID)]));
-        parentlessNodes.erase(Identifier<Node>(projectID));
+        Application::getGlobalInstance()->setRootObject(std::move(node));
     }
     else
     {

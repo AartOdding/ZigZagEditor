@@ -1,6 +1,6 @@
 #include <Application.hpp>
 #include <gui/widgets/OperatorListWidget.hpp>
-#include <object/TemplateGroup.hpp>
+#include <object/NodeTemplateGroup.hpp>
 
 #include <iostream>
 
@@ -27,7 +27,7 @@ void OperatorListWidget::draw()
     }
 }
 
-void OperatorListWidget::drawTreeNode(const TemplateGroup* node)
+void OperatorListWidget::drawTreeNode(const NodeTemplateGroup* node)
 {
 	if (node)
 	{

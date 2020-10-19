@@ -31,7 +31,7 @@ Application::Application()
     registerTypes();
     ZigZag::LuaBehaviour::loadDefaultScript((Directories::resourcesDir() / "LuaBehaviourDefaultScript.lua").string());
 
-    m_rootTypeNamespace = TemplateGroup::create("");
+    m_rootNodeTemplateGroup = NodeTemplateGroup::create("");
 
     m_hierarchyWindow.setScope(&m_appState.rootOperator);
 }
@@ -142,23 +142,23 @@ ApplicationState* Application::getAppState()
 
 Node* Application::getRootObject()
 {
-    return m_rootObject.get();
+    return m_rootNode.get();
 }
 
 const Node* Application::getRootObject() const
 {
-    return m_rootObject.get();
+    return m_rootNode.get();
 }
 
 void Application::setRootObject(std::unique_ptr<Node>&& object)
 {
-    m_rootObject = std::move(object);
-    m_nodeEditorWindow.setScope(m_rootObject->getIdentifier());
+    m_rootNode = std::move(object);
+    m_nodeEditorWindow.setScope(m_rootNode->getIdentifier());
 }
 
 void Application::clearRootObject()
 {
-    m_rootObject.reset();
+    m_rootNode.reset();
 }
 
 float Application::e() const
@@ -166,7 +166,34 @@ float Application::e() const
     return m_widthOfE;
 }
 
-TemplateGroup* Application::getRootTypeNamespace()
+NodeTemplateGroup* Application::getRootTypeNamespace()
 {
-    return m_rootTypeNamespace.get();
+    return m_rootNodeTemplateGroup.get();
+}
+
+void Application::addParentlessNode(Node::Pointer&& node)
+{
+    std::cout << "[dll] adding parentless node" << std::endl;
+    if (node)
+    {
+        m_parentlessNodes[node->getIdentifier()] = std::move(node);
+    }
+}
+
+Node::Pointer Application::takeParentlessNode(Identifier<Node> nodeID)
+{
+    std::cout << "[dll] removing parentless node" << std::endl;
+    auto it = m_parentlessNodes.find(nodeID);
+    if (it != m_parentlessNodes.end())
+    {
+        auto node = std::move(it->second);
+        m_parentlessNodes.erase(it);
+        return std::move(node);
+    }
+    return Node::Pointer();
+}
+
+bool Application::existsParentlessNode(Identifier<Node> nodeID)
+{
+    return m_parentlessNodes.find(nodeID) != m_parentlessNodes.end();
 }

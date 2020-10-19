@@ -38,7 +38,7 @@ private:
     Application* m_application;
     ApplicationState* m_appState;
     
-    ZigZag::Object* m_rootObject{ nullptr };
+    ZigZag::Object* m_rootNode{ nullptr };
     ZigZag::Object* m_editedObject{ nullptr };
 
     ZigZag::ObjectSelection m_objectSelection{ nullptr };

@@ -13,15 +13,15 @@
 
 
 
-class TemplateGroup
+class NodeTemplateGroup
 {
-    TemplateGroup() = delete;
-    TemplateGroup(TemplateGroup&&) = delete;
-    TemplateGroup(const TemplateGroup&) = delete;
+    NodeTemplateGroup() = delete;
+    NodeTemplateGroup(NodeTemplateGroup&&) = delete;
+    NodeTemplateGroup(const NodeTemplateGroup&) = delete;
 
 public:
     
-    using Pointer = std::unique_ptr<TemplateGroup>;
+    using Pointer = std::unique_ptr<NodeTemplateGroup>;
     using TypePointer = std::unique_ptr<NodeTemplate>;
 
     using Children = std::map<std::string, Pointer>;
@@ -35,14 +35,14 @@ public:
 
 
     static Pointer create(std::string_view name);
-    ~TemplateGroup() = default;
+    ~NodeTemplateGroup() = default;
 
-    TemplateGroup* addChild(Pointer&& childNamespace);
-    TemplateGroup* getChild(std::string_view childNamespace);
+    NodeTemplateGroup* addChild(Pointer&& childNamespace);
+    NodeTemplateGroup* getChild(std::string_view childNamespace);
     Pointer removeChild(std::string_view childNamespace);
 
-    TemplateGroup* getParent();
-    const TemplateGroup* getParent() const;
+    NodeTemplateGroup* getParent();
+    const NodeTemplateGroup* getParent() const;
 
     ChildrenView getChildren();
     ConstChildrenView getChildren() const;
@@ -57,10 +57,10 @@ public:
 
 private:
 
-    TemplateGroup(std::string_view name);
+    NodeTemplateGroup(std::string_view name);
     
     Children m_children;
-    TemplateGroup* m_parent = nullptr;
+    NodeTemplateGroup* m_parent = nullptr;
 
     Types m_types;
     TypesAlphabetic m_typesAlphabetic;

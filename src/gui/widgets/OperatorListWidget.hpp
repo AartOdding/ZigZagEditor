@@ -2,7 +2,7 @@
 
 #include <object/NodeTemplate.hpp>
 
-class TemplateGroup;
+class NodeTemplateGroup;
 
 
 class OperatorListWidget
@@ -19,7 +19,7 @@ public:
 
 private:
 
-	void drawTreeNode(const TemplateGroup* node);
+	void drawTreeNode(const NodeTemplateGroup* node);
 	void drawTreeLeaf(const NodeTemplate* leaf);
 
 	Identifier<NodeTemplate> m_hoveredType;

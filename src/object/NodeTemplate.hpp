@@ -8,7 +8,7 @@
 #include <object/Identity.hpp>
 #include <object/NodeCategory.hpp>
 
-class TemplateGroup;
+class NodeTemplateGroup;
 
 
 
@@ -30,17 +30,17 @@ public:
     NodeCategory getCategory() const;
     void setCategory(NodeCategory category);
 
-    TemplateGroup* getNamespace();
-    const TemplateGroup* getNamespace() const;
+    NodeTemplateGroup* getNamespace();
+    const NodeTemplateGroup* getNamespace() const;
 
 private:
 
-    friend class TemplateGroup;
+    friend class NodeTemplateGroup;
 
     NodeTemplate(std::string_view name, Identifier<NodeTemplate> identifier);
 
     const std::string m_name;
     NodeCategory m_category;
-    TemplateGroup* m_namespace;
+    NodeTemplateGroup* m_namespace;
 
 };
