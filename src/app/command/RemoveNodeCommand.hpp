@@ -3,16 +3,16 @@
 #include <string>
 
 #include <app/command/Command.hpp>
-#include <object/ZObject.hpp>
+#include <object/Node.hpp>
 
 
 
-class RemoveObjectCommand : public Command
+class RemoveNodeCommand : public Command
 {
 public:
 
-	RemoveObjectCommand(Identifier<ZObject> objectID);
-	~RemoveObjectCommand();
+	RemoveNodeCommand(Identifier<Node> nodeID);
+	~RemoveNodeCommand();
 
 	bool redo() final;
 	bool undo() final;
@@ -28,11 +28,11 @@ private:
 	//std::vector<std::pair<ZigZag::BaseDataSource*, ZigZag::BaseDataInput*>> m_dataDisconnections;
 	//std::vector<std::pair<ZigZag::BaseParameter*, ZigZag::BaseParameter*>> m_parameterDisconnections;
 	
-	Identifier<ZObject> m_objectID;
-	Identifier<ZObject> m_parentID;
+	Identifier<Node> m_nodeID;
+	Identifier<Node> m_parentID;
 
 	std::string m_description;
 
-	bool m_ownsObject;
+	bool m_ownsNode;
 
 };

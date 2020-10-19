@@ -1,6 +1,6 @@
 #include <Application.hpp>
 #include <gui/widgets/OperatorListWidget.hpp>
-#include <object/ObjectTypeNamespace.hpp>
+#include <object/TemplateGroup.hpp>
 
 #include <iostream>
 
@@ -12,8 +12,8 @@ using namespace ImGui;
 
 void OperatorListWidget::draw()
 {
-    m_hoveredType = Identifier<ObjectType>();
-    m_confirmedType = Identifier<ObjectType>();
+    m_hoveredType = Identifier<Template>();
+    m_confirmedType = Identifier<Template>();
 
     auto root = Application::getGlobalInstance()->getRootTypeNamespace();
 
@@ -27,7 +27,7 @@ void OperatorListWidget::draw()
     }
 }
 
-void OperatorListWidget::drawTreeNode(const ObjectTypeNamespace* node)
+void OperatorListWidget::drawTreeNode(const TemplateGroup* node)
 {
 	if (node)
 	{
@@ -50,9 +50,9 @@ void OperatorListWidget::drawTreeNode(const ObjectTypeNamespace* node)
 	}
 }
 
-void OperatorListWidget::drawTreeLeaf(const ObjectType* leaf)
+void OperatorListWidget::drawTreeLeaf(const Template* leaf)
 {
-    if (leaf && leaf->getCategory() == ObjectTypeCategory::Operator)
+    if (leaf && leaf->getCategory() == NodeCategory::Operator)
     {
         ImGuiTreeNodeFlags flags = 0;
         flags |= ImGuiTreeNodeFlags_SpanFullWidth;
@@ -82,17 +82,17 @@ void OperatorListWidget::drawTreeLeaf(const ObjectType* leaf)
     }
 }
 
-Identifier<ObjectType> OperatorListWidget::getHoveredOperator() const
+Identifier<Template> OperatorListWidget::getHoveredOperator() const
 {
     return m_hoveredType;
 }
 
-Identifier<ObjectType> OperatorListWidget::getSelectedOperator() const
+Identifier<Template> OperatorListWidget::getSelectedOperator() const
 {
     return m_selectedType;
 }
 
-Identifier<ObjectType> OperatorListWidget::getConfirmedOperator() const
+Identifier<Template> OperatorListWidget::getConfirmedOperator() const
 {
     return m_confirmedType;
 }

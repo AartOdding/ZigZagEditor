@@ -8,8 +8,8 @@
 #include <app/ApplicationState.hpp>
 #include <gui/Window.hpp>
 #include <gui/popups/OperatorSelectionPopup.hpp>
-#include <object/ObjectType.hpp>
-#include <object/ZObject.hpp>
+#include <object/Node.hpp>
+#include <object/Template.hpp>
 
 using namespace ax;
 
@@ -25,7 +25,7 @@ public:
 
     ~NodeEditorWindow();
 
-    void setScope(Identifier<ZObject> scope);
+    void setScope(Identifier<Node> scope);
 
 protected:
 
@@ -34,7 +34,7 @@ protected:
 
 private:
 
-    Identifier<ZObject> m_scope;
+    Identifier<Node> m_scope;
 
     OperatorSelectionPopup m_operatorSelectionPopup;
     

@@ -8,10 +8,10 @@ set(command_files
     "${CMAKE_CURRENT_LIST_DIR}/CommandStack.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/CommandStack.hpp"
 
-    "${CMAKE_CURRENT_LIST_DIR}/AddObjectCommand.cpp"
-    "${CMAKE_CURRENT_LIST_DIR}/AddObjectCommand.hpp"
-    "${CMAKE_CURRENT_LIST_DIR}/RemoveObjectCommand.cpp"
-    "${CMAKE_CURRENT_LIST_DIR}/RemoveObjectCommand.hpp"
+    "${CMAKE_CURRENT_LIST_DIR}/AddNodeCommand.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/AddNodeCommand.hpp"
+    "${CMAKE_CURRENT_LIST_DIR}/RemoveNodeCommand.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/RemoveNodeCommand.hpp"
     "${CMAKE_CURRENT_LIST_DIR}/RenameObjectCommand.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/RenameObjectCommand.hpp"
 

@@ -31,7 +31,7 @@ Application::Application()
     registerTypes();
     ZigZag::LuaBehaviour::loadDefaultScript((Directories::resourcesDir() / "LuaBehaviourDefaultScript.lua").string());
 
-    m_rootTypeNamespace = ObjectTypeNamespace::create("");
+    m_rootTypeNamespace = TemplateGroup::create("");
 
     m_hierarchyWindow.setScope(&m_appState.rootOperator);
 }
@@ -140,17 +140,17 @@ ApplicationState* Application::getAppState()
     return &m_appState;
 }
 
-ZObject* Application::getRootObject()
+Node* Application::getRootObject()
 {
     return m_rootObject.get();
 }
 
-const ZObject* Application::getRootObject() const
+const Node* Application::getRootObject() const
 {
     return m_rootObject.get();
 }
 
-void Application::setRootObject(std::unique_ptr<ZObject>&& object)
+void Application::setRootObject(std::unique_ptr<Node>&& object)
 {
     m_rootObject = std::move(object);
     m_nodeEditorWindow.setScope(m_rootObject->getIdentifier());
@@ -166,7 +166,7 @@ float Application::e() const
     return m_widthOfE;
 }
 
-ObjectTypeNamespace* Application::getRootTypeNamespace()
+TemplateGroup* Application::getRootTypeNamespace()
 {
     return m_rootTypeNamespace.get();
 }

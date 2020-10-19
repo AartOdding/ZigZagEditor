@@ -1,20 +1,20 @@
 #include <algorithm>
 #include <cassert>
 
-#include <object/ObjectTypeNamespace.hpp>
+#include <object/TemplateGroup.hpp>
 
 
-ObjectTypeNamespace::ObjectTypeNamespace(std::string_view name)
+TemplateGroup::TemplateGroup(std::string_view name)
     : m_name(name)
 {
 }
 
-ObjectTypeNamespace::Pointer ObjectTypeNamespace::create(std::string_view name)
+TemplateGroup::Pointer TemplateGroup::create(std::string_view name)
 {
-    return std::unique_ptr<ObjectTypeNamespace>(new ObjectTypeNamespace(name));
+    return std::unique_ptr<TemplateGroup>(new TemplateGroup(name));
 }
 
-ObjectTypeNamespace* ObjectTypeNamespace::addChild(Pointer&& childNamespace)
+TemplateGroup* TemplateGroup::addChild(Pointer&& childNamespace)
 {
     assert(m_children.count(childNamespace->getName()) == 0);
 
@@ -28,7 +28,7 @@ ObjectTypeNamespace* ObjectTypeNamespace::addChild(Pointer&& childNamespace)
     return nullptr;
 }
 
-ObjectTypeNamespace* ObjectTypeNamespace::getChild(std::string_view childNamespace)
+TemplateGroup* TemplateGroup::getChild(std::string_view childNamespace)
 {
     auto it = std::lower_bound(m_children.begin(), m_children.end(), childNamespace,
         [](const auto& pair, const std::string_view& name) { return pair.first < name; });
@@ -40,7 +40,7 @@ ObjectTypeNamespace* ObjectTypeNamespace::getChild(std::string_view childNamespa
     return nullptr;
 }
 
-ObjectTypeNamespace::Pointer ObjectTypeNamespace::removeChild(std::string_view childNamespace)
+TemplateGroup::Pointer TemplateGroup::removeChild(std::string_view childNamespace)
 {
     auto it = std::lower_bound(m_children.begin(), m_children.end(), childNamespace,
         [](const auto& pair, const std::string_view& name){ return pair.first < name; });
@@ -55,27 +55,27 @@ ObjectTypeNamespace::Pointer ObjectTypeNamespace::removeChild(std::string_view c
     return Pointer();
 }
 
-ObjectTypeNamespace* ObjectTypeNamespace::getParent()
+TemplateGroup* TemplateGroup::getParent()
 {
     return m_parent;
 }
 
-const ObjectTypeNamespace* ObjectTypeNamespace::getParent() const
+const TemplateGroup* TemplateGroup::getParent() const
 {
     return m_parent;
 }
 
-ObjectTypeNamespace::ChildrenView ObjectTypeNamespace::getChildren()
+TemplateGroup::ChildrenView TemplateGroup::getChildren()
 {
     return ChildrenView(m_children);
 }
 
-ObjectTypeNamespace::ConstChildrenView ObjectTypeNamespace::getChildren() const
+TemplateGroup::ConstChildrenView TemplateGroup::getChildren() const
 {
     return ConstChildrenView(m_children);
 }
 
-ObjectType* ObjectTypeNamespace::addType(TypePointer&& type)
+Template* TemplateGroup::addType(TypePointer&& type)
 {
     if (type)
     {
@@ -88,7 +88,7 @@ ObjectType* ObjectTypeNamespace::addType(TypePointer&& type)
     return nullptr;
 }
 
-ObjectTypeNamespace::TypePointer ObjectTypeNamespace::removeType(Identifier<ObjectType> typeIdentifier)
+TemplateGroup::TypePointer TemplateGroup::removeType(Identifier<Template> typeIdentifier)
 {
     if (typeIdentifier)
     {
@@ -115,17 +115,17 @@ ObjectTypeNamespace::TypePointer ObjectTypeNamespace::removeType(Identifier<Obje
     return TypePointer();
 }
 
-ObjectTypeNamespace::TypesView ObjectTypeNamespace::getTypes()
+TemplateGroup::TypesView TemplateGroup::getTypes()
 {
     return TypesView(m_typesAlphabetic);
 }
 
-ObjectTypeNamespace::ConstTypesView ObjectTypeNamespace::getTypes() const
+TemplateGroup::ConstTypesView TemplateGroup::getTypes() const
 {
     return ConstTypesView(m_typesAlphabetic);
 }
 
-const std::string& ObjectTypeNamespace::getName() const
+const std::string& TemplateGroup::getName() const
 {
     return m_name;
 }

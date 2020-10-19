@@ -13,8 +13,8 @@
 #include "gui/RenderOrderWindow.hpp"
 #include "gui/StyleEditorWindow.hpp"
 
-#include <object/ObjectTypeNamespace.hpp>
-#include <object/ZObject.hpp>
+#include <object/Node.hpp>
+#include <object/TemplateGroup.hpp>
 
 namespace ZigZag
 {
@@ -51,14 +51,14 @@ public:
 
     ApplicationState* getAppState();
     
-    ZObject* getRootObject();
-    const ZObject* getRootObject() const;
-    void setRootObject(std::unique_ptr<ZObject>&& object);
+    Node* getRootObject();
+    const Node* getRootObject() const;
+    void setRootObject(std::unique_ptr<Node>&& object);
     void clearRootObject();
 
     float e() const;
 
-    ObjectTypeNamespace* getRootTypeNamespace();
+    TemplateGroup* getRootTypeNamespace();
 
 private:
 
@@ -80,7 +80,7 @@ private:
     bool m_ImGuiDemoWindowOpen = false;
     bool m_ImGuiStyleEditorWindowOpen = false;
 
-    std::unique_ptr<ZObject> m_rootObject;
-    std::unique_ptr<ObjectTypeNamespace> m_rootTypeNamespace;
+    std::unique_ptr<Node> m_rootObject;
+    std::unique_ptr<TemplateGroup> m_rootTypeNamespace;
 
 };

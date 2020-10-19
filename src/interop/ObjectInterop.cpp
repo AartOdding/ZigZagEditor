@@ -1,7 +1,7 @@
 #include <Application.hpp>
 #include <interop/ObjectInterop.hpp>
-#include <object/ZObject.hpp>
-#include <object/ObjectTypeNamespace.hpp>
+#include <object/Node.hpp>
+#include <object/TemplateGroup.hpp>
 #include <util/StringUtils.hpp>
 
 #include <iostream>
@@ -10,101 +10,105 @@
 
 namespace
 {
-    AddObjectDelegate addObjectDelegate = nullptr;
-    RemoveObjectDelegate removeObjectDelegate = nullptr;
-    SetObjectParentDelegate setObjectParentDelegate = nullptr;
+    CreateNodeDelegate createNodeDelegate = nullptr;
+    DestroyNodeDelegate destroyNodeDelegate = nullptr;
+    SetNodeParentDelegate setNodeParentDelegate = nullptr;
 
-    std::unordered_map<Identifier<ZObject>, ZObject::Pointer> parentlessObjects;
+    std::unordered_map<Identifier<Node>, Node::Pointer> parentlessNodes;
 }
 
-
-Identifier<ZObject> addObject(Identifier<ObjectType> objectType, Identifier<ZObject> parentObject)
+namespace Host
 {
-    if (objectType && addObjectDelegate)
+
+    Identifier<Node> createNode(Identifier<Template> templateID, Identifier<Node> parentID)
     {
-        return Identifier<ZObject>(addObjectDelegate(static_cast<std::uint64_t>(objectType),
-                                                     static_cast<std::uint64_t>(parentObject)));
+        if (templateID && createNodeDelegate)
+        {
+            return Identifier<Node>(createNodeDelegate(static_cast<std::uint64_t>(templateID),
+                                                       static_cast<std::uint64_t>(parentID)));
+        }
+        return Identifier<Node>();
     }
-    return Identifier<ZObject>();
+
+    bool destroyNode(Identifier<Node> nodeID)
+    {
+        if (nodeID && destroyNodeDelegate)
+        {
+            return destroyNodeDelegate(static_cast<std::uint64_t>(nodeID));
+        }
+        return false;
+    }
+
+    bool setNodeParent(Identifier<Node> nodeID, Identifier<Node> newParentID)
+    {
+        if (nodeID && setNodeParentDelegate)
+        {
+            return setNodeParentDelegate(static_cast<std::uint64_t>(nodeID),
+                                         static_cast<std::uint64_t>(newParentID));
+        }
+        return false;
+    }
+
 }
 
-bool removeObject(Identifier<ZObject> object)
-{
-    if (object && removeObjectDelegate)
-    {
-        return removeObjectDelegate(static_cast<std::uint64_t>(object));
-    }
-    return false;
-}
-
-bool setObjectParent(Identifier<ZObject> object, Identifier<ZObject> newParent)
-{
-    if (object && setObjectParentDelegate)
-    {
-        return setObjectParentDelegate(static_cast<std::uint64_t>(object),
-                                       static_cast<std::uint64_t>(newParent));
-    }
-    return false;
-}
-
-ZIGZAG_API void installObjectDelegates(AddObjectDelegate addDelegate, 
-    RemoveObjectDelegate removeDelegate, SetObjectParentDelegate parentDelegate)
+ZIGZAG_API void installObjectDelegates(CreateNodeDelegate create,
+    DestroyNodeDelegate destroy, SetNodeParentDelegate setParent)
 {
     std::cout << "[editor dll] installing object delegates" << std::endl;
-    addObjectDelegate = addDelegate;
-    removeObjectDelegate = removeDelegate;
-    setObjectParentDelegate = parentDelegate;
+    createNodeDelegate = create;
+    destroyNodeDelegate = destroy;
+    setNodeParentDelegate = setParent;
 }
 
-ZIGZAG_API void onNewObjectTypeAdded(const char* name, std::uint64_t uniqueID, ObjectTypeCategory category)
+ZIGZAG_API void onTemplateAdded(const char* name, std::uint64_t templateID_, NodeCategory category)
 {
-    std::cout << "[editor dll] object type added: " << name << " " << uniqueID << std::endl;
-    auto identifier = Identifier<ObjectType>(uniqueID);
+    std::cout << "[editor dll] object type added: " << name << " " << templateID_ << std::endl;
+    auto templateID = Identifier<Template>(templateID_);
     auto nameParts = StringUtils::split(name, '.');
-    
-    if (identifier && !nameParts.empty())
+
+    if (templateID && !nameParts.empty())
     {
-        auto objectType = ObjectType::create(nameParts.back(), identifier);
-        objectType->setCategory(category);
+        auto nodeTemplate = Template::create(nameParts.back(), templateID);
+        nodeTemplate->setCategory(category);
         nameParts.pop_back();
 
-        ObjectTypeNamespace* typeNamespace = Application::getGlobalInstance()->getRootTypeNamespace();
+        TemplateGroup* templateGroup = Application::getGlobalInstance()->getRootTypeNamespace();
 
-        for (const auto& namespaceName : nameParts)
+        for (const auto& part : nameParts)
         {
-            auto childNamespace = typeNamespace->getChild(namespaceName);
+            auto childNamespace = templateGroup->getChild(part);
 
             if (childNamespace)
             {
-                typeNamespace = childNamespace;
+                templateGroup = childNamespace;
             }
             else
             {
-                typeNamespace = typeNamespace->addChild(ObjectTypeNamespace::create(namespaceName));
+                templateGroup = templateGroup->addChild(TemplateGroup::create(part));
             }
         }
 
-        typeNamespace->addType(std::move(objectType));
+        templateGroup->addType(std::move(nodeTemplate));
     }
 }
 
-ZIGZAG_API void onObjectCreated(std::uint64_t newObject, std::uint64_t parentObject, std::uint64_t objectType)
+ZIGZAG_API void onNodeConstructed(std::uint64_t nodeID_, std::uint64_t parentID_, std::uint64_t templateID_)
 {
-    std::cout << "[editor dll] object created: " << newObject << std::endl;
+    std::cout << "[editor dll] object created: " << nodeID_ << std::endl;
 
-    Identifier<ZObject> objectID(newObject);
-    Identifier<ZObject> parentID(parentObject);
-    Identifier<ObjectType> typeID(objectType);
+    Identifier<Node> nodeID(nodeID_);
+    Identifier<Node> parentID(parentID_);
+    Identifier<Template> templateID(templateID_);
 
-    auto parent = const_cast<ZObject*>(IdentityMap<ZObject>::get(parentID));
-    auto type = IdentityMap<ObjectType>::get(typeID);
+    auto parent = const_cast<Node*>(IdentityMap<Node>::get(parentID));
+    auto type = IdentityMap<Template>::get(templateID);
 
-    auto object = ZObject::create(objectID);
+    auto object = Node::create(nodeID);
 
     if (type)
     {
         object->setName(type->getName());
-        object->setNodeCategory(type->getCategory());
+        object->setCategory(type->getCategory());
 
         if (parent)
         {
@@ -112,51 +116,51 @@ ZIGZAG_API void onObjectCreated(std::uint64_t newObject, std::uint64_t parentObj
         }
         else
         {
-            parentlessObjects[object->getIdentifier()] = std::move(std::move(object));
+            parentlessNodes[object->getIdentifier()] = std::move(std::move(object));
         }
     }
 }
 
-ZIGZAG_API void onObjectDestroyed(std::uint64_t objectID_)
+ZIGZAG_API void onNodeDestroyed(std::uint64_t objectID_)
 {
-    auto objectID = Identifier<ZObject>(objectID_);
+    auto objectID = Identifier<Node>(objectID_);
 
     std::cout << "[editor dll] object destroyed: " << objectID << std::endl;
 
-    auto objectConst = IdentityMap<ZObject>::get(Identifier<ZObject>(objectID));
-    auto object = const_cast<ZObject*>(objectConst);
+    auto objectConst = IdentityMap<Node>::get(Identifier<Node>(objectID));
+    auto object = const_cast<Node*>(objectConst);
 
     if (object && object->getParent())
     {
-        object->getParent()->removeChild(Identifier<ZObject>(objectID));
+        object->getParent()->removeChild(Identifier<Node>(objectID));
     }
-    else if (object && parentlessObjects.count(objectID) == 1)
+    else if (object && parentlessNodes.count(objectID) == 1)
     {
-        parentlessObjects.erase(objectID);
+        parentlessNodes.erase(objectID);
     }
 }
 
-ZIGZAG_API void onObjectReparented(std::uint64_t objectID_, std::uint64_t newParentID_)
+ZIGZAG_API void onNodeParentChanged(std::uint64_t nodeID_, std::uint64_t newParentID_)
 {
-    auto objectID = Identifier<ZObject>(objectID_);
-    auto newParentID = Identifier<ZObject>(newParentID_);
+    auto nodeID = Identifier<Node>(nodeID_);
+    auto newParentID = Identifier<Node>(newParentID_);
 
-    auto objectPtr = const_cast<ZObject*>(IdentityMap<ZObject>::get(objectID));
-    auto newParentPtr = const_cast<ZObject*>(IdentityMap<ZObject>::get(newParentID));
-    auto oldParentPtr = objectPtr->getParent();
+    auto nodePtr = const_cast<Node*>(IdentityMap<Node>::get(nodeID));
+    auto newParentPtr = const_cast<Node*>(IdentityMap<Node>::get(newParentID));
+    auto oldParentPtr = nodePtr->getParent();
 
-    if (objectPtr)
+    if (nodePtr)
     {
-        ZObject::Pointer object;
+        Node::Pointer object;
 
-        if (objectPtr->getParent())
+        if (nodePtr->getParent())
         {
-            object = objectPtr->getParent()->removeChild(objectID);
+            object = nodePtr->getParent()->removeChild(nodeID);
         }
         else
         {
-            object = std::move(parentlessObjects[objectID]);
-            parentlessObjects.erase(objectID);
+            object = std::move(parentlessNodes[nodeID]);
+            parentlessNodes.erase(nodeID);
         }
         if (object)
         {
@@ -166,11 +170,11 @@ ZIGZAG_API void onObjectReparented(std::uint64_t objectID_, std::uint64_t newPar
             }
             else
             {
-                parentlessObjects[object->getIdentifier()] = std::move(object);
+                parentlessNodes[object->getIdentifier()] = std::move(object);
             }
         }
     }
 
-    std::cout << "[editor dll] object reparented: " << objectID << std::endl;
+    std::cout << "[editor dll] object reparented: " << nodeID << std::endl;
 
 }

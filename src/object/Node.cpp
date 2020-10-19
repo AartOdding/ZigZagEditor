@@ -1,24 +1,24 @@
 #include <stdexcept>
 
-#include <object/ZObject.hpp>
+#include <object/Node.hpp>
 
 
-ZObject::ZObject(Identifier<ZObject> identifier)
-    : Identity<ZObject>(this, identifier)
+Node::Node(Identifier<Node> identifier)
+    : Identity<Node>(this, identifier)
     , m_parent(nullptr)
 {
 }
 
-std::unique_ptr<ZObject> ZObject::create(Identifier<ZObject> identifier)
+std::unique_ptr<Node> Node::create(Identifier<Node> identifier)
 {
     if (identifier)
     {
-        return std::unique_ptr<ZObject>(new ZObject(identifier));
+        return std::unique_ptr<Node>(new Node(identifier));
     }
-    return std::unique_ptr<ZObject>();
+    return std::unique_ptr<Node>();
 }
 
-ZObject* ZObject::addChild(Pointer&& child)
+Node* Node::addChild(Pointer&& child)
 {
     if (child && !child->m_parent)
     {
@@ -29,7 +29,7 @@ ZObject* ZObject::addChild(Pointer&& child)
     return nullptr;
 }
 
-ZObject::Pointer ZObject::removeChild(Identifier<ZObject> childIdentifier)
+Node::Pointer Node::removeChild(Identifier<Node> childIdentifier)
 {
     for(auto it = m_children.begin(); it != m_children.end(); ++it)
     {
@@ -44,42 +44,42 @@ ZObject::Pointer ZObject::removeChild(Identifier<ZObject> childIdentifier)
     return Pointer();
 }
 
-ZObject* ZObject::getParent()
+Node* Node::getParent()
 {
     return m_parent;
 }
 
-const ZObject* ZObject::getParent() const
+const Node* Node::getParent() const
 {
     return m_parent;
 }
 
-ZObject::ChildrenView ZObject::getChildren()
+Node::ChildrenView Node::getChildren()
 {
     return ChildrenView(m_children);
 }
 
-ZObject::ConstChildrenView ZObject::getChildren() const
+Node::ConstChildrenView Node::getChildren() const
 {
     return ConstChildrenView(m_children);
 }
 
-void ZObject::setNodeCategory(ObjectTypeCategory category)
+void Node::setCategory(NodeCategory category)
 {
     m_category = category;
 }
 
-ObjectTypeCategory ZObject::getNodeCategory() const
+NodeCategory Node::getCategory() const
 {
     return m_category;
 }
 
-void ZObject::setName(std::string_view name)
+void Node::setName(std::string_view name)
 {
     m_name = name;
 }
 
-const std::string& ZObject::getName() const
+const std::string& Node::getName() const
 {
     return m_name;
 }

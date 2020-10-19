@@ -1,9 +1,9 @@
 #include <Application.hpp>
 #include <gui/NodeEditorWindow.hpp>
-#include <app/command/AddObjectCommand.hpp>
+#include <app/command/AddNodeCommand.hpp>
 #include <app/command/ConnectCommand.hpp>
 #include <app/command/DisconnectCommand.hpp>
-#include <app/command/RemoveObjectCommand.hpp>
+#include <app/command/RemoveNodeCommand.hpp>
 #include <interop/ObjectInterop.hpp>
 
 #include <iostream>
@@ -23,7 +23,7 @@ NodeEditorWindow::~NodeEditorWindow()
 }
 
 
-void NodeEditorWindow::setScope(Identifier<ZObject> scope)
+void NodeEditorWindow::setScope(Identifier<Node> scope)
 {
     m_scope = scope;
 }
@@ -35,7 +35,7 @@ void NodeEditorWindow::draw()
     NodeEditor::SetCurrentEditor(m_editorContext);
     NodeEditor::Begin(getTitle().c_str());
 
-    auto currentObject = IdentityMap<ZObject>::get(m_scope);
+    auto currentObject = IdentityMap<Node>::get(m_scope);
 
     if (currentObject)
     {
@@ -54,7 +54,7 @@ void NodeEditorWindow::draw()
             // while iterating the children make a list of what needs to be connected
             for (auto grandChild : child->getChildren())
             {
-                if (grandChild->getNodeCategory() == ObjectTypeCategory::OperatorInput)
+                if (grandChild->getCategory() == NodeCategory::OperatorInput)
                 {
                     int y = 30 + inputCount++ * 30;
                     ImGui::SetCursorPos({ localPos.x, localPos.y + y });
@@ -62,7 +62,7 @@ void NodeEditorWindow::draw()
                     ImGui::Dummy({ 20, 20 });
                     NodeEditor::EndPin();
                 }
-                else if (grandChild->getNodeCategory() == ObjectTypeCategory::OperatorOutput)
+                else if (grandChild->getCategory() == NodeCategory::OperatorOutput)
                 {
                     int y = 30 + outputCount++ * 30;
                     ImGui::SetCursorPos({ localPos.x + 80, localPos.y + y });
@@ -133,9 +133,9 @@ void NodeEditorWindow::draw()
         {
             if (NodeEditor::AcceptDeletedItem())
             {
-                auto ptr = nodeId.AsPointer<const ZObject>();
+                auto ptr = nodeId.AsPointer<const Node>();
                 auto appState = Application::getGlobalInstance()->getAppState();
-                appState->commandStack.push<RemoveObjectCommand>(ptr->getIdentifier());
+                appState->commandStack.push<RemoveNodeCommand>(ptr->getIdentifier());
             }
         }
     }
@@ -165,7 +165,7 @@ void NodeEditorWindow::draw()
         if (root)
         {
             auto appState = Application::getGlobalInstance()->getAppState();
-            appState->commandStack.push<AddObjectCommand>(typeID, root->getIdentifier());
+            appState->commandStack.push<AddNodeCommand>(typeID, root->getIdentifier());
         }
     }
 

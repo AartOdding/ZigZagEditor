@@ -1,21 +1,21 @@
 #include <cassert>
 #include <stdexcept>
 
-#include <app/command/RemoveObjectCommand.hpp>
+#include <app/command/RemoveNodeCommand.hpp>
 #include <interop/ObjectInterop.hpp>
 
 
 
-RemoveObjectCommand::RemoveObjectCommand(Identifier<ZObject> objectID)
-	: m_objectID(objectID)
-	, m_ownsObject(false)
+RemoveNodeCommand::RemoveNodeCommand(Identifier<Node> nodeID)
+	: m_nodeID(nodeID)
+	, m_ownsNode(false)
 {
-	assert(IdentityMap<ZObject>::get(objectID));
-	assert(IdentityMap<ZObject>::get(objectID)->getParent());
+	assert(IdentityMap<Node>::get(nodeID));
+	assert(IdentityMap<Node>::get(nodeID)->getParent());
 
 	// TODO LOGGING: log error if object does not exist, or does not have a parent.
 
-	auto objectPtr = IdentityMap<ZObject>::get(objectID);
+	auto objectPtr = IdentityMap<Node>::get(nodeID);
 	if (objectPtr)
 	{
 		auto parentPtr = objectPtr->getParent();
@@ -28,24 +28,24 @@ RemoveObjectCommand::RemoveObjectCommand(Identifier<ZObject> objectID)
 	}
 	// else log error
 
-	m_description = "Removed object <" + std::to_string(static_cast<std::uint64_t>(m_objectID)) + ">";
+	m_description = "Removed node <" + std::to_string(static_cast<std::uint64_t>(m_nodeID)) + ">";
 }
 
-RemoveObjectCommand::~RemoveObjectCommand()
+RemoveNodeCommand::~RemoveNodeCommand()
 {
-	if (m_ownsObject)
+	if (m_ownsNode)
 	{
-		removeObject(m_objectID);
+		Host::destroyNode(m_nodeID);
 	}
 }
 
-bool RemoveObjectCommand::redo()
+bool RemoveNodeCommand::redo()
 {
-	if (m_objectID && m_parentID)
+	if (m_nodeID && m_parentID)
 	{
-		if (setObjectParent(m_objectID, Identifier<ZObject>()))
+		if (Host::setNodeParent(m_nodeID, Identifier<Node>()))
 		{
-			m_ownsObject = true;
+			m_ownsNode = true;
 			return true;
 		}
 	}
@@ -53,23 +53,23 @@ bool RemoveObjectCommand::redo()
 	return false;
 }
 
-bool RemoveObjectCommand::undo()
+bool RemoveNodeCommand::undo()
 {
-	if (setObjectParent(m_objectID, m_parentID))
+	if (Host::setNodeParent(m_nodeID, m_parentID))
 	{
-		m_ownsObject = false;
+		m_ownsNode = false;
 		return true;
 	}
 	return false;
 }
 
-const std::string& RemoveObjectCommand::getCommandName()
+const std::string& RemoveNodeCommand::getCommandName()
 {
-	static const std::string name = "RemoveObjectCommand";
+	static const std::string name = "RemoveNodeCommand";
 	return name;
 }
 
-const std::string& RemoveObjectCommand::description()
+const std::string& RemoveNodeCommand::description()
 {
 	return m_description;
 }

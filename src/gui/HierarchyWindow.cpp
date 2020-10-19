@@ -1,8 +1,8 @@
 #include "HierarchyWindow.hpp"
 #include "Application.hpp"
 #include "app/ApplicationState.hpp"
-#include "app/command/AddObjectCommand.hpp"
-#include "app/command/RemoveObjectCommand.hpp"
+#include "app/command/AddNodeCommand.hpp"
+#include "app/command/RemoveNodeCommand.hpp"
 #include "app/command/RenameObjectCommand.hpp"
 
 #include <imgui.h>

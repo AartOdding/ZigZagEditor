@@ -1,8 +1,8 @@
 #pragma once
 
-#include <object/ObjectType.hpp>
+#include <object/Template.hpp>
 
-class ObjectTypeNamespace;
+class TemplateGroup;
 
 
 class OperatorListWidget
@@ -13,17 +13,17 @@ public:
 
 	// If the list does not get drawn, the hovered, selected and confirmed
 	// operators don't get updated either!
-	Identifier<ObjectType> getHoveredOperator() const;
-	Identifier<ObjectType> getSelectedOperator() const;
-	Identifier<ObjectType> getConfirmedOperator() const;
+	Identifier<Template> getHoveredOperator() const;
+	Identifier<Template> getSelectedOperator() const;
+	Identifier<Template> getConfirmedOperator() const;
 
 private:
 
-	void drawTreeNode(const ObjectTypeNamespace* node);
-	void drawTreeLeaf(const ObjectType* leaf);
+	void drawTreeNode(const TemplateGroup* node);
+	void drawTreeLeaf(const Template* leaf);
 
-	Identifier<ObjectType> m_hoveredType;
-	Identifier<ObjectType> m_selectedType;
-	Identifier<ObjectType> m_confirmedType;
+	Identifier<Template> m_hoveredType;
+	Identifier<Template> m_selectedType;
+	Identifier<Template> m_confirmedType;
 
 };

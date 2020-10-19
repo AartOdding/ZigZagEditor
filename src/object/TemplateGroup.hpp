@@ -8,46 +8,47 @@
 #include <vector>
 
 #include <object/Identity.hpp>
-#include <object/ObjectType.hpp>
+#include <object/Template.hpp>
 #include <tci/views.hpp>
 
 
-class ObjectTypeNamespace
+
+class TemplateGroup
 {
-    ObjectTypeNamespace() = delete;
-    ObjectTypeNamespace(ObjectTypeNamespace&&) = delete;
-    ObjectTypeNamespace(const ObjectTypeNamespace&) = delete;
+    TemplateGroup() = delete;
+    TemplateGroup(TemplateGroup&&) = delete;
+    TemplateGroup(const TemplateGroup&) = delete;
 
 public:
     
-    using Pointer = std::unique_ptr<ObjectTypeNamespace>;
-    using TypePointer = std::unique_ptr<ObjectType>;
+    using Pointer = std::unique_ptr<TemplateGroup>;
+    using TypePointer = std::unique_ptr<Template>;
 
     using Children = std::map<std::string, Pointer>;
     using ChildrenView = tci::values_view<Children>;
     using ConstChildrenView = tci::const_values_view<Children>;
 
-    using Types = std::unordered_map<Identifier<ObjectType>, TypePointer>;
-    using TypesAlphabetic = std::multimap<std::string, ObjectType*>;
+    using Types = std::unordered_map<Identifier<Template>, TypePointer>;
+    using TypesAlphabetic = std::multimap<std::string, Template*>;
     using TypesView = tci::values_view<TypesAlphabetic>;
     using ConstTypesView = tci::const_values_view<TypesAlphabetic>;
 
 
     static Pointer create(std::string_view name);
-    ~ObjectTypeNamespace() = default;
+    ~TemplateGroup() = default;
 
-    ObjectTypeNamespace* addChild(Pointer&& childNamespace);
-    ObjectTypeNamespace* getChild(std::string_view childNamespace);
+    TemplateGroup* addChild(Pointer&& childNamespace);
+    TemplateGroup* getChild(std::string_view childNamespace);
     Pointer removeChild(std::string_view childNamespace);
 
-    ObjectTypeNamespace* getParent();
-    const ObjectTypeNamespace* getParent() const;
+    TemplateGroup* getParent();
+    const TemplateGroup* getParent() const;
 
     ChildrenView getChildren();
     ConstChildrenView getChildren() const;
 
-    ObjectType* addType(TypePointer&& type);
-    TypePointer removeType(Identifier<ObjectType> type);
+    Template* addType(TypePointer&& type);
+    TypePointer removeType(Identifier<Template> type);
 
     TypesView getTypes();
     ConstTypesView getTypes() const;
@@ -56,10 +57,10 @@ public:
 
 private:
 
-    ObjectTypeNamespace(std::string_view name);
+    TemplateGroup(std::string_view name);
     
     Children m_children;
-    ObjectTypeNamespace* m_parent = nullptr;
+    TemplateGroup* m_parent = nullptr;
 
     Types m_types;
     TypesAlphabetic m_typesAlphabetic;

@@ -25,7 +25,7 @@ namespace
 	{
 		std::string name;
 		std::uint64_t id;
-		ObjectTypeCategory category;
+		NodeCategory category;
 	};
 
 	struct ObjInstance
@@ -40,16 +40,16 @@ namespace
 
 	std::unordered_map<std::uint64_t, ObjType> objectTypes
 	{
-		{ ++nextID, { "ZigZag.OpenGL.Texture.SineWave", nextID, ObjectTypeCategory::Operator } },
-		{ ++nextID, { "ZigZag.OpenGL.Texture.SquareWave", nextID, ObjectTypeCategory::Operator } },
-		{ ++nextID, { "ZigZag.OpenGL.Texture.Noise", nextID, ObjectTypeCategory::Operator } },
-		{ ++nextID, { "ZigZag.OpenGL.Geometry.Triangles", nextID, ObjectTypeCategory::Operator } },
-		{ ++nextID, { "ZigZag.OpenGL.Geometry.Sphere", nextID, ObjectTypeCategory::Operator } },
-		{ ++nextID, { "ZigZag.OpenGL.Geometry.PlatonicSolid", nextID, ObjectTypeCategory::Operator } },
-		{ ++nextID, { "ZigZag.Image.LoadImage", nextID, ObjectTypeCategory::Operator } },
-		{ ++nextID, { "ZigZag.Image.SaveImage", nextID, ObjectTypeCategory::Operator } },
-		{ ++nextID, { "ZigZag.OpenCV.EdgeDetection", nextID, ObjectTypeCategory::Operator } },
-		{ ++nextID, { "ZigZag.OpenCV.MatrixFromImage", nextID, ObjectTypeCategory::Operator } }
+		{ ++nextID, { "ZigZag.OpenGL.Texture.SineWave", nextID, NodeCategory::Operator } },
+		{ ++nextID, { "ZigZag.OpenGL.Texture.SquareWave", nextID, NodeCategory::Operator } },
+		{ ++nextID, { "ZigZag.OpenGL.Texture.Noise", nextID, NodeCategory::Operator } },
+		{ ++nextID, { "ZigZag.OpenGL.Geometry.Triangles", nextID, NodeCategory::Operator } },
+		{ ++nextID, { "ZigZag.OpenGL.Geometry.Sphere", nextID, NodeCategory::Operator } },
+		{ ++nextID, { "ZigZag.OpenGL.Geometry.PlatonicSolid", nextID, NodeCategory::Operator } },
+		{ ++nextID, { "ZigZag.Image.LoadImage", nextID, NodeCategory::Operator } },
+		{ ++nextID, { "ZigZag.Image.SaveImage", nextID, NodeCategory::Operator } },
+		{ ++nextID, { "ZigZag.OpenCV.EdgeDetection", nextID, NodeCategory::Operator } },
+		{ ++nextID, { "ZigZag.OpenCV.MatrixFromImage", nextID, NodeCategory::Operator } }
 	};
 
 	std::unordered_map<std::uint64_t, ObjInstance> objectInstances;
@@ -77,7 +77,7 @@ namespace
 			object.parent = parentID;
 			objectInstances[object.id] = object;
 
-			onObjectCreated(object.id, object.parent, object.type);
+			onNodeConstructed(object.id, object.parent, object.type);
 		}
 	};
 
@@ -100,7 +100,7 @@ namespace
 			// will also delete all children
 			recursivelyDelete(objectID);
 
-			onObjectDestroyed(objectID);
+			onNodeDestroyed(objectID);
 		}
 	};
 
@@ -114,7 +114,7 @@ namespace
 		virtual void execute() override
 		{
 			objectInstances[objectID].parent = newParentID;
-			onObjectReparented(objectID, newParentID);
+			onNodeParentChanged(objectID, newParentID);
 		}
 	};
 
@@ -124,7 +124,7 @@ namespace
 
 std::uint64_t createObject(std::uint64_t objectType, std::uint64_t parentObject)
 {
-	std::cout << "[host] creating object of type: " << objectType << " with parent: " << parentObject << std::endl;
+	std::cout << "[Host] creating object of type: " << objectType << " with parent: " << parentObject << std::endl;
 
 	if (objectTypes.count(objectType) == 1)
 	{
@@ -139,9 +139,9 @@ std::uint64_t createObject(std::uint64_t objectType, std::uint64_t parentObject)
 	return 0;
 }
 
-bool removeObject(std::uint64_t objectID)
+bool destroyNode(std::uint64_t objectID)
 {
-	std::cout << "[host] removing object with identifier: " << objectID << std::endl;
+	std::cout << "[Host] removing object with identifier: " << objectID << std::endl;
 
 	if (objectInstances.count(objectID) == 1)
 	{
@@ -151,9 +151,9 @@ bool removeObject(std::uint64_t objectID)
 	return false;
 }
 
-bool setObjectParent(std::uint64_t objectID, std::uint64_t newParentID)
+bool setNodeParent(std::uint64_t objectID, std::uint64_t newParentID)
 {
-	std::cout << "[host] reparenting object: " << objectID << " to new parent: " << newParentID << std::endl;
+	std::cout << "[Host] reparenting object: " << objectID << " to new parent: " << newParentID << std::endl;
 
 	// IMPORTANT: should also check for loops
 
@@ -171,7 +171,7 @@ bool setObjectParent(std::uint64_t objectID, std::uint64_t newParentID)
 
 int main()
 {
-	ObjType projectType{ "ZigZag.Project", ++nextID, ObjectTypeCategory::Project };
+	ObjType projectType{ "ZigZag.Project", ++nextID, NodeCategory::Project };
 	objectTypes[projectType.id] = projectType;
 
 	ObjInstance projectInstance{ "Project", ++nextID, projectType.id, 0, {} };
@@ -179,11 +179,11 @@ int main()
 
 
 	initialize();
-	installObjectDelegates(createObject, removeObject, setObjectParent);
+	installObjectDelegates(createObject, destroyNode, setNodeParent);
 
 	for (const auto& [id, t] : objectTypes)
 	{
-		onNewObjectTypeAdded(t.name.c_str(), t.id, t.category);
+		onTemplateAdded(t.name.c_str(), t.id, t.category);
 	}
 
 	onProjectCreated(projectInstance.name.c_str(), projectInstance.id);
