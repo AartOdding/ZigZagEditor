@@ -12,13 +12,13 @@ public:
 	void open(const ImVec2& centrePoint);
 	void update();
 
-	Identifier<Template> getConfirmedOperator() const;
+	Identifier<NodeTemplate> getConfirmedOperator() const;
 
 private:
 
 	OperatorListWidget m_operatorList;
 
-	Identifier<Template> m_confirmedOperator;
+	Identifier<NodeTemplate> m_confirmedOperator;
 
 	bool m_neverOpened = true;
 	ImVec2 m_openAt;

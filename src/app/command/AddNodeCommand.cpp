@@ -5,16 +5,16 @@
 
 
 
-AddNodeCommand::AddNodeCommand(Identifier<Template> templateID, Identifier<Node> parentID)
+AddNodeCommand::AddNodeCommand(Identifier<NodeTemplate> templateID, Identifier<Node> parentID)
 	: m_parentID(parentID)
 	, m_ownsNode(false)
 {
-	assert(IdentityMap<Template>::get(templateID));
+	assert(IdentityMap<NodeTemplate>::get(templateID));
 	assert(IdentityMap<Node>::get(parentID));
 
 	// TODO LOGGING: log error if object type does not exist, or parent is null.
 
-	if (IdentityMap<Template>::get(templateID))
+	if (IdentityMap<NodeTemplate>::get(templateID))
 	{
 		// Generate the object without a parent first, set parent in redo
 		m_nodeID = Host::createNode(templateID, Identifier<Node>());

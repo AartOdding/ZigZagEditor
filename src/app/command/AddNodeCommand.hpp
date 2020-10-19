@@ -4,7 +4,7 @@
 
 #include <app/command/Command.hpp>
 #include <object/Node.hpp>
-#include <object/Template.hpp>
+#include <object/NodeTemplate.hpp>
 
 
 
@@ -12,7 +12,7 @@ class AddNodeCommand : public Command
 {
 public:
 
-	AddNodeCommand(Identifier<Template> templateID, Identifier<Node> parentID);
+	AddNodeCommand(Identifier<NodeTemplate> templateID, Identifier<Node> parentID);
 	~AddNodeCommand();
 
 	bool redo() final;

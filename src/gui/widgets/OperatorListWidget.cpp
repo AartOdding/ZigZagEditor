@@ -12,8 +12,8 @@ using namespace ImGui;
 
 void OperatorListWidget::draw()
 {
-    m_hoveredType = Identifier<Template>();
-    m_confirmedType = Identifier<Template>();
+    m_hoveredType = Identifier<NodeTemplate>();
+    m_confirmedType = Identifier<NodeTemplate>();
 
     auto root = Application::getGlobalInstance()->getRootTypeNamespace();
 
@@ -50,7 +50,7 @@ void OperatorListWidget::drawTreeNode(const TemplateGroup* node)
 	}
 }
 
-void OperatorListWidget::drawTreeLeaf(const Template* leaf)
+void OperatorListWidget::drawTreeLeaf(const NodeTemplate* leaf)
 {
     if (leaf && leaf->getCategory() == NodeCategory::Operator)
     {
@@ -82,17 +82,17 @@ void OperatorListWidget::drawTreeLeaf(const Template* leaf)
     }
 }
 
-Identifier<Template> OperatorListWidget::getHoveredOperator() const
+Identifier<NodeTemplate> OperatorListWidget::getHoveredOperator() const
 {
     return m_hoveredType;
 }
 
-Identifier<Template> OperatorListWidget::getSelectedOperator() const
+Identifier<NodeTemplate> OperatorListWidget::getSelectedOperator() const
 {
     return m_selectedType;
 }
 
-Identifier<Template> OperatorListWidget::getConfirmedOperator() const
+Identifier<NodeTemplate> OperatorListWidget::getConfirmedOperator() const
 {
     return m_confirmedType;
 }

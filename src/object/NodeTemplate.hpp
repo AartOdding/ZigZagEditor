@@ -12,18 +12,18 @@ class TemplateGroup;
 
 
 
-class Template : public Identity<Template>
+class NodeTemplate : public Identity<NodeTemplate>
 {
-    Template() = delete;
-    Template(Template&&) = delete;
-    Template(const Template&) = delete;
+    NodeTemplate() = delete;
+    NodeTemplate(NodeTemplate&&) = delete;
+    NodeTemplate(const NodeTemplate&) = delete;
 
 public:
 
-    using Pointer = std::unique_ptr<Template>;
+    using Pointer = std::unique_ptr<NodeTemplate>;
 
-    static Pointer create(std::string_view name, Identifier<Template> identifier);
-    ~Template() = default;
+    static Pointer create(std::string_view name, Identifier<NodeTemplate> identifier);
+    ~NodeTemplate() = default;
 
     const std::string& getName() const;
 
@@ -37,7 +37,7 @@ private:
 
     friend class TemplateGroup;
 
-    Template(std::string_view name, Identifier<Template> identifier);
+    NodeTemplate(std::string_view name, Identifier<NodeTemplate> identifier);
 
     const std::string m_name;
     NodeCategory m_category;

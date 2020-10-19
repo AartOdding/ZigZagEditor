@@ -7,7 +7,7 @@
 
 #include <object/Identity.hpp>
 #include <object/NodeCategory.hpp>
-#include <object/Template.hpp>
+#include <object/NodeTemplate.hpp>
 #include <tci/views.hpp>
 
 

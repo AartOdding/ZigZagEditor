@@ -20,7 +20,7 @@ namespace
 namespace Host
 {
 
-    Identifier<Node> createNode(Identifier<Template> templateID, Identifier<Node> parentID)
+    Identifier<Node> createNode(Identifier<NodeTemplate> templateID, Identifier<Node> parentID)
     {
         if (templateID && createNodeDelegate)
         {
@@ -51,6 +51,7 @@ namespace Host
 
 }
 
+
 ZIGZAG_API void installObjectDelegates(CreateNodeDelegate create,
     DestroyNodeDelegate destroy, SetNodeParentDelegate setParent)
 {
@@ -60,15 +61,16 @@ ZIGZAG_API void installObjectDelegates(CreateNodeDelegate create,
     setNodeParentDelegate = setParent;
 }
 
+
 ZIGZAG_API void onTemplateAdded(const char* name, std::uint64_t templateID_, NodeCategory category)
 {
     std::cout << "[editor dll] object type added: " << name << " " << templateID_ << std::endl;
-    auto templateID = Identifier<Template>(templateID_);
+    auto templateID = Identifier<NodeTemplate>(templateID_);
     auto nameParts = StringUtils::split(name, '.');
 
     if (templateID && !nameParts.empty())
     {
-        auto nodeTemplate = Template::create(nameParts.back(), templateID);
+        auto nodeTemplate = NodeTemplate::create(nameParts.back(), templateID);
         nodeTemplate->setCategory(category);
         nameParts.pop_back();
 
@@ -92,16 +94,17 @@ ZIGZAG_API void onTemplateAdded(const char* name, std::uint64_t templateID_, Nod
     }
 }
 
-ZIGZAG_API void onNodeConstructed(std::uint64_t nodeID_, std::uint64_t parentID_, std::uint64_t templateID_)
+
+ZIGZAG_API void onNodeCreated(std::uint64_t nodeID_, std::uint64_t parentID_, std::uint64_t templateID_)
 {
     std::cout << "[editor dll] object created: " << nodeID_ << std::endl;
 
     Identifier<Node> nodeID(nodeID_);
     Identifier<Node> parentID(parentID_);
-    Identifier<Template> templateID(templateID_);
+    Identifier<NodeTemplate> templateID(templateID_);
 
     auto parent = const_cast<Node*>(IdentityMap<Node>::get(parentID));
-    auto type = IdentityMap<Template>::get(templateID);
+    auto type = IdentityMap<NodeTemplate>::get(templateID);
 
     auto object = Node::create(nodeID);
 
@@ -121,6 +124,7 @@ ZIGZAG_API void onNodeConstructed(std::uint64_t nodeID_, std::uint64_t parentID_
     }
 }
 
+
 ZIGZAG_API void onNodeDestroyed(std::uint64_t objectID_)
 {
     auto objectID = Identifier<Node>(objectID_);
@@ -139,6 +143,7 @@ ZIGZAG_API void onNodeDestroyed(std::uint64_t objectID_)
         parentlessNodes.erase(objectID);
     }
 }
+
 
 ZIGZAG_API void onNodeParentChanged(std::uint64_t nodeID_, std::uint64_t newParentID_)
 {
@@ -174,7 +179,22 @@ ZIGZAG_API void onNodeParentChanged(std::uint64_t nodeID_, std::uint64_t newPare
             }
         }
     }
-
     std::cout << "[editor dll] object reparented: " << nodeID << std::endl;
+}
 
+
+ZIGZAG_API void setProjectRootNode(const char* name, std::uint64_t projectID)
+{
+    std::cout << "[editor dll] project created: " << name << " " << projectID << std::endl;
+
+    if (parentlessNodes.count(Identifier<Node>(projectID)) == 1)
+    {
+        Application::getGlobalInstance()->setRootObject(
+            std::move(parentlessNodes[Identifier<Node>(projectID)]));
+        parentlessNodes.erase(Identifier<Node>(projectID));
+    }
+    else
+    {
+        std::cout << "[editor dll] project root node did not exist" << std::endl;
+    }
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <object/Template.hpp>
+#include <object/NodeTemplate.hpp>
 
 class TemplateGroup;
 
@@ -13,17 +13,17 @@ public:
 
 	// If the list does not get drawn, the hovered, selected and confirmed
 	// operators don't get updated either!
-	Identifier<Template> getHoveredOperator() const;
-	Identifier<Template> getSelectedOperator() const;
-	Identifier<Template> getConfirmedOperator() const;
+	Identifier<NodeTemplate> getHoveredOperator() const;
+	Identifier<NodeTemplate> getSelectedOperator() const;
+	Identifier<NodeTemplate> getConfirmedOperator() const;
 
 private:
 
 	void drawTreeNode(const TemplateGroup* node);
-	void drawTreeLeaf(const Template* leaf);
+	void drawTreeLeaf(const NodeTemplate* leaf);
 
-	Identifier<Template> m_hoveredType;
-	Identifier<Template> m_selectedType;
-	Identifier<Template> m_confirmedType;
+	Identifier<NodeTemplate> m_hoveredType;
+	Identifier<NodeTemplate> m_selectedType;
+	Identifier<NodeTemplate> m_confirmedType;
 
 };

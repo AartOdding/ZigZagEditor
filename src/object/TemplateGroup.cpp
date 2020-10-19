@@ -75,7 +75,7 @@ TemplateGroup::ConstChildrenView TemplateGroup::getChildren() const
     return ConstChildrenView(m_children);
 }
 
-Template* TemplateGroup::addType(TypePointer&& type)
+NodeTemplate* TemplateGroup::addType(TypePointer&& type)
 {
     if (type)
     {
@@ -88,7 +88,7 @@ Template* TemplateGroup::addType(TypePointer&& type)
     return nullptr;
 }
 
-TemplateGroup::TypePointer TemplateGroup::removeType(Identifier<Template> typeIdentifier)
+TemplateGroup::TypePointer TemplateGroup::removeType(Identifier<NodeTemplate> typeIdentifier)
 {
     if (typeIdentifier)
     {

@@ -77,7 +77,7 @@ namespace
 			object.parent = parentID;
 			objectInstances[object.id] = object;
 
-			onNodeConstructed(object.id, object.parent, object.type);
+			onNodeCreated(object.id, object.parent, object.type);
 		}
 	};
 
@@ -122,7 +122,7 @@ namespace
 }
 
 
-std::uint64_t createObject(std::uint64_t objectType, std::uint64_t parentObject)
+std::uint64_t createNode(std::uint64_t objectType, std::uint64_t parentObject)
 {
 	std::cout << "[Host] creating object of type: " << objectType << " with parent: " << parentObject << std::endl;
 
@@ -179,14 +179,15 @@ int main()
 
 
 	initialize();
-	installObjectDelegates(createObject, destroyNode, setNodeParent);
+	installObjectDelegates(createNode, destroyNode, setNodeParent);
 
 	for (const auto& [id, t] : objectTypes)
 	{
 		onTemplateAdded(t.name.c_str(), t.id, t.category);
 	}
 
-	onProjectCreated(projectInstance.name.c_str(), projectInstance.id);
+	onNodeCreated(projectInstance.id, 0, projectType.id);
+	setProjectRootNode(projectInstance.name.c_str(), projectInstance.id);
 
 	while (!shouldQuit())
 	{

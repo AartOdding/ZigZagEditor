@@ -8,7 +8,7 @@
 #include <vector>
 
 #include <object/Identity.hpp>
-#include <object/Template.hpp>
+#include <object/NodeTemplate.hpp>
 #include <tci/views.hpp>
 
 
@@ -22,14 +22,14 @@ class TemplateGroup
 public:
     
     using Pointer = std::unique_ptr<TemplateGroup>;
-    using TypePointer = std::unique_ptr<Template>;
+    using TypePointer = std::unique_ptr<NodeTemplate>;
 
     using Children = std::map<std::string, Pointer>;
     using ChildrenView = tci::values_view<Children>;
     using ConstChildrenView = tci::const_values_view<Children>;
 
-    using Types = std::unordered_map<Identifier<Template>, TypePointer>;
-    using TypesAlphabetic = std::multimap<std::string, Template*>;
+    using Types = std::unordered_map<Identifier<NodeTemplate>, TypePointer>;
+    using TypesAlphabetic = std::multimap<std::string, NodeTemplate*>;
     using TypesView = tci::values_view<TypesAlphabetic>;
     using ConstTypesView = tci::const_values_view<TypesAlphabetic>;
 
@@ -47,8 +47,8 @@ public:
     ChildrenView getChildren();
     ConstChildrenView getChildren() const;
 
-    Template* addType(TypePointer&& type);
-    TypePointer removeType(Identifier<Template> type);
+    NodeTemplate* addType(TypePointer&& type);
+    TypePointer removeType(Identifier<NodeTemplate> type);
 
     TypesView getTypes();
     ConstTypesView getTypes() const;

@@ -16,7 +16,7 @@ void OperatorSelectionPopup::open(const ImVec2& centrePoint)
 void OperatorSelectionPopup::update()
 {
 	const float e = Application::getGlobalInstance()->e();
-	m_confirmedOperator = Identifier<Template>();
+	m_confirmedOperator = Identifier<NodeTemplate>();
 
 	if (IsPopupOpen("Operator Selection"))
 	{
@@ -56,7 +56,7 @@ void OperatorSelectionPopup::update()
 	}
 }
 
-Identifier<Template> OperatorSelectionPopup::getConfirmedOperator() const
+Identifier<NodeTemplate> OperatorSelectionPopup::getConfirmedOperator() const
 {
 	return m_confirmedOperator;
 }

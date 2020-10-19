@@ -9,7 +9,7 @@
 #include <gui/Window.hpp>
 #include <gui/popups/OperatorSelectionPopup.hpp>
 #include <object/Node.hpp>
-#include <object/Template.hpp>
+#include <object/NodeTemplate.hpp>
 
 using namespace ax;
 
